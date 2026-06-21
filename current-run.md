@@ -21,19 +21,18 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: product
+active_node: spec-gate
 frontier: []
 completed:
 - intake
-- product
 outcomes:
   intake: PASS
-  product: PASS
 skipped: []
-counters: {}
+counters:
+  spec-gate->product: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false
@@ -43,16 +42,56 @@ flags:
   has_deploy: false
 note: null
 pending_delegations: []
-findings: []
-return_payload: {}
+findings:
+- node: spec-gate
+  severity: blocking
+  returns_to: product
+  signature: 'specs/runtime-control-plane.md — 4 druhy porušení agnostiky (spec musí
+    mluvit doménově, ne implementačně/kontraktně):
+
+    1) ř.12: přímá cesta `contracts/runtime-contract.md` → přeformulovat na "implementuje
+    slice 1 runtime kontraktu (v1.0.0)".
+
+    2) ř.27,30,31,32,40,62-64: HTTP metody/cesty (POST ensure, GET {project_id}, /v1/healthz,
+    …/git/files/terminal) → doménové akce (zajisti/stav/uspi/zruš prostředí; zdravotní
+    kontrola).
+
+    3) ř.35,55,95: HTTP/error kódy v textu (502 ERR_PROVISION_FAILED, 401 ERR_UNAUTHORIZED,
+    503 ERR_RUNTIME_UNAVAILABLE) → "server vrátí chybu (fail-closed)" / "selhání ověření"
+    / "server nedosažitelný".
+
+    4) ř.40-41: operationId (ensureEnvironment/getEnvironment/sleepEnvironment/destroyEnvironment)
+    → doménové pojmy "čtyři lifecycle operace: zajisti/stav/uspi/zruš prostředí".
+
+    Acceptance soubor je OK (HTTP/error kódy tam patří). Oprav JEN spec.'
+return_payload:
+  product:
+  - 'specs/runtime-control-plane.md — 4 druhy porušení agnostiky (spec musí mluvit
+    doménově, ne implementačně/kontraktně):
+
+    1) ř.12: přímá cesta `contracts/runtime-contract.md` → přeformulovat na "implementuje
+    slice 1 runtime kontraktu (v1.0.0)".
+
+    2) ř.27,30,31,32,40,62-64: HTTP metody/cesty (POST ensure, GET {project_id}, /v1/healthz,
+    …/git/files/terminal) → doménové akce (zajisti/stav/uspi/zruš prostředí; zdravotní
+    kontrola).
+
+    3) ř.35,55,95: HTTP/error kódy v textu (502 ERR_PROVISION_FAILED, 401 ERR_UNAUTHORIZED,
+    503 ERR_RUNTIME_UNAVAILABLE) → "server vrátí chybu (fail-closed)" / "selhání ověření"
+    / "server nedosažitelný".
+
+    4) ř.40-41: operationId (ensureEnvironment/getEnvironment/sleepEnvironment/destroyEnvironment)
+    → doménové pojmy "čtyři lifecycle operace: zajisti/stav/uspi/zruš prostředí".
+
+    Acceptance soubor je OK (HTTP/error kódy tam patří). Oprav JEN spec.'
 model_overrides: {}
-epoch: 2
+epoch: 3
 type_versions:
-  spec: 2
-  acceptance: 2
+  spec: 3
+  acceptance: 3
+  has_ui: 3
 node_versions:
   intake: 1
-  product: 2
 ```
 
 ## Lidský přehled
