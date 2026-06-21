@@ -21,20 +21,18 @@ run: 2026-06-21-containment-cage
 wave_base: d15032c244be306133f70d7bbd9d271a2b976e6f
 graph: delivery
 status: in_progress
-active_node: product
+active_node: spec-gate
 frontier: []
 completed:
 - intake
-- product
 outcomes:
   intake: PASS
-  product: PASS
 skipped: []
 counters:
-  spec-gate->product: 1
+  spec-gate->product: 2
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false
@@ -54,16 +52,30 @@ findings:
     do stack/ nebo contracts/. Nadstandardní §Rozhraní přesunout do contracts/. (2)
     acceptance/containment-cage.md: doplnit povinné tagy ke VŠEM AC; bezpečnostní
     invarianty I1-I7 → [security].'
-return_payload: {}
+- node: spec-gate
+  severity: blocking
+  returns_to: product
+  signature: 'spec-cleanliness (3 zbylé konkrétnosti v specs/containment-cage.md):
+    ř.37 "agent.py" → "workspace agent proces"; ř.35 konkrétní domény (api.github.com,
+    <CF_ACCESS_TEAM>.cloudflareaccess.com) → "proxy s doménovým allowlistem (konkrétní
+    domény v contracts/)"; ř.54 CIDR 169.254.0.0/16 → "metadata endpoint". Plus kompletní
+    sweep: žádný název souboru/IP/CIDR/doména/port/env-var v specs/**. AC tagy jsou
+    OK (neměnit), stack/ + contracts/ OK.'
+return_payload:
+  product:
+  - 'spec-cleanliness (3 zbylé konkrétnosti v specs/containment-cage.md): ř.37 "agent.py"
+    → "workspace agent proces"; ř.35 konkrétní domény (api.github.com, <CF_ACCESS_TEAM>.cloudflareaccess.com)
+    → "proxy s doménovým allowlistem (konkrétní domény v contracts/)"; ř.54 CIDR 169.254.0.0/16
+    → "metadata endpoint". Plus kompletní sweep: žádný název souboru/IP/CIDR/doména/port/env-var
+    v specs/**. AC tagy jsou OK (neměnit), stack/ + contracts/ OK.'
 model_overrides: {}
-epoch: 4
+epoch: 5
 type_versions:
-  spec: 4
-  acceptance: 4
-  has_ui: 3
+  spec: 5
+  acceptance: 5
+  has_ui: 5
 node_versions:
   intake: 1
-  product: 4
 ```
 
 ## Lidský přehled

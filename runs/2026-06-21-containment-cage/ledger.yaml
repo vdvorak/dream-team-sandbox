@@ -91,3 +91,26 @@ outputs:
 - type: has_ui
 agent: vision-po
 phase: T1
+---
+run: 2026-06-21-containment-cage
+node: spec-gate
+outcome: FAIL
+severity: blocking
+phase: T1
+signature: 'spec-cleanliness (3 zbylé konkrétnosti v specs/containment-cage.md): ř.37
+  "agent.py" → "workspace agent proces"; ř.35 konkrétní domény (api.github.com, <CF_ACCESS_TEAM>.cloudflareaccess.com)
+  → "proxy s doménovým allowlistem (konkrétní domény v contracts/)"; ř.54 CIDR 169.254.0.0/16
+  → "metadata endpoint". Plus kompletní sweep: žádný název souboru/IP/CIDR/doména/port/env-var
+  v specs/**. AC tagy jsou OK (neměnit), stack/ + contracts/ OK.'
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 68
+note: spec-gate FAIL#2 → returns_to product; jen spec-agnostika (3 zbytky), AC už
+  OK.
+agent: sheldon-spec
