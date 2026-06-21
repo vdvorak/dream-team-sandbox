@@ -291,3 +291,13 @@ agent: vitek-quality
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: audit-join
+outcome: PASS
+summary: 'Všechny fan-out audity PASS: performance (B1 opraveno), spec-audit (prefix→path),
+  security (PASS), code-quality (W7 opraveno). Advisory nálezy uloženy pro improvements.'
+agent: null
+phase: null
+time:
+  seconds: 0
