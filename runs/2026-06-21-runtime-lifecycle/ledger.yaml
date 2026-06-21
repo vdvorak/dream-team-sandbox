@@ -92,3 +92,39 @@ agent: vision-po
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: spec-gate
+outcome: FAIL
+severity: blocking
+signature: 'specs/runtime-control-plane.md — zbývá 6 výskytů agnostika-leaku (původní
+  4 kategorie OPRAVENY). KOMPLETNÍ scrub, ne po položkách:
+
+  - ř.5 note: "git/files/terminal" → "repozitář/soubory/terminál" nebo "AC-6/7/8".
+
+  - ř.64 Scope Out: závorka "(git clone uvnitř kontejneru/workspace)" → smazat, nech
+  jen "klonování repozitáře".
+
+  - ř.71: "(název a tvar implementace jsou rozhodnutím CTO/architekta)" → smazat (role-reference;
+  patří do handoffu, ne spec).
+
+  - ř.78: "volá se z `healthz`" → "volá se z operace zdravotní kontroly".
+
+  - ř.80-81: schema pole `control_url`/`terminal_url` → "opaque connection handle
+  (adresy v connection objektu)".
+
+  - ř.91: `2xx` → "úspěšná odpověď s aktuálním stavem".
+
+  - ř.95-96: `http://localhost:9999` + "AC-11 grep test" → "placeholder adresa bez
+  substrát-nounu" (vynech konkrétní URL i test-instrukci).
+
+  NAVÍC projeď CELÝ spec řádek po řádku a odstraň JAKÝKOLI zbylý: HTTP sloveso/cesta/status/třída,
+  error kód, název pole schématu, endpoint token, tool/command name, role/agent reference,
+  file-path. Tohle musí být POSLEDNÍ cleanup — žádný další výskyt téhož druhu.
+
+  '
+note: spec-cleanliness FAIL
+agent: sheldon-spec
+phase: T1
+time:
+  seconds: 0

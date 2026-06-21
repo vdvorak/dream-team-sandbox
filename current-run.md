@@ -21,20 +21,18 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: product
+active_node: spec-gate
 frontier: []
 completed:
 - intake
-- product
 outcomes:
   intake: PASS
-  product: PASS
 skipped: []
 counters:
-  spec-gate->product: 1
+  spec-gate->product: 2
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false
@@ -66,16 +64,69 @@ findings:
     → doménové pojmy "čtyři lifecycle operace: zajisti/stav/uspi/zruš prostředí".
 
     Acceptance soubor je OK (HTTP/error kódy tam patří). Oprav JEN spec.'
-return_payload: {}
+- node: spec-gate
+  severity: blocking
+  returns_to: product
+  signature: 'specs/runtime-control-plane.md — zbývá 6 výskytů agnostika-leaku (původní
+    4 kategorie OPRAVENY). KOMPLETNÍ scrub, ne po položkách:
+
+    - ř.5 note: "git/files/terminal" → "repozitář/soubory/terminál" nebo "AC-6/7/8".
+
+    - ř.64 Scope Out: závorka "(git clone uvnitř kontejneru/workspace)" → smazat,
+    nech jen "klonování repozitáře".
+
+    - ř.71: "(název a tvar implementace jsou rozhodnutím CTO/architekta)" → smazat
+    (role-reference; patří do handoffu, ne spec).
+
+    - ř.78: "volá se z `healthz`" → "volá se z operace zdravotní kontroly".
+
+    - ř.80-81: schema pole `control_url`/`terminal_url` → "opaque connection handle
+    (adresy v connection objektu)".
+
+    - ř.91: `2xx` → "úspěšná odpověď s aktuálním stavem".
+
+    - ř.95-96: `http://localhost:9999` + "AC-11 grep test" → "placeholder adresa bez
+    substrát-nounu" (vynech konkrétní URL i test-instrukci).
+
+    NAVÍC projeď CELÝ spec řádek po řádku a odstraň JAKÝKOLI zbylý: HTTP sloveso/cesta/status/třída,
+    error kód, název pole schématu, endpoint token, tool/command name, role/agent
+    reference, file-path. Tohle musí být POSLEDNÍ cleanup — žádný další výskyt téhož
+    druhu.'
+return_payload:
+  product:
+  - 'specs/runtime-control-plane.md — zbývá 6 výskytů agnostika-leaku (původní 4 kategorie
+    OPRAVENY). KOMPLETNÍ scrub, ne po položkách:
+
+    - ř.5 note: "git/files/terminal" → "repozitář/soubory/terminál" nebo "AC-6/7/8".
+
+    - ř.64 Scope Out: závorka "(git clone uvnitř kontejneru/workspace)" → smazat,
+    nech jen "klonování repozitáře".
+
+    - ř.71: "(název a tvar implementace jsou rozhodnutím CTO/architekta)" → smazat
+    (role-reference; patří do handoffu, ne spec).
+
+    - ř.78: "volá se z `healthz`" → "volá se z operace zdravotní kontroly".
+
+    - ř.80-81: schema pole `control_url`/`terminal_url` → "opaque connection handle
+    (adresy v connection objektu)".
+
+    - ř.91: `2xx` → "úspěšná odpověď s aktuálním stavem".
+
+    - ř.95-96: `http://localhost:9999` + "AC-11 grep test" → "placeholder adresa bez
+    substrát-nounu" (vynech konkrétní URL i test-instrukci).
+
+    NAVÍC projeď CELÝ spec řádek po řádku a odstraň JAKÝKOLI zbylý: HTTP sloveso/cesta/status/třída,
+    error kód, název pole schématu, endpoint token, tool/command name, role/agent
+    reference, file-path. Tohle musí být POSLEDNÍ cleanup — žádný další výskyt téhož
+    druhu.'
 model_overrides: {}
-epoch: 4
+epoch: 5
 type_versions:
-  spec: 4
-  acceptance: 3
-  has_ui: 3
+  spec: 5
+  acceptance: 5
+  has_ui: 5
 node_versions:
   intake: 1
-  product: 4
 ```
 
 ## Lidský přehled
