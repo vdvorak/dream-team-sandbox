@@ -451,3 +451,33 @@ agent: vitek-quality
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: spec-audit
+outcome: FAIL
+severity: blocking
+signature: 'acceptance/runtime-control-plane.md nesesynchronizován s kontraktem v1.1.0
+  (kód je správně, chyba jen v acceptance dokumentu):
+
+  F1 (BLOCKER): AC-1g dovoluje "422 ERR_CLONE_FAILED nebo validační 400" pro syntakticky
+  chybné repo.url. Kontrakt v1.1.0 §8: malformed URL = schema chyba = výhradně 400
+  ERR_INVALID_REQUEST; ERR_CLONE_FAILED (422) je JEN runtime selhání klonu (validní
+  url, nedostupný). Oprav AC-1g: PASS = 400 ERR_INVALID_REQUEST; 422 v tomto scénáři
+  = FAIL.
+
+  W1: AC-1b a AC-9a testují contract_version "1.0.0" -> oprav na "1.1.0".
+
+  W2: AC-1h, AC-12b, AC-13b mají PASS jen "400 (additionalProperties odmítnuto)" bez
+  kódu -> doplň konkrétní "400 ERR_INVALID_REQUEST" (compliance díra na security AC).
+
+  (W3 healthz 503 chybí v OpenAPI responses = advisory, pre-existing, odloženo na
+  slice 2 / improvements.)
+
+  '
+note: contract-mapping FAIL 1 blocker + 3 advisory. error-codes §8<->OpenAPI<->APP_FACING_CODES
+  1:1 (11 kódů) OK, registr-disjunktnost OK, žádný orphan AC. Jediný problém = acceptance
+  doc drift po contract bumpu.
+agent: sheldon-spec
+phase: T3
+time:
+  seconds: 0
