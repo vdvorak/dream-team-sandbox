@@ -1,0 +1,13 @@
+# Anti-pattern signatury back-align (constitution §Reuse §Operační mechanismus) — python.
+# Backend signatury: tech-agnostic mechanismus platí i mimo frontend. Jen vysoce jisté.
+meta:
+  scan_globs: ["server/src/**/*.py"]
+
+signatures:
+  - component: bound-sql
+    antipattern: 'f"\s*(SELECT|INSERT|UPDATE|DELETE)'
+    why: "f-string SQL — skládej přes SQLAlchemy text() s bound params, ne konkatenací (rules/backend, constitution F6)"
+    severity: blocker
+    allow: []
+  # Pozn.: signaturu str(exc) jsme vyřadili — blunt regex trefil i docstring s pravidlem
+  # (false positive). Stabilita > pokrytí: drž jen vysoce přesné signatury.

@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: code-quality
+outcome: PASS
+cost: { model: sonnet, input_tokens: 28622, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 45 }
+note: "Re-audit PASS: 3 blockery opravené (žádný privátní import, žádný except:pass, žádný dead code/WHAT komentář). Nové advisory: chybějící typ na github_service runner param (:237) a return type _connect_service router (:42) — non-blocking."

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash scripts/pipeline/check.sh)",
+      "Bash(python3 -m pytest scripts/pipeline/tests -q)"
+    ]
+  }
+}

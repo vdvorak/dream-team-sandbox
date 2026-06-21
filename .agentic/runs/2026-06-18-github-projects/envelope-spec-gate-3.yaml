@@ -1,0 +1,8 @@
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: FAIL
+severity: blocking
+signature: "spec §Scope Out ř.59: zkratky 'AI/LLM' + 'AI runtime' = stack pojmy ve specu. Přeformuluj doménově: 'Chytrá (konverzační) analýza a oprava struktury repa (odloženo; runtime pro konverzační asistenci zatím není k dispozici)'. Jediný nález; zbytek PASS."
+cost: { model: sonnet, input_tokens: 18237, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 63 }
+note: "Re-check: 1 nový blocker (technická zkratka v Scope Out, pochází z orchestrátorova zadání); zbytek čistý."

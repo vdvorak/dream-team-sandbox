@@ -1,0 +1,124 @@
+plugins {
+    id "io.quarkus" version "${quarkusPluginVersion}"
+    id "nu.studer.jooq" version "9.0"
+    id "com.diffplug.spotless" version "6.25.0"
+}
+
+// Formatter + style-lint (constitution §Standardy). google-java-format vynucuje i blokové
+// tělo if/for. Jen vlastní zdroják (ne generated jOOQ). Check: ./gradlew spotlessCheck.
+spotless {
+    java {
+        target "src/**/*.java"
+        googleJavaFormat()
+        removeUnusedImports()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+
+    implementation "io.quarkus:quarkus-rest"
+    implementation "io.quarkus:quarkus-rest-jackson"
+    implementation "io.quarkus:quarkus-jdbc-postgresql"
+    implementation "io.quarkus:quarkus-flyway"
+    implementation "io.quarkus:quarkus-smallrye-jwt"
+    implementation "io.quarkus:quarkus-smallrye-jwt-build"
+    implementation "io.quarkus:quarkus-elytron-security-common"
+    implementation "io.quarkus:quarkus-hibernate-validator"
+    implementation "io.quarkus:quarkus-arc"
+    implementation "io.quarkus:quarkus-security"
+    implementation "io.quarkus:quarkus-smallrye-openapi"
+
+    implementation "org.jooq:jooq:3.19.18"
+
+    testImplementation "io.quarkus:quarkus-junit5"
+    testImplementation "io.rest-assured:rest-assured"
+
+    jooqGenerator "org.postgresql:postgresql:42.7.4"
+    jooqGenerator "org.flywaydb:flyway-database-postgresql:10.21.0"
+    jooqGenerator "org.testcontainers:postgresql:1.20.4"
+    jooqGenerator "org.jooq:jooq-codegen:3.19.18"
+    jooqGenerator "org.jooq:jooq-meta:3.19.18"
+    jooqGenerator "org.slf4j:slf4j-simple:2.0.16"
+}
+
+// contracts/db/migrations je server-owned kontrakt (source of truth pro jOOQ codegen)
+def migrationsDir = file("${rootDir}/../contracts/db/migrations").canonicalPath
+def allMigrationsSql = layout.buildDirectory.file("all-migrations.sql")
+
+tasks.register("concatMigrations") {
+    inputs.dir(migrationsDir)
+    outputs.file(allMigrationsSql)
+    doLast {
+        def migrationOrder = { File f ->
+            def m = (f.name =~ /^V(\d+)__/)
+            m ? m[0][1].toInteger() : Integer.MAX_VALUE
+        }
+        def sqlFiles = fileTree(migrationsDir).include("*.sql").files.sort { a, b -> migrationOrder(a) <=> migrationOrder(b) }
+        allMigrationsSql.get().asFile.text = sqlFiles.collect { it.text }.join("\n")
+    }
+}
+
+jooq {
+    version = "3.19.18"
+    configurations {
+        main {
+            generateSchemaSourceOnCompilation = false
+            generationTool {
+                jdbc {
+                    def externalUrl = System.getenv("JOOQ_JDBC_URL")
+                    driver = externalUrl ? "org.postgresql.Driver" : "org.testcontainers.jdbc.ContainerDatabaseDriver"
+                    url = externalUrl ?: "jdbc:tc:postgresql:16:///app?TC_INITSCRIPT=file:${allMigrationsSql.get().asFile.canonicalPath}"
+                }
+                generator {
+                    name = "org.jooq.codegen.DefaultGenerator"
+                    database {
+                        name = "org.jooq.meta.postgres.PostgresDatabase"
+                        includes = ".*"
+                        excludes = "flyway_schema_history"
+                        inputSchema = "public"
+                    }
+                    target {
+                        packageName = "com.example.app.db"
+                        directory = "${layout.buildDirectory.get()}/generated-sources/jooq"
+                    }
+                    generate {
+                        daos = false
+                        records = true
+                        pojos = false
+                    }
+                }
+            }
+        }
+    }
+}
+
+generateJooq.dependsOn(concatMigrations)
+compileJava.dependsOn(generateJooq)
+
+sourceSets {
+    main {
+        java {
+            srcDir "${layout.buildDirectory.get()}/generated-sources/jooq"
+        }
+    }
+}
+
+processResources {
+    from("${rootDir}/../contracts/db/migrations") {
+        into("db/migration")
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << "-parameters"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}

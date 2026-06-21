@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: intake
+outcome: PASS
+class: feature
+tier: M
+flags: { has_signature: false }
+note: "Připojení GitHub repa jako projektu + zobrazení projektů; verifikace repa podle struktury = app logika, ne LLM."

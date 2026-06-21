@@ -1,0 +1,8 @@
+run: 2026-06-18-github-projects
+node: qa
+outcome: FAIL
+severity: blocking
+signature: "28/28 nových integ testů PASS, 10/15 AC pokryto. REGRESE (3 pre-existing testy v tests/server/integration/test_projects_integration.py): (1) test_list_newest_first_ordering → IntegrityError UNIQUE repo_url (fixture potřebuje různé repo_url); (2) test_get_project_detail_shape → čekal 9 klíčů, přišlo 12 (rozšířit expected o managed/connection_status/origin); (3) test_list_project_summary_shape → čekal 6, přišlo 9 (dtto). Příčina: Bobova aditivní pola v1.2 + UNIQUE constraint; testy je nereflektují. Bez Bobova kódu PASS (git stash ověřeno). Coverage gap: AC-14 PARTIAL (jen connect-origin, ne wizard+connect společně); AC-13 mimo scope (wizard = předchozí vlna)."
+cost: { model: sonnet, input_tokens: 86393, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 302 }
+note: "FAIL kvůli regresi pre-existing testů (zastaralé fixtures/expectations po aditivní změně schématu). Diagnostika → architecture (Ted) určí fault doménu."

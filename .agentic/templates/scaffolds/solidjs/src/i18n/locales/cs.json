@@ -1,0 +1,12 @@
+{
+  "nav": { "examples": "Příklady" },
+  "example": {
+    "title": "Příklady",
+    "new": "Nový",
+    "newTitle": "Nový příklad",
+    "labelField": "Popisek",
+    "loading": "Načítám…",
+    "empty": "Žádné položky"
+  },
+  "backend": { "unavailable": "Backend je nedostupný" }
+}

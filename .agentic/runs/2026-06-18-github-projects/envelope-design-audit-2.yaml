@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: design-audit
+outcome: PASS
+cost: { model: sonnet, input_tokens: 35156, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 191 }
+note: "Re-audit PASS: 2 hardcoded barvy opravené (tokeny + color-mix), manuál synchronní vč. submitting gallery. Přetrvávající advisory (Peter/page scope): Projects.css :focus vs :focus-visible, touch targety <44px, ConnectRepoDialog footer; + token-gap pro velikosti ikon (--icon-size-* chybí) — Leonard dožene před další T2."

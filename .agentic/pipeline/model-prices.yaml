@@ -1,0 +1,14 @@
+# model-prices.yaml — INDIKATIVNÍ ceník pro odhad kreditů z tokenů.
+#
+# Volitelný. Pokud existuje, ledger.sh dopočítá odhad kreditů z input/output tokenů
+# u uzlů, které nemají zaznamenané cost.credits. Tokeny jsou objektivní (loguje je
+# runtime); převod na kredity je editovatelná vrstva — UPRAV dle aktuálního ceníku.
+#
+# Jednotka: kredity za 1 milion tokenů (zvlášť input / output). Hodnoty níže jsou
+# jen poměrově orientační placeholdery, NE autoritativní ceník.
+
+unit: "credits per 1M tokens"
+prices:
+  haiku:  { input: 1,  output: 5 }
+  sonnet: { input: 3,  output: 15 }
+  opus:   { input: 15, output: 75 }

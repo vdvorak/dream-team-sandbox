@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: backend
+outcome: PASS
+cost: { model: sonnet, input_tokens: 29222, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 127 }
+note: "Re-flow oprava 3 zastaralých integ testů (test_projects_integration.py): unikátní repo_url ve fixture + rozšířené expected key sety o managed/connection_status/origin. Service/kontrakt/schéma netknuté. Celá suita 780 passed, 3 skipped, 0 failures."

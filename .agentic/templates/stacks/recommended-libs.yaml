@@ -1,0 +1,118 @@
+# recommended-libs.yaml — vetted knihovny per stack, indexované SCHOPNOSTÍ.
+#
+# Než agent zvolí knihovnu pro nějakou schopnost („přidej drag-and-drop", „potřebuju
+# rich-text"…), KOUKNE SEM (`scripts/pipeline/lib.sh --stack X --capability Y`) a použije
+# doporučenou pro svůj stack — neimprovizuje, nevymýšlí vlastní volbu. Tím je výběr
+# deterministický a konzistentní napříč projekty.
+#
+# Vrstvy (constitution §Reuse + §Standardy: „pouze deklarované knihovny", „nová
+# závislost musí být ověřená"):
+#   core         — vždy ve scaffoldu (package.json/requirements); dvě app stejného stacku
+#                  startují identicky
+#   dev          — vždy ve scaffoldu (build/test)
+#   capabilities — vetted optional: agent je smí přidat bez debaty, když schopnost potřebuje
+#   mimo list    — nová závislost → Tony (stack volba) + Heimdall (security) gate
+#
+# DB knihovny NEJSOU tady — patří do DB vrstvy (`_db/postgres` → asyncpg+Alembic,
+# `_db/sqlite` → aiosqlite), protože DB je nezávislá volba (python může jet s pg i sqlite).
+
+meta:
+  version: 1
+  policy_ref: "constitution.md §Reuse policy + §Standardy kódu (deklarované+ověřené závislosti)"
+
+stacks:
+
+  solidjs:
+    styling: "Komponentová knihovna (Kobalte headless) + CSS/SASS Modules. ZÁKAZ Tailwind (zaplevelí zdroják) a inline-style klubek."
+    data_access: "API přes typovaný openapi-fetch (z OpenAPI); žádné ručně skládané fetch URL."
+    core:
+      - { lib: solid-js, what: "reaktivní UI framework" }
+      - { lib: "@solidjs/router", what: "client-side routing" }
+      - { lib: "@kobalte/core", what: "headless přístupné komponenty (chování + a11y); styl si dáš přes CSS/SASS Modules" }
+      - { lib: openapi-fetch, what: "typovaný HTTP klient generovaný z OpenAPI kontraktu" }
+      - { lib: lucide-solid, what: "ikony — konzistentní SVG sada" }
+      - { lib: i18next, what: "i18n engine (constitution: i18n od prvního řádku, žádné hardcoded texty)" }
+      - { lib: "@mbarzda/solid-i18next", what: "SolidJS binding pro i18next" }
+    dev:
+      - { lib: "vite + vite-plugin-solid", what: "build a dev server" }
+      - { lib: "vitest + @solidjs/testing-library + jsdom", what: "unit/komponentové testy" }
+      - { lib: openapi-typescript, what: "generuje TS typy z OpenAPI" }
+      - { lib: msw, what: "Mock Service Worker — mockuje API v testech" }
+    capabilities:
+      drag-and-drop:    { lib: "@thisbeyond/solid-dnd", what: "SolidJS-native drag & drop (řazení, přesun)" }
+      node-graph:       { lib: "@xyflow/react", what: "flow/node canvas (cross-framework; @xyflow/solid neexistuje — viz STATE)" }
+      rich-text:        { lib: "@tiptap/core (+ extensions)", what: "WYSIWYG editor nad ProseMirror" }
+      html-sanitize:    { lib: dompurify, what: "čištění nedůvěryhodného HTML proti XSS" }
+      sass:             { lib: sass, what: "SCSS/SASS Modules (alternativa k CSS Modules)" }
+
+  python-fastapi:
+    data_access: "SQL piš v Pythonu přes SQLAlchemy Core/ORM — žádné stringově skládané SQL (rules/backend §Typovaný DB přístup, constitution F6). DB driver z `_db/` vrstvy."
+    core:
+      - { lib: fastapi, what: "web framework s automatickým OpenAPI" }
+      - { lib: "uvicorn[standard]", what: "ASGI server" }
+      - { lib: pydantic, what: "validace a (de)serializace modelů" }
+      - { lib: pydantic-settings, what: "konfigurace z env/souborů" }
+      - { lib: "sqlalchemy[asyncio]", what: "ORM/Core — SQL napsané v Pythonu, typované" }
+      - { lib: structlog, what: "strukturované logování (rules/logging)" }
+      - { lib: httpx, what: "async HTTP klient (volání cizích API)" }
+      - { lib: python-multipart, what: "parsing form-data / file uploadů" }
+    capabilities:
+      password-hashing: { lib: "passlib[bcrypt]", what: "hashování hesel ověřeným bcrypt (constitution F2 — žádná vlastní crypto)" }
+      jwt-auth:         { lib: "pyjwt", what: "JWT issue/verify (auth feature `base`); + passlib[bcrypt] na hesla" }
+      crypto:           { lib: cryptography, what: "šifrování/podpisy přes ověřenou knihovnu (F2)" }
+      observability:    { lib: "sentry-sdk[fastapi]", what: "sběr chyb a výkonu (monitoring)" }
+      background-jobs:  { lib: apscheduler, what: "plánované/periodické úlohy (idempotence + cancellability dle constitution)" }
+      templating:       { lib: jinja2, what: "render HTML/textových šablon (e-maily, PDF zdroj)" }
+      pdf-generation:   { lib: weasyprint, what: "HTML/CSS → PDF" }
+
+  java-quarkus:
+    data_access: "SQL piš v Javě přes jOOQ (typový SQL z codegenu ze schématu) — žádné raw JDBC stringy (rules/backend, constitution F6)."
+    core:
+      - { lib: "quarkus-rest + quarkus-rest-jackson", what: "REST endpointy + JSON" }
+      - { lib: "quarkus-jdbc-postgresql + quarkus-flyway", what: "Postgres + verzované migrace" }
+      - { lib: jooq, what: "typový SQL v Javě (codegen ze schématu)" }
+      - { lib: "quarkus-smallrye-jwt + quarkus-security + quarkus-elytron-security-common", what: "auth / JWT / security" }
+      - { lib: quarkus-hibernate-validator, what: "validace vstupů" }
+      - { lib: quarkus-smallrye-openapi, what: "OpenAPI dokument" }
+      - { lib: quarkus-arc, what: "DI kontejner (CDI)" }
+    capabilities:
+      scheduler:        { lib: quarkus-scheduler, what: "periodické úlohy" }
+      fault-tolerance:  { lib: quarkus-smallrye-fault-tolerance, what: "retry / circuit-breaker / timeout / bulkhead" }
+      email:            { lib: quarkus-mailer, what: "odesílání e-mailů" }
+      templating:       { lib: quarkus-qute, what: "šablonovací engine (e-maily, HTML)" }
+      html-parse:       { lib: jsoup, what: "parsování/čištění HTML" }
+
+  flutter:                              # PRIMÁRNÍ mobile stack (iOS + Android z jedné báze)
+    styling: "Design tokeny přes ThemeExtension<AppTheme> + Material widgety; tokeny jsou jediný slovník hodnot, NIKDY hardcoded Color/spacing v komponentě (constitution §Frontend styling, ekvivalent tokeny+headless)."
+    data_access: "Typovaný klient generovaný z OpenAPI (openapi-generator dart-dio) + Dio interceptor pro Authorization; explicitní timeouty (connect/send/receive 10s). Nikdy přímý http.get."
+    core:
+      - { lib: flutter, what: "SDK — deklarativní UI (sdk dependency)" }
+      - { lib: flutter_localizations, what: "i18n delegáti (sdk); i18n od prvního řádku" }
+      - { lib: flutter_riverpod, what: "state management — AsyncNotifier/Notifier vertical slice" }
+      - { lib: go_router, what: "deklarativní routing + deep links + auth redirect guard" }
+      - { lib: dio, what: "HTTP klient s interceptory (auth, mapování chyb na ApiError)" }
+      - { lib: intl, what: "formátování + pin pro flutter_localizations" }
+    dev:
+      - { lib: flutter_test, what: "widget + unit testy (sdk)" }
+      - { lib: flutter_lints, what: "lint pravidla" }
+      - { lib: mocktail, what: "mockování bez codegenu (preferuj nad mockito)" }
+      - { lib: "openapi-generator-cli", what: "generuje dart-dio typovaný klient z contracts/api/openapi.yaml" }
+    capabilities:
+      secure-storage:   { lib: flutter_secure_storage, what: "JWT/tajné hodnoty do Keychain/Keystore — NIKDY SharedPreferences" }
+      url-launch:       { lib: url_launcher, what: "tel:/https launch přes nativní OS handler (oficiální flutter.dev balíček)" }
+      state-codegen:    { lib: "riverpod_annotation + riverpod_generator (+ build_runner)", what: "@riverpod codegen providerů; volitelné — scaffold jede bez codegenu" }
+      models-codegen:   { lib: "freezed + json_serializable (+ build_runner)", what: "immutable modely + (de)serializace; sáhni až modely narostou (scaffold je plain Dart)" }
+
+  electron:                             # desktop shell (renderer = solidjs — viz solidjs stack)
+    styling: "Renderer je SolidJS — platí solidjs stack (Kobalte + CSS/SASS Modules + tokeny). Electron vrstva neřeší UI, jen okno/IPC/balení."
+    security: "Renderer sahá na main JEN přes typovaný preload most (contextBridge); contextIsolation+sandbox zapnuté, nodeIntegration vypnuté; CSP jen vlastní bundle. Neměň bez důvodu (Heimdall baseline)."
+    core:
+      - { lib: electron, what: "desktop runtime (main proces + Chromium renderer)" }
+      - { lib: "solid-js", what: "renderer UI framework (shodný s web scaffoldem)" }
+    dev:
+      - { lib: electron-vite, what: "build main/preload/renderer přes Vite + TS + HMR" }
+      - { lib: electron-builder, what: "balení do dmg/nsis/AppImage" }
+      - { lib: "vite-plugin-solid", what: "SolidJS v rendereru" }
+      - { lib: "typescript + vitest", what: "typecheck + testy čisté renderer logiky" }
+    capabilities:
+      auto-update:      { lib: electron-updater, what: "auto-aktualizace z electron-builder release feedu" }

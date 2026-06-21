@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: code-lint
+outcome: PASS
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Mechanická brána spuštěna orchestrátorem (ruff). ruff format: 3 soubory přeformátovány (0006 migrace, github_service, test_project_connect_service); ruff check --fix: 1 import-sort I001. Re-verify: all checks passed. 74 affected testů PASS po fixu. Neměřeno (orchestrátor-run, ne subagent)."

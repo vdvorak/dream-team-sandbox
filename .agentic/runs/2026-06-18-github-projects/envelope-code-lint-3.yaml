@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: code-lint
+outcome: PASS
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Re-run: zachycen Joeyho nezalintovaný test (3× I001 import-sort v test_project_connect_integration.py). ruff format + check --fix aplikováno → all checks passed. 29 testů drží. Neměřeno (orchestrátor-run)."

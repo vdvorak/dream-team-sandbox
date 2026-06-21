@@ -1,0 +1,14 @@
+appId: com.example.app
+productName: App
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - "!**/*.map"
+mac:
+  target: dmg
+win:
+  target: nsis
+linux:
+  target: AppImage

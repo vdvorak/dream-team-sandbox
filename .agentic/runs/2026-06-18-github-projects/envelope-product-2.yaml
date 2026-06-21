@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags: { has_ui: true }
+cost: { model: sonnet, input_tokens: 17509, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 52 }
+note: "Re-flow: opraveno 6 spec-gate nálezů (B-1..B-4 + A-1,A-2); smysl beze změny."

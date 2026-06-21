@@ -1,0 +1,123 @@
+---
+run: 2026-06-13-p5-human-interaction
+node: intake
+outcome: PASS
+class: feature
+agent: null
+phase: null
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: product
+outcome: PASS
+outputs:
+- type: spec
+  path: specs/p5-human-interaction-registry.md
+flags:
+  has_ui: false
+  touches_db: false
+note: P5 registr/schéma — no UI, no DB
+agent: vision-po
+phase: T1
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: feasibility
+outcome: PASS
+note: Feasible — rozšíření YAML registru + schéma + check rozšíření; malé, žádná nová
+  závislost
+outputs:
+- type: gate-output
+agent: tony-cto
+phase: T1
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: architecture
+outcome: PASS
+outputs:
+- type: contract
+  path: contracts/p5-interaction-typology.md
+note: 'reuse-existing: delegate-or-provide stojí na design_source flagu; žádný nový
+  routing'
+agent: ted-architect
+phase: T2
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: backend
+outcome: PASS
+outputs:
+- type: server-code
+  path: pipeline/interactions.yaml
+- type: unit-tests
+  path: scripts/pipeline/tests/test_check_interactions.py
+changed:
+- server-code
+note: interactions.yaml v2 typovaný registr + check.py C10 produces-validace + 8 unit
+  testů
+agent: bob-backend
+phase: T2
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: qa
+outcome: PASS
+note: 'Acceptance 1-6 OK: typovaný registr + delegate-or-provide + C10 produces-validace;
+  selftest 57/57, pytest 83, check OK'
+outputs:
+- type: gate-output
+agent: joey-qa
+phase: T3
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: spec-audit
+outcome: PASS
+note: Spec brevity-first, kontrakt typologie sedí na spec; Decided sekce drží rozhodnutí
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T3
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: code-quality
+outcome: PASS
+note: 'check.py: typy, single-responsibility (_check_produces), WHY komentáře, mypy
+  clean; 8 unit testů'
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T3
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: security
+outcome: FAIL
+severity: advisory
+signature: 'delegate-or-provide/upload: až app implementuje upload souboru, validuj
+  typ+velikost (F-future, ne teď)'
+note: Registr sám bez security surface (config+validace). Advisory pro app vrstvu,
+  neblokuje.
+agent: heimdall-security
+phase: T3
+time:
+  seconds: 0
+---
+run: 2026-06-13-p5-human-interaction
+node: l2-review
+outcome: ACK
+note: Viděl jsem P5 registr + advisory. Pokračovat.
+agent: null
+phase: null
+time:
+  seconds: 0

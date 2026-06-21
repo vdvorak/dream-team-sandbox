@@ -1,0 +1,7 @@
+run: 2026-06-18-github-issues-import
+node: feasibility
+outcome: PASS
+flags: { touches_db: true, touches_server: true, has_ui: true, design_source: derive }
+cost: { model: opus, input_tokens: 48734, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 81 }   # duration_ms 81144
+note: "Tech PASS, stack-impact NONE (staví na existujícím gh CLI + subprocess vzoru v github_service). breaking NONE (aditivní). Dekompozice 3 slices: A server import core + úložiště (list_issues přes gh api, sloupec github_issue_number + partial UNIQUE, UPSERT-by-key dedup AC-3/4/5), B server connect post-commit hook + POST import endpoint + souběh guard (AC-1/6/8/10/11), C web tlačítko 'Načíst znovu' + stavy (AC-6..10 UI). Směr úložiště: DB-cache (ne backlog soubory) — GitHub je zdroj pravdy, app cache; odlišit github-origin od ručních issues = detail pro Ted/Chandler. Sekvence A→B→C."

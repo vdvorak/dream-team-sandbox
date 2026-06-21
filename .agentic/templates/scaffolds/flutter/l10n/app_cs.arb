@@ -1,0 +1,7 @@
+{
+  "@@locale": "cs",
+  "appTitle": "Aplikace",
+  "exampleTitle": "Příklady",
+  "exampleError": "Načtení selhalo.",
+  "exampleRefresh": "Obnovit"
+}

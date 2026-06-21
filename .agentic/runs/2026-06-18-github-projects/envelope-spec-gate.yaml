@@ -1,0 +1,8 @@
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: FAIL
+severity: blocking
+signature: "B-1/B-2 pipeline feature-slug v backtickách (project-create-wizard §Hlavní scénář, accounts-oauth §Předpoklad) → doménový jazyk; B-3 arch constraint '(DB je index, ne kopie)' §Scope Out → odstranit; B-4 AC-15 chybí tag [security] u authz invariantu. +advisory A-1 'DB', A-2 '(OAuth)'."
+cost: { model: sonnet, input_tokens: 33641, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 115 }
+note: "Intrinsic FAIL — 4 mechanické zábrany, returns to product."

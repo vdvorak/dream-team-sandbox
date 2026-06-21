@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: web
+outcome: PASS
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Re-affirm: Peterův page kód (ConnectRepoDialog.tsx, Projects.tsx, api/project-connect) nezměněn. Stale-reopen z ui-system fixu (token-swap CSS komponent, vizuálně identické, page logika netknuta). Komponentní testy drží (Leonard 293)."

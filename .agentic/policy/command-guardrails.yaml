@@ -1,0 +1,122 @@
+# command-guardrails.yaml — neutrální politika: kam agenti NESMÍ psát + co NESMÍ spouštět.
+# Tool-agnostické. Zdroj pravdy je TOTO; engine/FS to vynucuje, adaptér (CLI tool) ho jen
+# volitelně projektuje. Žádné CLI specifikum tady nežije (žádný hook, settings.json, PreToolUse).
+#
+# Návrh: backlog/agent-command-guardrails.md §5 (revize v2). Vynucení ve třech vrstvách dle
+# síly (tvrdá → měkká): (1) path-based write-protection [PRIMÁRNÍ, FS/OS], (2) commit ownership
+# [engine-proces], (3) příkazový denylist [SEKUNDÁRNÍ redundantní pojistka].
+version: 2
+rationale: >
+  Do stavu workflow enginu nesmí sahat žádný agent. Vynucení je v enginu + FS, ne v CLI toolu.
+  Primárně path-based write-protection; commit vlastní engine; příkazový denylist je sekundární.
+
+# ── PRIMÁRNÍ: path-based write-protection (vynuceno FS/OS, viz §3c, §4 vrstva 2) ──
+# Enginové cesty jsou pro běžné agenty read-only. Zápis = jen engine-proces nebo write-owner.
+# path-check (primární checker) bere TUTO sekci jako vstup: (agent-id, write cesta) → allow/deny.
+# Pravidla se vyhodnocují shora dolů; první matchnuvší skupina rozhoduje (deterministicky).
+write_protect:
+  # běhový stav — píše JEN engine-proces (run.sh), žádný agent ani Eywa ručně.
+  # writer "engine" = pseudo-agent; žádný LLM agent se mu nerovná → všichni agenti read-only.
+  engine_runtime:
+    paths:
+      - current-run.md
+      - .agentic/current-run.md
+      - STATE.md
+      - runs/**
+      - .agentic/runs/**
+    writer: engine            # výhradně engine-proces (done/summary/checkpoint/repair)
+    agents_access: read-only
+    reason: "běhový stav enginu (current-run.md/STATE.md/runs) píše jen engine-proces; agent read-only"
+  # autorské enginové cesty — píše JEN meta-agent Eywa (graf, policy, agenti, šablony).
+  engine_authored:
+    paths:
+      - .agentic/pipeline/**
+      - .agentic/policy/**
+      - .agentic/agents/**
+      - .agentic/templates/**
+    writer: eywa-meta         # po L3 pro destruktivní změny (nový/smazaný agent, template)
+    agents_access: read-only
+    reason: "autorské enginové cesty (graf/policy/agenti/šablony) píše jen write-owner Eywa; ostatní read-only"
+  # engine kód — mění jen maintainer pod L3, agenti read-only.
+  engine_code:
+    paths:
+      - .agentic/scripts/pipeline/core/**
+      - .agentic/scripts/pipeline/**
+    writer: l3-maintainer
+    agents_access: read-only
+    reason: "engine kód (pipeline/**) mění jen maintainer pod L3; agent read-only"
+
+# ── ENGINE-OWNED operace (agent je nedělá VŮBEC; viz §3b, §4 vrstva 1) ──
+# Architektonické rozlišení procesu, ne pattern-match: tyto operace běží mimo agent-shell.
+engine_owned_ops:
+  - id: commit
+    desc: "git add + git commit dělá výhradně engine-proces (commit-on-done), ne agent-shell"
+  - id: checkpoint
+    desc: "engine při dispatch/handoff checkpointuje current-run + ledger (idempotentně)"
+  - id: repair
+    desc: "run.sh repair = replay z ledgeru; rekonstrukce stavu je engine příkaz, ne ruční edit"
+
+# ── SEKUNDÁRNÍ: příkazový denylist (redundantní pojistka, viz §3d, §4 vrstva 3) ──
+# command-check (sekundární checker) bere TUTO sekci jako vstup: command string → allow/deny.
+# Vyhodnocení: nejdřív allow_through (přebíjí deny), pak deny_commands; per-pravidlo navíc except.
+# Fail-safe: command-check rozhoduje nad CELÝM stringem (pipe/&&/;/subshell), při nejistotě blokuj.
+deny_commands:
+  - id: git-stash
+    match: '(^|[;&|(])\s*git\s+stash\b'
+    except: '(^|[;&|(])\s*git\s+stash\s+list\b'   # read-only varianta povolena
+    reason: "git stash odloží git-tracked stav enginu (current-run.md, runs/) → použij BLOCKER na orchestrátora"
+  - id: git-commit
+    match: '(^|[;&|(])\s*git\s+commit\b'
+    reason: "commit vlastní engine (commit-on-done); agent nikdy necommituje (§3b)"
+  - id: git-reset-tree
+    match: '(^|[;&|(])\s*git\s+reset\b'
+    reason: "reset zahodí staged/working stav rozdělané vlny"
+  - id: git-clean
+    match: '(^|[;&|(])\s*git\s+clean\b'
+    reason: "clean smaže untracked (např. nové handoffy)"
+  - id: git-checkout-restore-switch
+    match: '(^|[;&|(])\s*git\s+(checkout|restore|switch)\b'
+    reason: "přepíše tracked soubory včetně engine stavu"
+  - id: git-rebase
+    match: '(^|[;&|(])\s*git\s+rebase\b'
+    reason: "přepíše historii i tree, koliduje s commit-on-done (PO 2026-06-20)"
+  - id: git-cherry-pick
+    match: '(^|[;&|(])\s*git\s+cherry-pick\b'
+    reason: "vytváří/mění commity mimo engine (PO 2026-06-20)"
+  - id: git-revert
+    match: '(^|[;&|(])\s*git\s+revert\b'
+    reason: "vytváří commit mimo engine + mění tree (PO 2026-06-20)"
+  - id: git-force-push
+    match: '(^|[;&|(])\s*git\s+push\b.*(--force\b|--force-with-lease\b|\s-f\b)'
+    reason: "force push přepíše vzdálenou historii (constitution §8)"
+  - id: engine-state-overwrite
+    # `>`/`>>` mířící na engine stav kdekoli ve stringu (i `echo x > current-run.md`)
+    match: '>{1,2}\s*\.?/?(\.agentic/)?(current-run\.md|STATE\.md)\b'
+    reason: "přímý přepis stavu enginu obchází run.sh done"
+  - id: engine-state-redirect
+    match: '\b(tee)\b[^|;&]*\b(current-run\.md|STATE\.md)\b'
+    reason: "tee do stavu enginu obchází run.sh done"
+  - id: engine-state-rm-mv
+    match: '(^|[;&|(])\s*(rm|mv)\b[^|;&]*\b(current-run\.md|STATE\.md|runs/)'
+    reason: "smazání/přesun stavu enginu"
+
+# Allow-through: vždy povolit i kdyby matchlo deny (read-only / vstupní bod enginu).
+# Vyhodnocuje se PŘED deny_commands; pokud kterýkoli vzor matchne → allow (přebíjí deny).
+allow_through:
+  - '(^|[;&|(])\s*git\s+(status|diff|log|show|stash\s+list|ls-files|branch|remote|rev-parse|describe|blame)\b'
+  - '(^|[;&|(])\s*git\s+push\b(?!.*(--force\b|--force-with-lease\b|\s-f\b))'  # push bez force OK (push není engine-owned)
+  - '(^|[;&|(])\s*(cat|grep|rg|awk|head|tail|less|wc)\b'
+  - '(^|[;&|(])\s*sed\s+-n\b'                # sed jen v read-only -n módu
+  - '\brun\.sh\b'                            # run.sh done interně commituje = engine cesta
+  - '(^|[;&|(])\s*(pytest|ruff|mypy)\b'
+  - '(^|[;&|(])\s*npm\s+(test|run)\b'
+  - '(^|[;&|(])\s*(node|python3?|tsx?)\b'
+
+# ── Tool allowlist (přesun z hardcoded mapy v generátoru → sem, §3a/§5) ──
+# Adaptér (setup-claude-code.sh) projektuje tools: řádek wrapperu z tohoto; needuplikuje hardcode.
+# Není to o příkazech, ale o TŘÍDÁCH nástrojů (auditoři bez Write/Edit).
+tool_profiles:
+  generating: [Read, Write, Edit, Glob, Grep, Bash]
+  readonly:   [Read, Glob, Grep, Bash]
+# které agenty jsou readonly (dnes hardcoded v generátoru READONLY = {...}).
+readonly_agents: [sheldon-spec, heimdall-security, vitek-quality, edna-design]

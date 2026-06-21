@@ -1,0 +1,11 @@
+# Anti-pattern signatury back-align (constitution §Reuse §Operační mechanismus) — flutter.
+# Jen vysoce jisté signatury (stabilita). Rozšiřuj při extrakci sdílených widgetů.
+meta:
+  scan_globs: ["lib/**/*.dart"]
+
+signatures:
+  - component: AppTheme-tokens
+    antipattern: 'Color\(0x[0-9a-fA-F]{6,8}\)'
+    why: "hardcoded Color — vem token přes Theme.of(context).extension<AppTheme>() (recommended-libs flutter §styling)"
+    severity: blocker
+    allow: ["lib/src/theme/*.dart"]   # definice tokenů smí

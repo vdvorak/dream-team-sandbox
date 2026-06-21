@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: web
+outcome: PASS
+cost: { model: sonnet, input_tokens: 141696, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 597 }
+note: "ConnectRepoDialog + Projects.tsx (tlačítko Připojit repo, ConnectedProjectRow); api/project-connect.ts; binding na kontrakty (struktura-odchylka=doménová 200, ne HTTP chyba). 13/13 nových unit testů PASS; 293/294 celkem (1 pre-existing fail nesouvisí). i18n parity cs/en OK. AC [integration]/[security] předány QA."

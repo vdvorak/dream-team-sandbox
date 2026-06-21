@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: security
+outcome: PASS
+cost: { model: opus, input_tokens: 40673, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 86 }
+note: "F1-F8 PASS. Command injection OK (argv-list, žádný shell). Secrets leak OK (token v keyringu, sanitizace před log/response, AC-15 no-token potvrzeno na kódu). Parametrized queries OK. SSRF/path-injection OK (regex kotví github.com, owner/repo/path jen [A-Za-z0-9_.-]). Fail-closed ordering OK. Advisory: A1 chybí '--' argv separator (flag-injection defense-in-depth, regex povolí vedoucí pomlčku), A2 dead code _AUTH_RE github_service.py:357. Oboje hardening, non-blocking."

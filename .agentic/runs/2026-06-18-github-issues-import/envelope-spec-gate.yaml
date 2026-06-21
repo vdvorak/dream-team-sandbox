@@ -1,0 +1,6 @@
+run: 2026-06-18-github-issues-import
+node: spec-gate
+outcome: PASS
+cost: { model: sonnet, input_tokens: 37180, output_tokens: 0, credits: 0.0 }   # subagent_tokens combined — Sheldon auditoval i project-workspace (Vlna 2); split neměřen
+time: { started: null, ended: null, seconds: 122 }   # duration_ms 122095 (combined)
+note: "github-issues-import: spec 55 ř (limit OK), struktura OK, spec-cleanliness OK (žádné tech identifikátory), 11 AC pokrývá každé chování, AC-11 [security] pro autorizaci importu přítomen. PASS čistě. (Blockery z auditu se týkaly jen project-workspace = Vlna 2, mimo tuto vlnu.)"

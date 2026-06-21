@@ -1,0 +1,30 @@
+# Guardraily pipeline enginu — běží jen pro dream-team repo (framework).
+# Po klonu jako .agentic/ je tento soubor pod .agentic/.github/ → GitHub ho NEspouští
+# (běží jen root .github/workflows). Žádný leak do CI projektů.
+name: pipeline-guardrails
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install PyYAML + pytest + mypy
+        run: pip install pyyaml pytest mypy
+      - name: check — integrita grafu (C1–C15, vč. strict-SDD a typovaného I/O)
+        run: bash scripts/pipeline/check.sh
+      - name: structure-check — PRODUCT-layer tvar projektu (S1–S4)
+        run: bash scripts/pipeline/structure-check.sh
+      - name: selftest — end-to-end smyčka runneru
+        run: bash scripts/pipeline/selftest.sh
+      - name: pytest — unit-vrstva doménového modelu (predicate/graph/runstate)
+        run: python3 -m pytest scripts/pipeline/tests -q
+      - name: mypy — type anotace enginu (čitelnostní guard)
+        run: python3 -m mypy --config-file scripts/pipeline/mypy.ini scripts/pipeline/core

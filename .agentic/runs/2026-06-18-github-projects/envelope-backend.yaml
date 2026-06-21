@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: backend
+outcome: PASS
+cost: { model: sonnet, input_tokens: 130545, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 757 }
+note: "project_connect_service + router; github_service rozšířen (repo_exists, read_structure přes gh api contents). Fail-closed pořadí (URL→kanonizace→auth→existence→duplikát→re-struktura→zápis). 7 error kódů. URL kanonizace sdílená. Router registrován před projects_router (first-match). 47/47 nových + 572/572 celá suita PASS. Perf kandidát: 3 contents volání → git/trees recursive."

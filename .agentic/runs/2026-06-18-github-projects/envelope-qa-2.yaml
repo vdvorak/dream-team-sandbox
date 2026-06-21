@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: qa
+outcome: PASS
+cost: { model: sonnet, input_tokens: 36865, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 154 }
+note: "Re-confirm PASS: regrese opravena (test_projects_integration 28/28), 29/29 connect integ testů, 15/15 AC pokryto (doplněn test_wizard_and_connect_both_appear_in_list pro AC-13/AC-14). Žádné advisory."

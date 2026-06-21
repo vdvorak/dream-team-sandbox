@@ -1,0 +1,359 @@
+# delivery.yaml — delivery value-stream jako deklarativní stavový graf.
+#
+# Zachycuje flow.md §Tři transformace + agents/INDEX.md §Dispatch matrix 1:1.
+# Sémantika polí a validace: pipeline/README.md. Architektura: pipeline-architecture.md.
+#
+# UZEL = ROLE (capability), ne osoba. `agent:` = cast binding (kdo roli plní). Hrany drátují
+# ROLE, ne jména → graf je modifikovatelný vizuálním editorem a výměna agenta na roli je změna
+# bindingu, ne přepojení grafu. Agenti znají jen typy artefaktů (flow-blind) → výměny se nedotkne.
+#
+# STATUS: F3 — runner graf VYKONÁVÁ. `scripts/pipeline/{next,run}.sh` z něj počítají routing
+# (`run.sh drive` = řidič smyčky), `result.sh` posouvá stav. Zdroj pravdy o flow zůstává
+# flow.md (próza = lidská spec); tento soubor je její strojová podoba, validovaná 1:1 (run.sh check).
+
+meta:
+  stream: delivery
+  version: 1
+  entry: intake
+  source_of_truth: flow.md            # při konfliktu platí flow.md (do F3)
+  condition_language: machine         # predikáty strojově vyhodnocuje runner (predicate.py: PROJ_RE/CMP_RE + flag-atomy) — F3 aktivní
+
+  # prose_gates — strojový MOST mezi flow.md prózou (§Stop body / §Lint gate) a grafem.
+  # Každá brána, kterou próza SLIBUJE, musí mít odpovídající uzel zde. C16 (check.py)
+  # ověří, že `node` existuje a má `type` → drift „próza slibuje bránu, graf ji nemá"
+  # (díry A1–A3) už neprojde tiše. flow.md zůstává lidský zdroj pravdy; tohle je jeho
+  # kontrolovatelný otisk. Při přidání slibu do flow.md sem přidej řádek (a uzel do grafu).
+  prose_gates:
+    - id: spec-check               # flow.md §Stop body #1/#2/#3 — spec-čistota po zápisu specs/contracts/rules
+      node: spec-gate
+      type: gate
+      promise: "Po zápisu spec/contract/rules → raná spec brána (intrinsic čistota + mechanika)"
+    - id: lint-gate                # flow.md §Stop body #4 + §Lint gate — mechanika PŘED audity
+      node: code-lint
+      type: gate
+      promise: "Po zápisu kódu, PŘED T3 audity → tvrdá mechanická lint brána"
+
+# ── Typy uzlů ─────────────────────────────────────────────────────────────
+#   agent       pracovní uzel (subagent invocation), produkuje handoff
+#   gate        L1 inter-agent kontrola, výstup PASS | FAIL
+#   human-gate  blokuje běh, čeká na člověka (level: L2 informativní | L3 souhlas)
+#   router      větví dle predikátu nad project-config / spec; neprodukuje práci
+#   join        slučovací bod; pokračuje jen když requires všichni PASS
+#   terminal    konec běhu
+#
+#   agent: cast binding — short agenta (z agents/), který tuto roli plní. Vyměníš ho beze
+#          změny grafu. Engine routuje přes node-id (roli); agenta jen dispatchuje.
+#   model: výchozí strop tieru (agents/INDEX.md §Model strategy). Orchestrátor smí
+#          snížit (XS→haiku) i zvýšit (záludná→opus) dle flow.md §Model routing.
+#   when:  aktivace uzlu / hrany; predikát nad project flagy (has_server, has_db,
+#          has_ui, has_deploy, targets.{web,mobile,desktop}), feature touches_* flagy
+#          (touches_db→db-schema, touches_server→backend, touches_shared_ui→ui-system;
+#          emituje architecture, default = příslušná capability → chybí = NEprořezávat),
+#          value-flagy (design_source == author|intake|derive; default = author) nebo gate výsledkem.
+
+nodes:
+
+  # ── Intake ────────────────────────────────────────────────────────────────
+  intake:
+    type: router
+    desc: "klasifikuje issue (feature | bugfix | improvement) a směruje vstup. `class` = ÚSUDEK LLM (porozumění textu); sub-signály jsou DETERMINISTICKÉ a berou se ze skriptu, ne od oka — `scripts/intake-signals.sh` dá has_signature (existuje failure-signature dokument? ano/ne) + tier prior (complexity-estimate.sh). FIX #2: u XS improvement bez stack-impactu a bez nového kontraktu emituje envelope flag lightweight=true (+ audit stopa stack_impact/new_contract; complexity-estimate je VSTUP do rozhodnutí, LLM ho potvrdí/přebije) → feasibility+architecture se auto-přeskočí. Při nejistotě lightweight NEemituje (konzervativní default = uzly běží)."
+    inputs: [issue]
+
+  # ── T1: Idea → Spec ─────────────────────────────────────────────────────────
+  product:                     # role: product owner / spec autorita
+    type: agent
+    agent: vision-po
+    phase: T1
+    model: sonnet              # opus strop u produktově nejednoznačných feature
+    inputs:  [backlog-item]
+    outputs: [spec, acceptance, has_ui]
+  spec-gate:                   # role: raná spec brána — mechanika + intrinsic čistota specu
+    type: gate
+    agent: sheldon-spec
+    phase: T1
+    model: sonnet
+    readonly: true
+    desc: "raná spec brána: preflight --mode spec (agnostika/line-refs/i18n) + Sheldon intrinsic (čistota/struktura/brevity); FAIL → return product. Contract-mapping NEřeší (to je T3 spec-audit). Skenuje delta vlny (specs/** od wave_base); full-scan jen bez báze."
+    inputs:  [spec, acceptance]
+    outputs: [gate-output]
+  feasibility:                 # role: tech-feasibility triage (CTO)
+    type: gate
+    agent: tony-cto
+    phase: T1
+    model: opus
+    skip_if: "flags.lightweight"   # FIX #2: lehká dráha (improvement, žádný stack-impact, žádný nový kontrakt) → auto-PASS
+    inputs:  [spec]
+    outputs: [gate-output]
+  design-intake:               # human-gate jen v design_source=intake (upload mockupu)
+    type: human-gate
+    level: L2
+    interaction: design-source
+    desc: "intake mód: user nahraje mockup (Figma/v0/Claude design) → ux-design ho ověří"
+    when: "spec.has_ui && design_source == intake"
+  ux-design:                   # role: UX / mockupy
+    type: agent
+    agent: denisa-ux
+    phase: T1
+    model: sonnet
+    when: "spec.has_ui && (design_source == author || design_source == intake)"  # ne v derive
+    inputs:  [spec]             # design-manual odebrán — ambient styleguide, ne dataflow vstup;
+                                # mockup vzniká ze specu; opačný směr kauzality: Denisa navrhne →
+                                # Leonard implementuje+aktualizuje manuál. Odebrání rozbíjí
+                                # staleness cyklus ux-design ↔ ui-system (finding #2).
+    outputs: [mockup]
+
+  # ── T2: Spec → Code ───────────────────────────────────────────────────────
+  architecture:                # role: API contract / architektura
+    type: agent
+    agent: ted-architect
+    phase: T2
+    model: opus
+    skip_if: "flags.lightweight"   # FIX #2: lehká dráha → auto-PASS (no_new_contract garantuje, že contract nevzniká)
+    inputs:  [spec, acceptance]
+    outputs: [contract, error-codes, reuse-decision]
+  db-schema:                   # role: databázové schéma (= fault-doména i artefakt db-schema)
+    type: agent
+    agent: chandler-db
+    phase: T2
+    model: sonnet
+    when: "project.has_db && touches_db"   # DB existuje A feature ji reálně mění
+    inputs:  [contract, spec]
+    outputs: [db-schema, migrations]
+  ui-system:                   # role: design systém / UI komponenty
+    type: agent
+    agent: leonard-ui
+    phase: T2
+    model: sonnet
+    when: "spec.has_ui && touches_shared_ui"   # featura má UI A reálně sahá na sdílený design systém
+    inputs:  [spec, mockup, design-manual]   # mockup VOLITELNÝ: derive mód staví UI ze specu
+    outputs: [ui-components, design-manual]
+  backend:                     # role: server logika
+    type: agent
+    agent: bob-backend
+    phase: T2
+    model: sonnet
+    when: "project.has_server && touches_server"   # projekt má server A featura ji reálně mění (web-only → odpadne)
+    inputs:  [contract, reuse-decision, migrations]
+    outputs: [server-code, unit-tests]
+  web:                         # role: web klient
+    type: agent
+    agent: peter-web
+    phase: T2
+    model: sonnet
+    when: project.targets.web && spec.has_ui   # projekt cílí web A feature má UI (jinak backend-only)
+    inputs:  [contract, mockup, ui-components]
+    outputs: [web-code, unit-tests]
+  mobile:                      # role: mobilní klient
+    type: agent
+    agent: mob-mobile
+    phase: T2
+    model: sonnet
+    when: project.targets.mobile && spec.has_ui
+    inputs:  [contract, mockup, ui-components]
+    outputs: [mobile-code, unit-tests]
+  desktop:                     # role: desktop klient
+    type: agent
+    agent: winny-desktop
+    phase: T2
+    model: sonnet
+    when: project.targets.desktop && spec.has_ui
+    inputs:  [contract, mockup, ui-components]
+    outputs: [desktop-code, unit-tests]
+
+  # ── Lint gate: mechanická brána PŘED úsudkem (T3 audity) ─────────────────────
+  code-lint:                   # role: mechanický lint gate (stroj před okem auditora)
+    type: gate
+    agent: vitek-quality
+    phase: T2
+    model: sonnet
+    readonly: true
+    desc: "tvrdá mechanická brána: preflight --mode code (format/style lint + file-size). FAIL → return na vlastníka kódu (backend/web/…) s --fix; T3 audity se nespustí, dokud nesvítí zeleně. Skenuje delta vlny (změněné stack soubory od wave_base); full-scan jen bez báze."
+    inputs:  [code]
+    outputs: [gate-output]
+
+  # ── T3: Code → Ověření ──────────────────────────────────────────────────────
+  qa:                          # role: funkční testy (integration/system vs acceptance)
+    type: gate
+    agent: joey-qa
+    phase: T3
+    model: sonnet
+    desc: "funkční gate — integration/system testy vs acceptance"
+    inputs:  [acceptance, server-code, web-code, mobile-code, desktop-code]
+    outputs: [gate-output]
+  performance:                 # role: výkon / tuning
+    type: gate
+    agent: optimus-perf
+    phase: T3
+    model: sonnet
+    inputs:  [acceptance, code]
+    outputs: [gate-output]
+    failure_limit: 5           # constitution: performance má 5 pokusů (tuning iterativní)
+  spec-audit:                  # role: čistota specu vs kontrakt
+    type: gate
+    agent: sheldon-spec
+    phase: T3
+    model: sonnet
+    readonly: true
+    desc: "T3 spec↔contract mapping (acceptance↔endpoint, error kódy v registru). Skenuje delta vlny (změněné specs/acceptance od wave_base přes preflight --mode audit); orphan AC ve staré nezměněné featuře = pre-existing dluh, ne nález. Full-scan jen bez báze."
+    inputs:  [spec, acceptance, contract]
+    outputs: [gate-output]
+  security:                    # role: bezpečnostní audit
+    type: gate
+    agent: heimdall-security
+    phase: T3
+    model: opus
+    readonly: true
+    inputs:  [code, contract]
+    outputs: [gate-output]
+  code-quality:                # role: kvalita kódu / reuse drift
+    type: gate
+    agent: vitek-quality
+    phase: T3
+    model: sonnet
+    readonly: true
+    inputs:  [code]
+    outputs: [gate-output]
+  design-audit:                # role: design-fidelity audit
+    type: gate
+    agent: edna-design
+    phase: T3
+    model: sonnet
+    readonly: true
+    when: spec.has_ui
+    desc: "T3 design-fidelity audit. Skenuje delta vlny: grep-half (hardcoded barvy/px) per-soubor přes preflight --mode audit; screenshot-half (kontrast z renderu) nad delta seznamem. Out-of-delta vizuální nález = advisory + app-wide cleanup backlog, ne blocking return. Full-scan jen bez báze."
+    inputs:  [mockup, design-manual, screenshot]
+    outputs: [gate-output]
+  audit-join:
+    type: join
+    requires: [performance, spec-audit, security, code-quality, design-audit]   # design-audit jen pokud has_ui
+  l2-review:
+    type: human-gate
+    level: L2
+    interaction: l2-review
+    desc: "user vidí finální feature (vč. estetického soudu nad screenshotem); neblokuje"
+
+  # ── T3-post: Release & Deploy ────────────────────────────────────────────────
+  devops:                      # role: build / staging deploy
+    type: agent
+    agent: alfred-devops
+    phase: T3-post
+    model: sonnet
+    when: project.has_deploy
+    inputs:  [code, gate-output]
+    outputs: [build, staging-deploy]
+  deploy-approve:
+    type: human-gate
+    level: L3
+    interaction: deploy-approve
+    when: project.has_deploy        # deploy-track: bez deploye uzel neexistuje (dataflow gating)
+    desc: "produkční deploy — explicitní lidský souhlas, žádný opt-out"
+  production:                  # role: produkční deploy (devops persona)
+    type: agent
+    agent: alfred-devops
+    phase: T3-post
+    model: sonnet
+    when: project.has_deploy        # deploy-track
+    outputs: [production-deploy]
+  monitor:                     # role: post-deploy monitoring (devops persona)
+    type: gate
+    agent: alfred-devops
+    phase: T3-post
+    when: project.has_deploy        # deploy-track
+    desc: "post-deploy monitor; FAIL → rollback → return viníkovi"
+    outputs: [gate-output]
+  done:
+    type: terminal
+
+# ── Hrany ───────────────────────────────────────────────────────────────────
+edges:
+
+  # intake → STRICT SPEC-DRIVEN: vše produkující jde přes product (spec/acceptance)
+  # first. product smí být pro drobnou improvement/bugfix lehký (nižší model tier),
+  # ale je mandatorní spec autorita — kód/kontrakt nikdy nevzniká bez ní (constitution §1).
+  - { from: intake, to: product, when: "class == feature || class == improvement || (class == bugfix && !has_signature)" }
+  # bugfix s failure-signature → return mechanika k vlastníkovi; fix musí splnit
+  # EXISTUJÍCÍ acceptance (spec-driven i bez nového průchodu product).
+
+  # T1 — raná spec brána: product → spec-gate → feasibility. spec-gate je intrinsic
+  # (čistota/struktura/brevity/agnostika), NE contract-mapping (ten je T3 spec-audit).
+  - { from: product, to: spec-gate }
+  - { from: spec-gate, to: feasibility, when: PASS }
+  - { from: spec-gate, to: product,     when: FAIL, kind: return }
+  # design-intake = PROJEKTOVÁ POLITIKA design_source (author|intake|derive), ne per-feature gate.
+  # Engine routuje deterministicky; člověk dodává jen artefakt (intake upload), ne volbu „koho spustit".
+  # author = ux-design kreslí mockup z manuálu (default); intake = user nahraje vlastní → ux-design ověří;
+  # derive = bez mockupu, ui-system staví UI rovnou ze specu (solo/lean). Watson nastaví 1× při initu.
+  #
+  # Design-track NEJPŘÍSNĚJŠÍ varianta (Vitek 2026-06-16): celý design-track (ux-design / design-intake /
+  # ui-system) visí na `feasibility PASS`, NE na holém `product`. Dřív startoval paralelně se
+  # spec-gate/feasibility → fail rané brány zahodil už rozjetou UI práci. Tím že fork vede z
+  # feasibility(PASS), ui-system (i v derive módu) nikdy neběží před tím, než feasibility prošla.
+  - { from: feasibility, to: ux-design,     when: "PASS && spec.has_ui && design_source == author", kind: fork }
+  - { from: feasibility, to: design-intake, when: "PASS && spec.has_ui && design_source == intake", kind: fork }
+  - { from: design-intake, to: ux-design }   # intake: user nahrál mockup → ux-design ho ověří
+  - { from: feasibility, to: ui-system,     when: "PASS && spec.has_ui && design_source == derive", kind: fork }
+  - { from: feasibility, to: architecture, when: PASS }
+  - { from: feasibility, to: product,      when: FAIL, kind: return }
+
+  # T2
+  # touches_db (feature-level, architecture): default = project.has_db (DB-projekt → assume DB-touch),
+  # architecture smí prořezat na read-only featuru (touches_db=false) → db-schema odpadne, backend jde přímo.
+  # touches_server (flow-consistency-hardening): default = project.has_server; architecture smí prořezat
+  # web-only featuru (touches_server=false) → backend odpadne, code-lint jede z web. Uzly jsou gatovány
+  # node-`when`em (inactive → _active_deps filtruje); edge podmínky to jen zrcadlí pro čistý routing.
+  # Static graf vs runtime úsudek zodpovědné role (B2, zrcadlí B3 model-routing).
+  - { from: architecture, to: db-schema, when: "project.has_db && touches_db" }
+  - { from: architecture, to: backend,   when: "project.has_server && touches_server && !(project.has_db && touches_db)" }  # DB-untouched → backend mine db-schema
+  - { from: db-schema, to: backend,  when: "project.has_server && touches_server" }
+  # architecture jako diagnostik (od testů) jmenuje DOMÉNU vady (fault); graf ji přeloží na uzel/roli
+  # (flow-blind: agent nejmenuje kolegu). fault == contract → architecture opraví sama (re-emit, bez hrany).
+  - { from: architecture, to: db-schema, when: "fault == db-schema",    kind: return }
+  - { from: architecture, to: backend,   when: "fault == server-logic", kind: return }
+  - { from: architecture, to: product,   when: "fault == spec",         kind: return }
+  - { from: ux-design, to: ui-system, when: "mockup needs missing component" }
+  - { from: ui-system, to: [web, mobile, desktop] }    # dle aktivních targetů
+  - { from: architecture, to: [web, mobile, desktop] } # contract → klienti
+  # dev uzel hotov se zelenými testy (outcome PASS) → code-lint (mechanická brána),
+  # teprve PASS code-lint pouští qa + T3 audity. „Linter to chytí, ne oko."
+  - { from: backend, to: code-lint, when: PASS }
+  - { from: web,     to: code-lint, when: PASS }
+  - { from: mobile,  to: code-lint, when: PASS }
+  - { from: desktop, to: code-lint, when: PASS }
+  - { from: code-lint, to: qa, when: PASS }
+  # lint FAIL → return na vlastníka kódu (--fix); graf přeloží doménu na uzel (flow-blind).
+  - { from: code-lint, to: [backend, web, mobile, desktop], when: FAIL, kind: return }
+
+  # T3 — fan-out auditorů po qa PASS
+  - { from: qa, to: [performance, spec-audit, security, code-quality, design-audit], when: PASS, kind: fan-out }
+  # T3 — qa FAIL → DIAGNOSTIKA u architecture (ne přímé hádání vlastníka).
+  # qa je „zkoušeč naslepo": vidí příznak (spadlý test), ne příčinu. NEdiagnostikuje sama —
+  # selhání jde k architecture (zná, jak do sebe části zapadají). Z failure signature (nese ji
+  # E1 payload-carry) určí, čí část je vadná; její re-rozhodnutí řídí přestavbu T2 řetězu (vč.
+  # db-schema/migrací — tím se zavírá mezera „chybějící sloupec vypadá jako chyba backendu"),
+  # nebo eskaluje na product při chybě zadání (fault == spec). Viz WORKFLOW.md.
+  - { from: qa, to: architecture, when: FAIL, kind: return, counter: qa }
+
+  # auditoři → join (PASS) nebo return vlastníkovi (finding = BLOCKER)
+  - { from: performance,  to: audit-join }
+  - { from: spec-audit,   to: audit-join }
+  - { from: security,     to: audit-join }
+  - { from: code-quality, to: audit-join }
+  - { from: design-audit, to: audit-join }
+  # return jen na FAIL (finding); na PASS jde auditor do join. Bez guardu = bezpodmínečně eligible (F8).
+  - { from: spec-audit,   to: [product, architecture],          when: FAIL, kind: return }
+  - { from: security,     to: [backend, web, mobile, desktop],  when: FAIL, kind: return }
+  - { from: code-quality, to: [backend, web, mobile, desktop],  when: FAIL, kind: return }
+  - { from: performance,  to: [backend, web, mobile, desktop],  when: FAIL, kind: return, counter: performance }
+  - { from: design-audit, to: [web, mobile, desktop, ux-design, ui-system], when: FAIL, kind: return }
+
+  - { from: audit-join, to: l2-review }   # dosažení joinu = všichni auditoři PASS (return hrany guardované FAIL)
+
+  # T3-post
+  - { from: l2-review, to: devops, when: project.has_deploy }
+  - { from: l2-review, to: done,   when: "!project.has_deploy" }
+  - { from: devops, to: deploy-approve }
+  - { from: devops, to: [backend, web, mobile, desktop, feasibility, db-schema, qa], when: "FAIL: build/deploy/migration", kind: return }
+  - { from: deploy-approve, to: production, when: APPROVED }
+  - { from: production, to: monitor }
+  - { from: monitor, to: done, when: PASS }
+  - { from: monitor, to: [backend, web, mobile, desktop], when: "FAIL → rollback", kind: return }

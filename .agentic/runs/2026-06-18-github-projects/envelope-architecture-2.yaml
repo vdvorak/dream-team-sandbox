@@ -1,0 +1,9 @@
+run: 2026-06-18-github-projects
+node: architecture
+outcome: FAIL
+fault: server-logic
+severity: blocking
+signature: "Kontrakt (projects.openapi v1.2 aditivní pola) i migrace 0006 (uq_projects_repo_url) jsou SPRÁVNÉ — žádný re-emit. Vada = 3 zastaralé pre-existing testy v tests/server/integration/test_projects_integration.py. Backend opraví: (1) různé repo_url ve fixtures (uq_projects_repo_url); (2)+(3) rozšířit expected key sety o managed/connection_status/origin. Žádná změna kontraktu ani schématu — jen synchronizace testů s novým správným stavem."
+cost: { model: sonnet, input_tokens: 34467, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 40 }
+note: "Diagnostika qa regrese: fault server-logic → backend. Contract+migrace potvrzeny správné."

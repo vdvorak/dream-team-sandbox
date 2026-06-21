@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: backend
+outcome: PASS
+changed: [server-code]
+cost: { model: sonnet, input_tokens: 43496, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 113 }
+note: "Code-quality fix: _SIGN_META→SIGN_META (veřejné), except:pass→logger.debug, dead _AUTH_RE smazán, 2 WHAT komentáře pryč, _HTTP_404_RE na modul-level. Kontrakt/chování/missing[] tvar beze změny. Suita 781/781 PASS, ruff clean."

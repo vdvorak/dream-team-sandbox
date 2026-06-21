@@ -1,0 +1,15 @@
+# Anti-pattern signatury back-align (constitution §Reuse §Operační mechanismus) — java-quarkus.
+# Backend reuse: použij sdílenou infra (shared/), ne vlastní variantu. Jen vysoce jisté.
+meta:
+  scan_globs: ["server/src/main/java/**/*.java"]
+
+signatures:
+  - component: ApiException
+    antipattern: 'Response\.status\('
+    why: "raw JAX-RS Response.status — throwuj ApiException (shared infra), mapper ji přeloží (rules/backend §Vrstvení)"
+    severity: blocker
+    allow:
+      - "**/ApiException.java"          # shared infra sama smí (drží status + buduje Response)
+      - "**/ApiExceptionMapper.java"
+      - "**/ValidationExceptionMapper.java"
+      - "**/BaseResource.java"

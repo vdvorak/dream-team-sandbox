@@ -1,0 +1,8 @@
+run: 2026-06-18-github-projects
+node: feasibility
+outcome: PASS
+flags: { has_ui: true, design_source: derive, touches_db: true, touches_server: true }
+tier: M
+cost: { model: sonnet, input_tokens: 16394, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 22 }
+note: "Re-confirm zúženého rozsahu PASS. Stack-impact NONE (gh CLI reuse github_service.py + aditivní migrace projects: sloupce managed + connection_status). breaking NONE. Pozn. pro Ted/Chandler: projects nese příznak řízenosti + stav propojení."

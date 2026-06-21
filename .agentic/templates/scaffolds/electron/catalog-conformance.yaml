@@ -1,0 +1,18 @@
+# Anti-pattern signatury back-align (constitution §Reuse §Operační mechanismus) — electron.
+# Renderer je SolidJS → platí solidjs signatury; navíc electron-specific security/reuse.
+# Jen vysoce jisté signatury (stabilita).
+meta:
+  scan_globs: ["src/renderer/**/*.tsx", "src/renderer/**/*.ts"]
+
+signatures:
+  - component: preload-bridge
+    antipattern: 'ipcRenderer'
+    why: "renderer sahá na main JEN přes typovaný window.api most (preload) — ne přímý ipcRenderer (security baseline)"
+    severity: blocker
+    allow: []
+
+  - component: design-tokens
+    antipattern: 'style=\{\{'
+    why: "inline style v rendereru — vizuál do *.module.css + tokeny (solidjs stack)"
+    severity: warn
+    allow: []

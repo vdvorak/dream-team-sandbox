@@ -1,0 +1,7 @@
+run: 2026-06-18-github-issues-import
+node: ui-system
+outcome: PASS
+flags: { touches_shared_ui: false }
+cost: { model: sonnet, input_tokens: 29007, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 57 }   # duration_ms 56584
+note: "No-op derive — existující sdílené komponenty pokryjí všechny stavy slice C bez úprav, žádné nové tokeny. Pro Petera: Button variant=secondary + <Show when=repoUrl> (AC-7), Button disabled=isSyncing (AC-10), InteractionErrorBanner s onRetry (AC-8/6), EmptyNotice (AC-9), LoadingNotice (loading feedback). Vše z components/InteractionNotices + components/Button. Design manuál NO_CHANGE."

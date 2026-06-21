@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "appTitle": "App",
+  "exampleTitle": "Examples",
+  "exampleError": "Failed to load.",
+  "exampleRefresh": "Refresh"
+}

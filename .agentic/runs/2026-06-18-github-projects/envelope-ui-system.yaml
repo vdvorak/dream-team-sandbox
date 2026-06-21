@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: ui-system
+outcome: PASS
+cost: { model: sonnet, input_tokens: 106173, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 560 }
+note: "Derive mód: 5 sdílených komponent (RepoUrlField, StructureCheckPanel, StructureChecklist, GitHubAuthPrompt, ConnectedProjectRow) + design manuál + i18n cs/en + WCAG-AA. Page binding předáno Peterovi."

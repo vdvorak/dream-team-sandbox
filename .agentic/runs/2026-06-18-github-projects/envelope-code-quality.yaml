@@ -1,0 +1,9 @@
+run: 2026-06-18-github-projects
+node: code-quality
+outcome: FAIL
+severity: blocking
+returns_to: backend
+signature: "3 blockery v backend kódu: B1 import privátního _SIGN_META přes modul-hranici (project_connect_service.py:45) → udělej veřejné (SIGN_META) nebo read_structure vrátí obohacený typ (sign/label/explanation), volající nečte privátní strukturu; B2 spolykaná výjimka project_connect_service.py:249-250 (except Exception: pass v 409 race větvi) → přidej logger.debug/warning; B3 dead code _AUTH_RE github_service.py:357 (unused) → odstranit, + 2 WHAT komentáře (project_connect_service.py:83 a :162 'Krok 2 kanonizace') → odstranit. Advisory (ne blokující): _HTTP_404_RE v smyčce read_structure → modul-level; chybí return type _connect_service router:42; duplicitní default_name výraz :134/:225."
+cost: { model: sonnet, input_tokens: 36858, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 54 }
+note: "FAIL → backend (Bob). 3 blockery, 3 advisory."

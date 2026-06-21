@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: architecture
+outcome: PASS
+flags: { touches_db: true, touches_server: true, touches_shared_ui: false }
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Uzavření diagnostiky: Ted potvrdil kontrakt (projects.openapi v1.2) i migraci 0006 jako SPRÁVNÉ (žádný re-emit). Architektura sama je v pořádku → PASS. Oprava 3 zastaralých testů už nasměrována na backend přes fault=server-logic (předchozí envelope). Orchestrátor-recorded uzávěr, žádná nová agent práce."

@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: code-lint
+outcome: PASS
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Re-run po backend test-fixu: ruff format + check na test_projects_integration.py — already formatted, all checks passed. Neměřeno (orchestrátor-run)."

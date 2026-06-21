@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: qa
+outcome: PASS
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Re-affirm po code-quality fixu: celá server suita 781 passed, 3 skipped (orchestrátor ověřil čerstvě). 15/15 AC pokrytí beze změny — Bobovy quality fixy (rename/log/dead-code) nezměnily chování ani testy."

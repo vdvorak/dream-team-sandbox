@@ -1,0 +1,21 @@
+# Dart/Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock        # app pin? držíme; pro knihovnu ignoruj — tady app, viz README
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Platform build dirs
+ios/Pods/
+ios/.symlinks/
+android/.gradle/
+android/local.properties
+
+# Generováno gen-l10n (vzniká z l10n/*.arb při pub get)
+lib/l10n/app_localizations*.dart

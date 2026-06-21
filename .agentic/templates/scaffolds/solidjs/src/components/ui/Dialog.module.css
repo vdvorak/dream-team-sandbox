@@ -1,0 +1,30 @@
+.trigger {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+}
+.overlay { position: fixed; inset: 0; background: var(--color-overlay); }
+.positioner {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.content {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-6);
+  min-width: 320px;
+}
+.title { font-size: 18px; margin-bottom: var(--space-4); }
+.body { margin-bottom: var(--space-4); }
+.close {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius);
+}

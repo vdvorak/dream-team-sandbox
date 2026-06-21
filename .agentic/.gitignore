@@ -1,0 +1,12 @@
+# dogfood — ephemerální projekty pro testování flow, mimo verzování
+dogfood/
+
+# Python bytecode cache (core/ moduly)
+__pycache__/
+*.pyc
+
+# engine-native checkpoint (run.sh checkpoint) — runtime snapshot mimo working tree
+.checkpoint/
+
+# Claude Code — sdílený allowlist (settings.json) se verzuje; lokální/osobní ne
+.claude/settings.local.json

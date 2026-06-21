@@ -1,0 +1,13 @@
+.button {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+.primary { background: var(--color-primary); color: #fff; }
+.primary:hover { background: var(--color-primary-hover); }
+.secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}

@@ -1,0 +1,7 @@
+run: 2026-06-18-github-issues-import
+node: intake
+outcome: PASS
+class: feature
+tier: M
+flags: { has_signature: false }
+note: "Import existujících GitHub issues při connectu repa + tlačítko 'Načíst znovu' pro re-sync v záložce Issues. Opravuje nahlášený bug — po connectu se issues nenačetly, protože import v kódu chyběl. Vlna 1 z dvojice; přestavba IA (project-workspace) jde samostatně jako Vlna 2."

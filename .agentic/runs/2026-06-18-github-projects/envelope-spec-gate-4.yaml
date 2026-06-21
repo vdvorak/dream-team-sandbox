@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: PASS
+cost: { model: haiku, input_tokens: 14309, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 23 }
+note: "Cílené potvrzení PASS — zkratka odstraněna, spec čistý (68 ř)."

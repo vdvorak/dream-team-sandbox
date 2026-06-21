@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: db-schema
+outcome: PASS
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Re-affirm: artefakt (migrace 0006) nezměněn od předchozího PASS. Stale-reopen čistě z upstream re-stamp kaskády (architecture touches_db re-emit); žádná reálná změna schématu. Backendová oprava se týká jen testů."

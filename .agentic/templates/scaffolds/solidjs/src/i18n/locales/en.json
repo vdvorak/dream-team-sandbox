@@ -1,0 +1,12 @@
+{
+  "nav": { "examples": "Examples" },
+  "example": {
+    "title": "Examples",
+    "new": "New",
+    "newTitle": "New example",
+    "labelField": "Label",
+    "loading": "Loading…",
+    "empty": "No items"
+  },
+  "backend": { "unavailable": "Backend is unavailable" }
+}

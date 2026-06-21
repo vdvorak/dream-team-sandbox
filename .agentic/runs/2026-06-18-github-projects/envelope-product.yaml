@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags: { has_ui: true }
+cost: { model: sonnet, input_tokens: 57145, output_tokens: 0, credits: 0.0 }   # subagent_tokens combined (2 průchody: 37774+19371), split neměřen
+time: { started: null, ended: null, seconds: 228 }   # duration_ms 136017+91772
+note: "Spec+acceptance (15 bodů) zrevidováno dle PO rozhodnutí; verifikace = Watsonem asistovaná analýza+oprava; blokující předpoklad: závisí na GitHub OAuth."

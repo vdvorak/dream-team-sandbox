@@ -1,0 +1,91 @@
+# auth — cross-project feature (P7 feature library). Security-critical → spec + vetted impl
+# (audit-once: Heimdall audituje impl JEDNOU tady, ne v každém projektu; regenerate-never).
+#
+# Watson init se zeptá (question + options) → feature.sh resolvne spec + impl scaffold pro stack
+# + variantu + volby. Spec je stack-agnostic a VŽDY; impl je per-stack a volitelný.
+
+id: auth
+description: "Authentication — user accounts, login, tokens (JWT or server-side session)."
+security_critical: true
+spec: templates/features/auth/spec.md
+
+watson:
+  question: "Chce projekt autentizaci uživatelů?"
+  kind: choice
+
+variants:
+  base:
+    label: "Credentials (email + heslo)"
+    default: true
+    options:
+      token_strategy:
+        question: "Tokeny: stateless JWT, nebo server-side session?"
+        choices: [jwt, session]
+        default: jwt
+    produces: [auth-spec, server-code, unit-tests]
+    impl:
+      python-fastapi: templates/features/auth/impl/python-fastapi/   # ready: jwt + session (pytest 8/8 oba)
+      java-quarkus: templates/features/auth/impl/java-quarkus/       # strukturální — BUILD-VERIFICATION PENDING (no gradle env); viz impl README
+    # APPLY manifest (strojově čitelné pro deterministický overlay — apply-feature.sh).
+    # Cesty relativní k impl root (impl.<stack>). package_root = odkud přepsat na projektový base_package.
+    apply:
+      java-quarkus:
+        package_root: com.example.app
+        wiring: none            # JAX-RS @Path se registruje sám; python-fastapi: vlož router do main
+        common:
+          files:
+            - server/src/main/java/com/example/app/auth/model/RegisterData.java
+            - server/src/main/java/com/example/app/auth/model/LoginData.java
+            - server/src/main/java/com/example/app/auth/model/UserView.java
+            - server/src/main/java/com/example/app/auth/repository/AuthRepository.java
+            - server/src/main/java/com/example/app/auth/service/AuthService.java
+            - server/src/main/java/com/example/app/auth/security/Passwords.java
+          migrations:
+            - contracts/db/migrations/V2__auth.sql
+        options:
+          jwt:
+            files:
+              - server/src/main/java/com/example/app/auth/resource/AuthResourceJwt.java
+              - server/src/main/java/com/example/app/auth/model/TokenView.java
+            migrations: []
+          session:
+            files:
+              - server/src/main/java/com/example/app/auth/resource/AuthResourceSession.java
+              - server/src/main/java/com/example/app/auth/repository/SessionRepository.java
+            migrations:
+              - contracts/db/migrations/V3__sessions.sql
+      python-fastapi:
+        package_root: null        # generický src.* — nepřejmenovává se (na rozdíl od javy)
+        wiring: router-into-main   # vlož `app.include_router(auth_router)` do server/src/main.py (zatím manuální krok)
+        common:
+          files:
+            - server/src/auth/__init__.py
+            - server/src/auth/models.py
+            - server/src/auth/passwords.py
+            - server/src/auth/repository.py
+            - server/src/auth/service.py
+          migrations:
+            - contracts/db/migrations/V2__auth.sql
+        options:
+          jwt:
+            files:
+              - server/src/auth/security_jwt.py
+              - server/src/auth/router_jwt.py
+              - server/tests/test_auth_jwt.py
+            migrations: []
+          session:
+            files:
+              - server/src/auth/security_session.py
+              - server/src/auth/router_session.py
+              - server/src/auth/sessions.py
+              - server/tests/test_auth_session.py
+            migrations:
+              - contracts/db/migrations/V3__sessions.sql
+  oauth:
+    label: "+ OAuth (Google / GitHub)"
+    requires: [base]
+    status: planned
+  mfa:
+    label: "+ MFA (TOTP)"
+    requires: [base]
+    status: planned

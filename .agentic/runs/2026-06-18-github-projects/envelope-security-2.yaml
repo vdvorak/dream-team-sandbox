@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: security
+outcome: PASS
+cost: { model: null, input_tokens: 0, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: null }
+note: "Re-affirm po code-quality fixu: Bobovy změny jsou quality-only bez bezpečnostního povrchu (SIGN_META rename, dead-code removal, _HTTP_404_RE module-level). Nový logger.debug ve 409 větvi loguje jen type(exc).__name__ — žádný token/zpráva/PII (ověřeno na kódu). Argv-list, sanitizace, fail-closed ordering, parametrized queries beze změny."

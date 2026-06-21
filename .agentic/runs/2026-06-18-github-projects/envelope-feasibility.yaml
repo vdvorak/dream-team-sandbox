@@ -1,0 +1,8 @@
+run: 2026-06-18-github-projects
+node: feasibility
+outcome: FAIL
+severity: blocking
+signature: "Tech FEASIBLE (Tony PASS), ale PO zúžil rozsah → spec musí sednout PŘED architekturou: (1) AC-15 přepsat z 'OAuth' na gh-keyring single-user fail-closed model (privátní repo funguje když host přihlášen gh+repo scope; jinak hláška 'přihlas se ke GitHubu'; veřejná repa vždy; per-user OAuth = navazující pilíř accounts-oauth, mimo vlnu); (2) AC-4..7 + spec §analýza přepsat z 'asistovaná Watson analýza' na DETERMINISTICKOU strukturní kontrolu + checklist chybějících markerů řízeného projektu (.agentic/, PROJECT-CONSTITUTION.md, project-config.md); nápravný tok = interaktivní checklist, NE konverzační AI; plná Watson/LLM analýza deferred (chybí AI runtime)."
+cost: { model: opus, input_tokens: 86500, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 139 }
+note: "Feasibility PASS po stránce techniky; FAIL-return jen kvůli PO-zúžení rozsahu (gh-model + deterministická analýza). Stack-impact NONE (gh CLI + aditivní migrace projects). design_source=derive, has_ui=true. Decomposition Tony: slice A connect-public, B deterministic-analysis+checklist, C private/gh-auth."

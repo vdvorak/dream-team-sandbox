@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags: { has_ui: true }
+cost: { model: haiku, input_tokens: 12772, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 9 }
+note: "Re-flow: jednořádková oprava zkratky AI/LLM ve Scope Out → doménová formulace."

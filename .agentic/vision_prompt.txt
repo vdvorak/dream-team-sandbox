@@ -1,0 +1,33 @@
+co nam ve workflow jeste chybi cilem je mit pipelinu ktere dam issue, vytvori se specifikace, udela se implementacni plan, dekompozice na todos, deleguje se prace, vysledna prace se testuje a prochazi overovanim, cilem je dostavat stabilni 
+vysledky tzn budu mit 2 aplikace pro stejny stack, tak by ty veci mely diky scaffoldum vypadat a fungovat z hlediska zdrojaku a implementace stejne, stejne tak kdyz vyberu platformu atd. chci aby watson umel vec jako reknu "Chci zalozit projekt",  
+watson se vypta na nazev, platformy, stack, zakladni popis, inicializuje novy projekt a pak budu jen hazet issues do flow a ono to bude plyvat stabilni a konzistentni vysledky. toto jsou hrube myslenky, clovek ma delat zasani rozhodnduti. mam      
+takovou myslenku ze kazdy agent ma byt uzel s jasne definovanymi vstupy a vystupy a budou se retezit, pri planovani by se pro ucrite tasky mely volit urcite modely dle slozitosti ukolu aby to bylo cenove efektivni. ma to byt cli tool agnostic tzn  
+max nejaky setup pro konkretni tool ale nic by nemelo fungovat specialne pro claude code. kdyz se pisi specs tak by mely byt ciste a jasne a hlavne lidsky citelne. co  jde udelat scriptem by se melo delat scriptem a ne pres llm, projekty by mely   
+mit jasne standardizovanou strukturu. klicem jsou take scaffoldy aby AI co nejmene kodu vymyslelo samo, to zajisit i konzistenci zdrojaku.
+
+zapomel jsem zminit, ze stav projektu se ma ukladat do md filu, tzn aby to nebylo zavisle na nejake tool memory, kdyz otevru novou session tak reknu hej watsone a ten se zorientuje a pokud je neco rozpracovaneho tak navrhne co dal a nebo se      
+  zepta zda delat novou feature nebo co, chceme taky postupovat podle SCRUM   
+  
+
+
+flow musi vzdy produkovat na zaklade spec driven developmentu a to velmi striktne, pokracuj                                                                                            
+
+klicova je determinicnost, konzistence
+
+
+kdyz se bude zpracovavat nejaka issue tak se musi nakonci vedet jak dlouho to trvalo a kolik kreditu to stalo
+vzdy je treba se drzet mych programatorskych pravidel
+nikdy se nesmi spadnout do vibe codingu
+maximalizovat vyuziti scriptu a scaffoldu, tam kde to jde, llm pouzit jen tam kde to fakt dava smysl
+scaffoldy musi byt jak per platforma, per backend stack, per frontend stack
+pokud to platforma dovoli tak vzdy lokalni run delat v docker containeru aby to nebylo zavisle na vecech nainstalovanych v systemu
+pouzivat nejnovejsi stack technologie tzn pokud se pouziva java tak vzdy nejnovejsi
+scaffoldy by mely byt i pro definice agentu aby vsichni agenti mely vzdy stejnou strukturu
+melo by to fungovat tak pokud agent deleguje praci a subagent ma mit scaffold, tak hlavni agent zjisti jaky scaffold a pak se zadanim ho preda subagentovy (jak jsem rikal, vstypy a vystupy)
+pro lehci ukoly by se meli pouzivat levnejsi agenti pro slozitejsi jako napriklad planovaci ukoly by se meli pouzivat drazsi agenti
+cilem je byt cli tool agnostic, tzn vse se dela obecne nic nesmi spolehat na nejakou treba claude code pamet nebo tak
+handoffy se musi delat do vlastnich souboru aby jsme nebyli zavisly na tool memory, musi to byt tak aby kdyz by aktualni session vypadla nebo jsem ji rucne prerusil tak aby dalsi automaticky vedela jak navazat
+nevim zda na scripty pouzivat bash nebo python
+
+
+budouci plan je udelat aplikaci kde pujde tvorit vlastni agentni, toto flow se pak bude pouzivat pro vytvareni projektu kde kazdy projekt bude mit board issues ktere budou dostupne pres api a jen v issue kliknu na zpracovat to zalozi nove todo pro toto issue, kam se postupne rozepise co je potreba udelat a pak nejaky agent jednotlivym subagentum bude delegovat praci, toto i to stema issues bude tak ze pristup bude garantovanej pomoci tokenu tzn kazdy bude moct sahat jen do toho k cemu ma token, muzes se podivat jak funguje ../vtodo to je takove AI callable todo, tak na tomto principu to chci stavet, ai flows zde bude node editor kde budu retezit vstupy a vystupy a to tak ze vzdy pujdou jen vzajemne kompatibilni I/O. chtel bych i aby bylo zive videt co flow zrovna dela a pripadne pokud bude potrebovat nejakou uzivatelskou interakci tak aby tam byla moznost, tzn napriklad denisa ma bud udelat mockup nebo se zeptat zda ten navrh nemam tak toto vsechno musi jit handlovat v aplikaci, vlastne se chci pak uplne zbavit terminalu. ale i tyto vstupy by meli byt nekde jasne definovany aby to bylo co nejvic deterministicke a kazdy totiz bude potrebovat jiny typ interakce. nejde o to zbavit se cloveka, ale vytvorit deterministicky system kde na zaklade jasnych vstupu vypadavaji jasne vystupy a co nejvic minimalizovat diverzitu. prechody by meli fungovat podobne jako to todo, agent vi, ze dokoncil praci tak zavola nejaky endpoint rekneme treba /done, kde jako vstup posle svoje vystupy a aplikace to pouzije jako vstupy pro dalsi krok ve flow, toto umozni pak zive sledovani co se ve flow daneho projektu zrovna deje. asi budou muset zacit nejake veci typu file locking atp aby se issues a agenti navzajem neruzily ale to uz jsou pak detaily.

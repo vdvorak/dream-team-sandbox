@@ -1,0 +1,64 @@
+# interactions.yaml — typovaný registr human-interaction bodů.
+#
+# Human-gate uzly v delivery.yaml blokují/pozastaví běh a čekají na člověka. Tady je každá
+# interakce JASNĚ a TYPOVANĚ definovaná, aby:
+#   - aplikace ji vyrenderovala jen z `kind` + `produces` (bez per-gate kódu),
+#   - odpověď byla typovaná (jasný vstup → jasný výstup do flow, minimální diverzita),
+#   - „hej Watsone" / live-view věděl, na co přesně se čeká (current-run.awaiting_human).
+# Vstup do běhu = vždy specializovaný interface dle `kind`, NIKDY terminál.
+#
+# ── Schéma interakce (každá položka v `interactions:`) ──────────────────────────────────────
+#   kind      ano   typ interakce ∈ typologie níže (řídí UI control)
+#   prompt    ano   text k uživateli (česky)
+#   level     ano   L0–L3 (schvalovací úroveň, viz constitution)
+#   blocking  ano   true = drží běh (halt_gate) · false = awaiting_human (nezdržuje)
+#   produces  ano   typovaný výstup: { artifact: <typ z artifacts.yaml> } NEBO { outcome: <O z vocabulary> }
+#   options   jen choice/approval   seznam { value, label }
+#   delegate_to  jen delegate-or-provide   role agenta = alternativa k uploadu
+#
+# ── Typologie kindů (kind → UI control → typované I/O) ──────────────────────────────────────
+#   choice              → radio/select z options       → produces.outcome (zvolená value)
+#   approval            → schválit / zamítnout          → produces.outcome (APPROVED/REJECTED)
+#   ack                 → tlačítko „potvrdit"           → produces.outcome: ACK   (informativní)
+#   upload              → file upload widget            → produces.artifact (člověk dodá obsah)
+#   text                → text input                    → produces.artifact (volná odpověď)
+#   delegate-or-provide → dvojvolba [upload <typ>] XOR [spustit <delegate_to>] → produces.artifact
+#                         (oba konce stejný typ; „kdo dodá" řeší projektová politika design_source)
+#
+# check.sh C10 ověří: každý human-gate má platnou interakci · kind ∈ typologie ·
+#   produces je { artifact: <∈artifacts> } nebo { outcome: <∈vocabulary> }.
+
+meta:
+  version: 2
+
+interactions:
+
+  design-source:
+    level: L2
+    kind: delegate-or-provide
+    prompt: "Dodej mockup featury (upload Figma export / v0 / Claude design / HTML), NEBO nech návrh udělat Denisu."
+    produces: { artifact: mockup }         # oba konce produkují mockup → vstup pro Denisu (ověření) / přímo do flow
+    delegate_to: ux-design                 # alternativa k uploadu: spustit Denisu (role ux-design)
+    blocking: false                        # L2 — neblokuje; aktivní JEN v design_source=intake módu
+    # POZN: výběr „kdo dodá" (author|intake|derive) NENÍ tento gate — je to projektová politika
+    # design_source, kterou Watson nastaví 1× při initu a engine na ni routuje (delivery.yaml).
+    # Tento gate je typový bod „dodej obsah XOR deleguj"; routing dál jede přes design_source flag.
+
+  l2-review:
+    level: L2
+    kind: ack
+    prompt: "Hotová feature — prohlédni (vč. screenshotu). Estetický soud je na tobě."
+    options:
+      - { value: ACK, label: "Viděl jsem, pokračovat" }
+    produces: { outcome: ACK }
+    blocking: false                        # informativní, nezdržuje
+
+  deploy-approve:
+    level: L3
+    kind: approval
+    prompt: "Nasadit na produkci? Destruktivní krok, žádný opt-out (constitution §8)."
+    options:
+      - { value: APPROVED, label: "Schválit produkční deploy" }
+      - { value: REJECTED, label: "Zamítnout (běh se zastaví)" }
+    produces: { outcome: APPROVED }        # APPROVED → production; REJECTED → halt
+    blocking: true                         # L3 — blokuje, musí padnout explicitní ano/ne

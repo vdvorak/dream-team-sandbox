@@ -1,0 +1,30 @@
+name: app
+description: "Flutter mobile client (iOS + Android) — dream-team scaffold."
+publish_to: "none"
+version: 0.1.0
+
+# Newest-stack politika: piny drž na nejnovějších stabilních; aktualizuj přes
+# `flutter pub upgrade --major-versions`. Verze žijí TADY (ne v manifestu).
+environment:
+  sdk: ^3.11.0
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:                 # i18n delegáti (constitution: i18n od 1. řádku)
+    sdk: flutter
+  flutter_riverpod: ^2.6.1               # stav (AsyncNotifier vertical slice)
+  go_router: ^14.6.2                     # deklarativní routing
+  dio: ^5.7.0                            # HTTP klient
+  intl: any                              # pinuje flutter_localizations
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4                        # mockování v testech (žádné codegen mocky)
+
+flutter:
+  uses-material-design: true
+  generate: true                          # zapne gen-l10n z l10n/*.arb při `flutter pub get`

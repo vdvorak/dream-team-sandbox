@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: PASS
+cost: { model: sonnet, input_tokens: 32117, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 105 }
+note: "Re-check PASS — 6 nálezů opraveno, žádná nová vada."

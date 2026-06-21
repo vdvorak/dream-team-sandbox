@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags: { has_ui: true }
+cost: { model: sonnet, input_tokens: 19557, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 103 }
+note: "Re-flow po feasibility: zúženo na gh single-user model (AC-15) + deterministická strukturní kontrola+checklist (AC-4..7); full Watson/OAuth deferred."

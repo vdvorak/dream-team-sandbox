@@ -1,0 +1,6 @@
+# gen-l10n konfigurace: ARB zdroje → typovaná AppLocalizations.
+arb-dir: l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-dir: lib/l10n
+synthetic-package: false        # generuj do zdrojáku (ne deprecated synthetic package)

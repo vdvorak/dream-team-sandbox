@@ -1,0 +1,5 @@
+# Build / IDE artefakty kostry
+build/
+.gradle/
+# Vygenerované dev klíče (negenerují se do repa — viz server/src/main/resources/dev/README.md)
+*.pem

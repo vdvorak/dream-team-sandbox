@@ -1,0 +1,7 @@
+run: 2026-06-18-github-issues-import
+node: architecture
+outcome: PASS
+flags: { touches_db: true, touches_server: true, touches_shared_ui: false }
+cost: { model: opus, input_tokens: 146916, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 514 }   # duration_ms 514423
+note: "Kontrakty: issues-import.openapi.yaml (nový, POST /api/projects/{id}/issues/import → IssueImportResult), issues.openapi v1.2.0, project-connect.openapi v1.1.0 (aditivní pole issue_import v ProjectConnectResponse; selhání importu = 201 status import_failed, ne 5xx). 3 nové error kódy (ERR_ISSUE_IMPORT_NO_REPO 409, ERR_ISSUE_IMPORT_IN_PROGRESS 409, ERR_ISSUE_IMPORT_FAILED 422), reuse ERR_GITHUB_PROBE_FAILED/AUTH_INVALID. Migrace 0007 ADDITIVE (down_rev 0006) pro Chandlera: github_issue_number (Integer null) + origin (String16 NOT NULL default 'manual', CHECK manual|github) + partial UNIQUE (project_id, github_issue_number) WHERE not null. Reuse: issues tabulka jako cache (GitHub=truth), github_service.list_issues přes _run_gh, connect post-commit seam (krok 7, NESMÍ rollbacknout projekt). UPSERT-by-(project_id,github_number): existující UPDATE, nový INSERT, zmizelý ponech (AC-3/4/5), ručních origin=manual se nedotkne. Nález: per-operation concurrency guard = první v projektu, feature-local, extraction candidate with_operation_lock."

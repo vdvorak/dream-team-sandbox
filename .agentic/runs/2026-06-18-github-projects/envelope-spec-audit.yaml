@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: spec-audit
+outcome: PASS
+cost: { model: sonnet, input_tokens: 61161, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 67 }
+note: "T3 contract-mapping PASS: 15 AC mapováno na endpointy/kódy; 7 error kódů registrovaných (5 nových + 2 sdílené anti-duplikace); 200+missing[] konzistentní spec↔kontrakt↔impl; enum lowercase doménové OK, ERR_* uppercase OK; $ref jediný zdroj pravdy mezi kontrakty."

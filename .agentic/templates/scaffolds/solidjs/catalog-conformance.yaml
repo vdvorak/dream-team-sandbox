@@ -1,0 +1,23 @@
+# Anti-pattern signatury back-align (constitution §Reuse §Operační mechanismus):
+# komponenta v katalogu existuje → raw inline varianta téhož = drift. Scanner
+# (`scripts/catalog-conformance.sh`) je mechanicky vynucuje ve Vitek gate.
+#
+# DRŽ JEN VYSOCE JISTÉ signatury (nízká false-positive cena = stabilita). Když extrahuješ
+# novou komponentu, přidej její signaturu (raw forma, co nahrazuje) — scan pak vynutí
+# migraci všech míst. `allow` = glob výjimky (komponenta sama, definiční soubory).
+
+meta:
+  scan_globs: ["src/**/*.tsx"]
+
+signatures:
+  - component: design-tokens
+    antipattern: '#[0-9a-fA-F]{3,8}\b'
+    why: "hardcoded hex barva v TSX — vizuál do *.module.css + var(--token) (rules/frontend §Styling)"
+    severity: blocker
+    allow: []
+
+  - component: design-tokens
+    antipattern: 'style=\{\{'
+    why: "inline style objekt v TSX — vizuál patří do *.module.css s tokeny (rules/frontend §Styling)"
+    severity: warn
+    allow: []

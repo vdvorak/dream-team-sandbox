@@ -1,0 +1,15 @@
+include: package:flutter_lints/flutter.yaml
+
+# Generovaný l10n kód analýzou neřešíme (vzniká mimo náš zdroják).
+analyzer:
+  exclude:
+    - lib/l10n/app_localizations*.dart
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    require_trailing_commas: true
+    avoid_print: true
+    # if/for/while vždy s blokovým tělem { } (constitution §Standardy) — vynucuje dart analyze
+    curly_braces_in_flow_control_structures: true

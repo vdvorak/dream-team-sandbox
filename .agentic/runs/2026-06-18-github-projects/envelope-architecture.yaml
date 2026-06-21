@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: architecture
+outcome: PASS
+flags: { touches_db: true, touches_server: true, touches_shared_ui: false }
+cost: { model: opus, input_tokens: 120444, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 459 }
+note: "Contracts: project-connect.openapi v1.0 (check-structure + connect), projects.openapi 1.1→1.2 aditivní pola (managed/connection_status/origin). 5 nových error kódů + reuse ERR_GITHUB_AUTH_INVALID. Reuse github_service + projects tabulka + auth vzor. Migrace 0005 ADDITIVE pro Chandlera (managed/connection_status/origin + uq_projects_repo_url). NON_BREAKING. Arch nález: projects.platform uvolnit na nullable pro připojené projekty (aditivní, dořeší Chandler/Bob)."

@@ -1,0 +1,838 @@
+---
+run: 2026-06-18-github-projects
+node: intake
+outcome: PASS
+class: feature
+tier: M
+flags:
+  has_signature: false
+note: Připojení GitHub repa jako projektu + zobrazení projektů; verifikace repa podle
+  struktury = app logika, ne LLM.
+agent: null
+phase: null
+time:
+  seconds: 0
+---
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags:
+  has_ui: true
+cost:
+  model: sonnet
+  input_tokens: 57145
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 228
+note: 'Spec+acceptance (15 bodů) zrevidováno dle PO rozhodnutí; verifikace = Watsonem
+  asistovaná analýza+oprava; blokující předpoklad: závisí na GitHub OAuth.'
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: FAIL
+severity: blocking
+signature: B-1/B-2 pipeline feature-slug v backtickách (project-create-wizard §Hlavní
+  scénář, accounts-oauth §Předpoklad) → doménový jazyk; B-3 arch constraint '(DB je
+  index, ne kopie)' §Scope Out → odstranit; B-4 AC-15 chybí tag [security] u authz
+  invariantu. +advisory A-1 'DB', A-2 '(OAuth)'.
+cost:
+  model: sonnet
+  input_tokens: 33641
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 115
+note: Intrinsic FAIL — 4 mechanické zábrany, returns to product.
+agent: sheldon-spec
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags:
+  has_ui: true
+cost:
+  model: sonnet
+  input_tokens: 17509
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 52
+note: 'Re-flow: opraveno 6 spec-gate nálezů (B-1..B-4 + A-1,A-2); smysl beze změny.'
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 32117
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 105
+note: Re-check PASS — 6 nálezů opraveno, žádná nová vada.
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: feasibility
+outcome: FAIL
+severity: blocking
+signature: 'Tech FEASIBLE (Tony PASS), ale PO zúžil rozsah → spec musí sednout PŘED
+  architekturou: (1) AC-15 přepsat z ''OAuth'' na gh-keyring single-user fail-closed
+  model (privátní repo funguje když host přihlášen gh+repo scope; jinak hláška ''přihlas
+  se ke GitHubu''; veřejná repa vždy; per-user OAuth = navazující pilíř accounts-oauth,
+  mimo vlnu); (2) AC-4..7 + spec §analýza přepsat z ''asistovaná Watson analýza''
+  na DETERMINISTICKOU strukturní kontrolu + checklist chybějících markerů řízeného
+  projektu (.agentic/, PROJECT-CONSTITUTION.md, project-config.md); nápravný tok =
+  interaktivní checklist, NE konverzační AI; plná Watson/LLM analýza deferred (chybí
+  AI runtime).'
+cost:
+  model: opus
+  input_tokens: 86500
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 139
+note: 'Feasibility PASS po stránce techniky; FAIL-return jen kvůli PO-zúžení rozsahu
+  (gh-model + deterministická analýza). Stack-impact NONE (gh CLI + aditivní migrace
+  projects). design_source=derive, has_ui=true. Decomposition Tony: slice A connect-public,
+  B deterministic-analysis+checklist, C private/gh-auth.'
+agent: tony-cto
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags:
+  has_ui: true
+cost:
+  model: sonnet
+  input_tokens: 19557
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 103
+note: 'Re-flow po feasibility: zúženo na gh single-user model (AC-15) + deterministická
+  strukturní kontrola+checklist (AC-4..7); full Watson/OAuth deferred.'
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: FAIL
+severity: blocking
+signature: 'spec §Scope Out ř.59: zkratky ''AI/LLM'' + ''AI runtime'' = stack pojmy
+  ve specu. Přeformuluj doménově: ''Chytrá (konverzační) analýza a oprava struktury
+  repa (odloženo; runtime pro konverzační asistenci zatím není k dispozici)''. Jediný
+  nález; zbytek PASS.'
+cost:
+  model: sonnet
+  input_tokens: 18237
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 63
+note: 'Re-check: 1 nový blocker (technická zkratka v Scope Out, pochází z orchestrátorova
+  zadání); zbytek čistý.'
+agent: sheldon-spec
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: product
+outcome: PASS
+flags:
+  has_ui: true
+cost:
+  model: haiku
+  input_tokens: 12772
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 9
+note: 'Re-flow: jednořádková oprava zkratky AI/LLM ve Scope Out → doménová formulace.'
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: spec-gate
+outcome: PASS
+cost:
+  model: haiku
+  input_tokens: 14309
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 23
+note: Cílené potvrzení PASS — zkratka odstraněna, spec čistý (68 ř).
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: feasibility
+outcome: PASS
+flags:
+  has_ui: true
+  design_source: derive
+  touches_db: true
+  touches_server: true
+tier: M
+cost:
+  model: sonnet
+  input_tokens: 16394
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 22
+note: 'Re-confirm zúženého rozsahu PASS. Stack-impact NONE (gh CLI reuse github_service.py
+  + aditivní migrace projects: sloupce managed + connection_status). breaking NONE.
+  Pozn. pro Ted/Chandler: projects nese příznak řízenosti + stav propojení.'
+outputs:
+- type: gate-output
+agent: tony-cto
+phase: T1
+---
+run: 2026-06-18-github-projects
+node: architecture
+outcome: PASS
+flags:
+  touches_db: true
+  touches_server: true
+  touches_shared_ui: false
+cost:
+  model: opus
+  input_tokens: 120444
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 459
+note: 'Contracts: project-connect.openapi v1.0 (check-structure + connect), projects.openapi
+  1.1→1.2 aditivní pola (managed/connection_status/origin). 5 nových error kódů +
+  reuse ERR_GITHUB_AUTH_INVALID. Reuse github_service + projects tabulka + auth vzor.
+  Migrace 0005 ADDITIVE pro Chandlera (managed/connection_status/origin + uq_projects_repo_url).
+  NON_BREAKING. Arch nález: projects.platform uvolnit na nullable pro připojené projekty
+  (aditivní, dořeší Chandler/Bob).'
+outputs:
+- type: contract
+- type: error-codes
+- type: reuse-decision
+agent: ted-architect
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: ui-system
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 106173
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 560
+note: 'Derive mód: 5 sdílených komponent (RepoUrlField, StructureCheckPanel, StructureChecklist,
+  GitHubAuthPrompt, ConnectedProjectRow) + design manuál + i18n cs/en + WCAG-AA. Page
+  binding předáno Peterovi.'
+outputs:
+- type: ui-components
+- type: design-manual
+agent: leonard-ui
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: db-schema
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 71455
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 298
+note: 'Migrace 0006 ADDITIVE: managed/connection_status/origin + uq_projects_repo_url;
+  platform uvolněn na nullable. NULL≠NULL UNIQUE ok pro PG i SQLite. breaking NONE.
+  Downgrade warning: ALTER platform NOT NULL selže pokud existují connect řádky s
+  platform=NULL.'
+outputs:
+- type: db-schema
+- type: migrations
+agent: chandler-db
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: web
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 141696
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 597
+note: ConnectRepoDialog + Projects.tsx (tlačítko Připojit repo, ConnectedProjectRow);
+  api/project-connect.ts; binding na kontrakty (struktura-odchylka=doménová 200, ne
+  HTTP chyba). 13/13 nových unit testů PASS; 293/294 celkem (1 pre-existing fail nesouvisí).
+  i18n parity cs/en OK. AC [integration]/[security] předány QA.
+outputs:
+- type: web-code
+- type: unit-tests
+agent: peter-web
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: backend
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 130545
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 757
+note: 'project_connect_service + router; github_service rozšířen (repo_exists, read_structure
+  přes gh api contents). Fail-closed pořadí (URL→kanonizace→auth→existence→duplikát→re-struktura→zápis).
+  7 error kódů. URL kanonizace sdílená. Router registrován před projects_router (first-match).
+  47/47 nových + 572/572 celá suita PASS. Perf kandidát: 3 contents volání → git/trees
+  recursive.'
+outputs:
+- type: server-code
+- type: unit-tests
+agent: bob-backend
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: code-lint
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Mechanická brána spuštěna orchestrátorem (ruff). ruff format: 3 soubory přeformátovány
+  (0006 migrace, github_service, test_project_connect_service); ruff check --fix:
+  1 import-sort I001. Re-verify: all checks passed. 74 affected testů PASS po fixu.
+  Neměřeno (orchestrátor-run, ne subagent).'
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: qa
+outcome: FAIL
+severity: blocking
+signature: '28/28 nových integ testů PASS, 10/15 AC pokryto. REGRESE (3 pre-existing
+  testy v tests/server/integration/test_projects_integration.py): (1) test_list_newest_first_ordering
+  → IntegrityError UNIQUE repo_url (fixture potřebuje různé repo_url); (2) test_get_project_detail_shape
+  → čekal 9 klíčů, přišlo 12 (rozšířit expected o managed/connection_status/origin);
+  (3) test_list_project_summary_shape → čekal 6, přišlo 9 (dtto). Příčina: Bobova
+  aditivní pola v1.2 + UNIQUE constraint; testy je nereflektují. Bez Bobova kódu PASS
+  (git stash ověřeno). Coverage gap: AC-14 PARTIAL (jen connect-origin, ne wizard+connect
+  společně); AC-13 mimo scope (wizard = předchozí vlna).'
+cost:
+  model: sonnet
+  input_tokens: 86393
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 302
+note: FAIL kvůli regresi pre-existing testů (zastaralé fixtures/expectations po aditivní
+  změně schématu). Diagnostika → architecture (Ted) určí fault doménu.
+agent: joey-qa
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: architecture
+outcome: FAIL
+fault: server-logic
+severity: blocking
+signature: 'Kontrakt (projects.openapi v1.2 aditivní pola) i migrace 0006 (uq_projects_repo_url)
+  jsou SPRÁVNÉ — žádný re-emit. Vada = 3 zastaralé pre-existing testy v tests/server/integration/test_projects_integration.py.
+  Backend opraví: (1) různé repo_url ve fixtures (uq_projects_repo_url); (2)+(3) rozšířit
+  expected key sety o managed/connection_status/origin. Žádná změna kontraktu ani
+  schématu — jen synchronizace testů s novým správným stavem.'
+cost:
+  model: sonnet
+  input_tokens: 34467
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 40
+note: 'Diagnostika qa regrese: fault server-logic → backend. Contract+migrace potvrzeny
+  správné.'
+agent: ted-architect
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: architecture
+outcome: PASS
+flags:
+  touches_db: true
+  touches_server: true
+  touches_shared_ui: false
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Uzavření diagnostiky: Ted potvrdil kontrakt (projects.openapi v1.2) i migraci
+  0006 jako SPRÁVNÉ (žádný re-emit). Architektura sama je v pořádku → PASS. Oprava
+  3 zastaralých testů už nasměrována na backend přes fault=server-logic (předchozí
+  envelope). Orchestrátor-recorded uzávěr, žádná nová agent práce.'
+outputs:
+- type: contract
+- type: error-codes
+- type: reuse-decision
+agent: ted-architect
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: db-schema
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Re-affirm: artefakt (migrace 0006) nezměněn od předchozího PASS. Stale-reopen
+  čistě z upstream re-stamp kaskády (architecture touches_db re-emit); žádná reálná
+  změna schématu. Backendová oprava se týká jen testů.'
+outputs:
+- type: db-schema
+- type: migrations
+agent: chandler-db
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: web
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Re-affirm: web artefakty (ConnectRepoDialog, Projects.tsx, api/project-connect)
+  nezměněny od předchozího PASS. Stale-reopen z upstream re-stamp kaskády; backendová
+  oprava se týká jen server testů, web se nedotýká.'
+outputs:
+- type: web-code
+- type: unit-tests
+agent: peter-web
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: backend
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 29222
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 127
+note: 'Re-flow oprava 3 zastaralých integ testů (test_projects_integration.py): unikátní
+  repo_url ve fixture + rozšířené expected key sety o managed/connection_status/origin.
+  Service/kontrakt/schéma netknuté. Celá suita 780 passed, 3 skipped, 0 failures.'
+outputs:
+- type: server-code
+- type: unit-tests
+agent: bob-backend
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: code-lint
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Re-run po backend test-fixu: ruff format + check na test_projects_integration.py
+  — already formatted, all checks passed. Neměřeno (orchestrátor-run).'
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: qa
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 36865
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 154
+note: 'Re-confirm PASS: regrese opravena (test_projects_integration 28/28), 29/29
+  connect integ testů, 15/15 AC pokryto (doplněn test_wizard_and_connect_both_appear_in_list
+  pro AC-13/AC-14). Žádné advisory.'
+outputs:
+- type: gate-output
+agent: joey-qa
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: security
+outcome: PASS
+cost:
+  model: opus
+  input_tokens: 40673
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 86
+note: 'F1-F8 PASS. Command injection OK (argv-list, žádný shell). Secrets leak OK
+  (token v keyringu, sanitizace před log/response, AC-15 no-token potvrzeno na kódu).
+  Parametrized queries OK. SSRF/path-injection OK (regex kotví github.com, owner/repo/path
+  jen [A-Za-z0-9_.-]). Fail-closed ordering OK. Advisory: A1 chybí ''--'' argv separator
+  (flag-injection defense-in-depth, regex povolí vedoucí pomlčku), A2 dead code _AUTH_RE
+  github_service.py:357. Oboje hardening, non-blocking.'
+outputs:
+- type: gate-output
+agent: heimdall-security
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: code-quality
+outcome: FAIL
+severity: blocking
+returns_to: backend
+signature: '3 blockery v backend kódu: B1 import privátního _SIGN_META přes modul-hranici
+  (project_connect_service.py:45) → udělej veřejné (SIGN_META) nebo read_structure
+  vrátí obohacený typ (sign/label/explanation), volající nečte privátní strukturu;
+  B2 spolykaná výjimka project_connect_service.py:249-250 (except Exception: pass
+  v 409 race větvi) → přidej logger.debug/warning; B3 dead code _AUTH_RE github_service.py:357
+  (unused) → odstranit, + 2 WHAT komentáře (project_connect_service.py:83 a :162 ''Krok
+  2 kanonizace'') → odstranit. Advisory (ne blokující): _HTTP_404_RE v smyčce read_structure
+  → modul-level; chybí return type _connect_service router:42; duplicitní default_name
+  výraz :134/:225.'
+cost:
+  model: sonnet
+  input_tokens: 36858
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 54
+note: FAIL → backend (Bob). 3 blockery, 3 advisory.
+agent: vitek-quality
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: design-audit
+outcome: FAIL
+severity: blocking
+returns_to: ui-system
+signature: '2 blockery hardcoded barev v StructureChecklist.css: B1 ř.192-193 submit-spinner
+  #fff + rgba(255,255,255,0.3) → tokeny (vzor StructureCheckPanel.css spinner var(--node-inflight-border)/var(--badge-progress-fg));
+  B2 ř.67 checked-item background rgba(22,39,22,0.4) → token (--badge-done-bg-alpha
+  nebo color-mix); pozn. manual/index.html:941 replikuje stejnou hardcoded hodnotu
+  → opravit i v manuálu. Advisory: A1 Projects.css:411 :focus místo :focus-visible;
+  A2 3× touch target <44px (fi-add-btn:586, fi-remove-btn:593, cockpit-repo-rename-input:337);
+  A3 submit-spinner stav chybí v manuálu; A4 ConnectRepoDialog dialog layout chybí
+  v manuálu + footer padding asymetrie.'
+cost:
+  model: sonnet
+  input_tokens: 53855
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 119
+note: FAIL → ui-system (Leonard). 2 blockery (hardcoded barvy), 4 advisory.
+agent: edna-design
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: backend
+outcome: PASS
+changed:
+- server-code
+cost:
+  model: sonnet
+  input_tokens: 43496
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 113
+note: 'Code-quality fix: _SIGN_META→SIGN_META (veřejné), except:pass→logger.debug,
+  dead _AUTH_RE smazán, 2 WHAT komentáře pryč, _HTTP_404_RE na modul-level. Kontrakt/chování/missing[]
+  tvar beze změny. Suita 781/781 PASS, ruff clean.'
+outputs:
+- type: server-code
+- type: unit-tests
+agent: bob-backend
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: ui-system
+outcome: PASS
+changed:
+- shared-ui
+cost:
+  model: sonnet
+  input_tokens: 33685
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 161
+note: 'Design fix: submit-spinner přes tokeny (var(--badge-progress-fg)/var(--node-inflight-border)),
+  checked-item color-mix místo rgba; manual/index.html:941 sjednocen; doplněna submitting
+  gallery ukázka. Žádná hardcoded barva v StructureChecklist.css. Komponentní testy
+  drží (1 pre-existing app-shell fail nesouvisí).'
+outputs:
+- type: ui-components
+- type: design-manual
+agent: leonard-ui
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: spec-audit
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 61161
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 67
+note: 'T3 contract-mapping PASS: 15 AC mapováno na endpointy/kódy; 7 error kódů registrovaných
+  (5 nových + 2 sdílené anti-duplikace); 200+missing[] konzistentní spec↔kontrakt↔impl;
+  enum lowercase doménové OK, ERR_* uppercase OK; $ref jediný zdroj pravdy mezi kontrakty.'
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: web
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Re-affirm: Peterův page kód (ConnectRepoDialog.tsx, Projects.tsx, api/project-connect)
+  nezměněn. Stale-reopen z ui-system fixu (token-swap CSS komponent, vizuálně identické,
+  page logika netknuta). Komponentní testy drží (Leonard 293).'
+outputs:
+- type: web-code
+- type: unit-tests
+agent: peter-web
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: code-lint
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Re-run: zachycen Joeyho nezalintovaný test (3× I001 import-sort v test_project_connect_integration.py).
+  ruff format + check --fix aplikováno → all checks passed. 29 testů drží. Neměřeno
+  (orchestrátor-run).'
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T2
+---
+run: 2026-06-18-github-projects
+node: qa
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Re-affirm po code-quality fixu: celá server suita 781 passed, 3 skipped (orchestrátor
+  ověřil čerstvě). 15/15 AC pokrytí beze změny — Bobovy quality fixy (rename/log/dead-code)
+  nezměnily chování ani testy.'
+outputs:
+- type: gate-output
+agent: joey-qa
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: security
+outcome: PASS
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'Re-affirm po code-quality fixu: Bobovy změny jsou quality-only bez bezpečnostního
+  povrchu (SIGN_META rename, dead-code removal, _HTTP_404_RE module-level). Nový logger.debug
+  ve 409 větvi loguje jen type(exc).__name__ — žádný token/zpráva/PII (ověřeno na
+  kódu). Argv-list, sanitizace, fail-closed ordering, parametrized queries beze změny.'
+outputs:
+- type: gate-output
+agent: heimdall-security
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: code-quality
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 28622
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 45
+note: 'Re-audit PASS: 3 blockery opravené (žádný privátní import, žádný except:pass,
+  žádný dead code/WHAT komentář). Nové advisory: chybějící typ na github_service runner
+  param (:237) a return type _connect_service router (:42) — non-blocking.'
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: design-audit
+outcome: PASS
+cost:
+  model: sonnet
+  input_tokens: 35156
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 191
+note: 'Re-audit PASS: 2 hardcoded barvy opravené (tokeny + color-mix), manuál synchronní
+  vč. submitting gallery. Přetrvávající advisory (Peter/page scope): Projects.css
+  :focus vs :focus-visible, touch targety <44px, ConnectRepoDialog footer; + token-gap
+  pro velikosti ikon (--icon-size-* chybí) — Leonard dožene před další T2.'
+outputs:
+- type: gate-output
+agent: edna-design
+phase: T3
+---
+run: 2026-06-18-github-projects
+node: l2-review
+outcome: ACK
+cost:
+  model: null
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 0
+note: 'L2 ACK (Vitek): hotová feature github-project-connect schválena k uzávěru.
+  15/15 AC, 781 testů zelených, všechny audity PASS. Necommitnuto (čeká na pokyn).'
+agent: null
+phase: null

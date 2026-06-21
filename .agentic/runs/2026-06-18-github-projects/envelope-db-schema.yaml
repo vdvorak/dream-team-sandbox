@@ -1,0 +1,6 @@
+run: 2026-06-18-github-projects
+node: db-schema
+outcome: PASS
+cost: { model: sonnet, input_tokens: 71455, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 298 }
+note: "Migrace 0006 ADDITIVE: managed/connection_status/origin + uq_projects_repo_url; platform uvolněn na nullable. NULL≠NULL UNIQUE ok pro PG i SQLite. breaking NONE. Downgrade warning: ALTER platform NOT NULL selže pokud existují connect řádky s platform=NULL."

@@ -1,0 +1,16 @@
+# Lokální dev: Vite dev server v kontejneru.
+#   docker compose -f docker-compose.dev.yml up --build
+# Backend běží zvlášť (jeho compose). Vite proxuje /api → 127.0.0.1:8000 (vite.config.ts);
+# pro backend na hostu je tu host.docker.internal namapovaný na host-gateway.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src:/app/src              # hot-reload zdrojáku
+      - ./index.html:/app/index.html
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,100 @@
+# manifest.yaml — strojový index scaffoldů (scaffold systém v2).
+#
+# Scaffold = hotová kostra, ať AI vymýšlí co nejmíň kódu (konzistence zdrojáků:
+# dvě aplikace na stejném stacku vypadají strukturálně stejně). Tento index je
+# zdroj pravdy pro deterministické scaffold-passing — `scripts/pipeline/scaffold.sh`
+# z něj resolvne, který scaffold subagent dostane, a předá ho jako typovaný artefakt
+# `scaffold` (artifacts.yaml).
+#
+# Osy taxonomie (axis): platform | backend | frontend | deploy | agent.
+# Pole: axis · stack · path · platforms (kde použitelný) · docker_dev (lokální běh
+# v kontejneru) · newest (politika nejnovějšího stacku) · produces (typy z artifacts.yaml)
+# · status (ready | planned).
+
+meta:
+  version: 1
+  policy:
+    docker_dev: "Lokální běh VŽDY v kontejneru, pokud to platforma dovolí (nezávislost na hostu = determinismus prostředí)."
+    newest_stack: "Scaffoldy drží NEJNOVĚJŠÍ stabilní verze; konkrétní piny žijí v build souborech scaffoldu (package.json, build.gradle, pyproject)."
+
+scaffolds:
+
+  # ── Backend stacky ────────────────────────────────────────────────────────
+  python-fastapi:
+    axis: backend
+    stack: python-fastapi
+    path: templates/scaffolds/python-fastapi/
+    platforms: [server]
+    docker_dev: true
+    newest: "Python (nejnovější stabilní) + FastAPI latest"
+    produces: [server-code, unit-tests]
+    status: ready
+  java-quarkus:
+    axis: backend
+    stack: java-quarkus
+    path: templates/scaffolds/java-quarkus/
+    platforms: [server]
+    docker_dev: true
+    newest: "Java (nejnovější LTS) + Quarkus latest"
+    produces: [server-code, unit-tests]
+    status: ready
+
+  # ── Frontend stacky ───────────────────────────────────────────────────────
+  solidjs:                             # PRIMÁRNÍ web stack (CSR)
+    axis: frontend
+    stack: solidjs
+    render: csr                        # client-side rendering (SSR/SSG zakázán — rules/frontend)
+    path: templates/scaffolds/solidjs/
+    platforms: [web, desktop]          # web = hlavní; desktop přes electron target
+    docker_dev: true                   # vite dev server v kontejneru
+    newest: "SolidJS CSR + Vite latest; Kobalte headless + CSS Modules"
+    produces: [web-code, ui-components, unit-tests]
+    status: ready
+
+  # ── Deploy targety ────────────────────────────────────────────────────────
+  deploy-fly:
+    axis: deploy
+    stack: fly
+    path: templates/scaffolds/deploy/fly/
+    docker_dev: true
+    newest: "Fly.io single-machine + embedded pg"
+    produces: [build, staging-deploy, production-deploy]
+    status: ready
+  deploy-compose:
+    axis: deploy
+    stack: docker-compose
+    path: templates/scaffolds/deploy/compose/
+    docker_dev: true
+    newest: "Docker Compose (VPS / self-host)"
+    produces: [build, staging-deploy, production-deploy]
+    status: ready
+
+  # ── Agent scaffold ────────────────────────────────────────────────────────
+  agent:
+    axis: agent
+    stack: agent-definition
+    path: templates/agent-template.md
+    docker_dev: false
+    newest: "n/a"
+    produces: []
+    status: ready
+
+  # ── Platform/mobile/desktop stacky ────────────────────────────────────────
+  flutter:                             # PRIMÁRNÍ mobile stack
+    axis: frontend
+    stack: flutter
+    path: templates/scaffolds/flutter/
+    platforms: [mobile]                # iOS + Android z jedné kódové báze
+    docker_dev: false                  # flutter SDK + emulátor/zařízení na hostu (GUI toolchain)
+    newest: "Flutter (nejnovější stabilní) + Dart; Riverpod + go_router + dio"
+    produces: [mobile-code, unit-tests]
+    status: ready
+  electron:                            # desktop shell (renderer = solidjs)
+    axis: platform
+    stack: electron
+    path: templates/scaffolds/electron/
+    platforms: [desktop]
+    docker_dev: false                  # Electron potřebuje GUI/display toolchain (dev na hostu)
+    newest: "Electron + electron-vite + electron-builder; SolidJS renderer"
+    produces: [desktop-code, unit-tests]
+    status: ready

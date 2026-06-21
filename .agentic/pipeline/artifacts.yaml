@@ -1,0 +1,112 @@
+# artifacts.yaml — registr typů artefaktů (typované I/O hran grafu).
+#
+# Kanonický slovník toho, co uzly produkují a konzumují. Každý `inputs`/`outputs`
+# název v delivery.yaml MUSÍ být tady (jinak check.sh C8 = nález). Umožňuje:
+#   - node editoru spojit jen kompatibilní I/O (output type == input type)
+#   - check.sh ověřit, že každý konzumovaný typ někdo produkuje (C9)
+#   - scaffold-passing (scaffold je taky typovaný artefakt předaný subagentovi)
+#
+# Pole artefaktu:
+#   kind      kategorie: source | spec | flag | design | contract | code | test | report | deploy | meta
+#   desc      jednořádkový popis
+#   external  true = vzniká mimo graf (tool/uživatel); C9 ho nevyžaduje produkovat uzlem
+#   abstract  true = zástupný typ; `subtypes` vyjmenuje konkrétní (input je uspokojen, produkuje-li se ≥1 subtype)
+#   subtypes  (jen u abstract)
+
+meta:
+  version: 1
+  graph: delivery
+
+artifacts:
+
+  # ── Zdrojové (vznikají mimo graf) ─────────────────────────────────────────
+  issue:
+    kind: source
+    desc: "vstupní požadavek (board / uživatel)"
+  backlog-item:
+    kind: source
+    desc: "položka backlogu odvozená z issue (vstup Vision)"
+  screenshot:
+    kind: report
+    external: true
+    desc: "snímek běžící UI (scripts/screenshot.sh) — vstup design auditu"
+
+  # ── Spec (Vision) ─────────────────────────────────────────────────────────
+  spec:
+    kind: spec
+    desc: "feature spec — WHAT a proč (Vision)"
+  acceptance:
+    kind: spec
+    desc: "acceptance criteria checklist (Vision)"
+  has_ui:
+    kind: flag
+    desc: "spec property: feature má UI (router flag, produkuje Vision)"
+
+  # ── Design (Denisa / Leonard) ─────────────────────────────────────────────
+  mockup:
+    kind: design
+    desc: "statický HTML mockup = vizuální acceptance (Denisa); soubor design/<feature>/mockup.html"
+  design-manual:
+    kind: design
+    desc: "living styleguide + tokeny + galerie komponent (Leonard); design/manual/"
+  ui-components:
+    kind: code
+    desc: "sdílené UI komponenty (Leonard); clients/<platform>/src/ui/"
+
+  # ── Contract (Ted / Chandler) ─────────────────────────────────────────────
+  contract:
+    kind: contract
+    desc: "API contract / OpenAPI (Ted)"
+  error-codes:
+    kind: contract
+    desc: "registr error kódů (Ted)"
+  reuse-decision:
+    kind: meta
+    desc: "reuse pass: reuse-existing | extract-shared | scaffold-only | feature-local (Ted)"
+  scaffold:
+    kind: meta
+    desc: "kostra kódu předaná subagentovi při delegaci (scaffold-passing); cesta + produces z templates/scaffolds/manifest.yaml"
+  db-schema:
+    kind: contract
+    desc: "DB schéma (Chandler)"
+  migrations:
+    kind: contract
+    desc: "DB migrace (Chandler)"
+
+  # ── Code (Bob / Peter / Mob / Winny) ──────────────────────────────────────
+  code:
+    kind: code
+    abstract: true
+    subtypes: [server-code, web-code, mobile-code, desktop-code]
+    desc: "implementační kód libovolného targetu (zástupný typ pro auditory)"
+  server-code:
+    kind: code
+    desc: "server kód (Bob); server/"
+  web-code:
+    kind: code
+    desc: "web frontend kód (Peter); clients/web/"
+  mobile-code:
+    kind: code
+    desc: "mobile kód (Mob); clients/mobile/"
+  desktop-code:
+    kind: code
+    desc: "desktop kód (Winny); clients/desktop/"
+  unit-tests:
+    kind: test
+    desc: "unit testy implementátora"
+
+  # ── Report (gates / auditoři) ─────────────────────────────────────────────
+  gate-output:
+    kind: report
+    desc: "výsledek gate/auditora: PASS | FAIL + řádky (flow.md §GATE OUTPUT)"
+
+  # ── Deploy (Alfred) ───────────────────────────────────────────────────────
+  build:
+    kind: deploy
+    desc: "build artefakt (Alfred)"
+  staging-deploy:
+    kind: deploy
+    desc: "nasazení na staging (Alfred)"
+  production-deploy:
+    kind: deploy
+    desc: "nasazení na produkci (Alfred)"

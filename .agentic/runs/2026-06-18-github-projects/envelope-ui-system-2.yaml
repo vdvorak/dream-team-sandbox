@@ -1,0 +1,7 @@
+run: 2026-06-18-github-projects
+node: ui-system
+outcome: PASS
+changed: [shared-ui]
+cost: { model: sonnet, input_tokens: 33685, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 161 }
+note: "Design fix: submit-spinner přes tokeny (var(--badge-progress-fg)/var(--node-inflight-border)), checked-item color-mix místo rgba; manual/index.html:941 sjednocen; doplněna submitting gallery ukázka. Žádná hardcoded barva v StructureChecklist.css. Komponentní testy drží (1 pre-existing app-shell fail nesouvisí)."

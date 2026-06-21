@@ -1,0 +1,9 @@
+run: 2026-06-18-github-projects
+node: design-audit
+outcome: FAIL
+severity: blocking
+returns_to: ui-system
+signature: "2 blockery hardcoded barev v StructureChecklist.css: B1 ř.192-193 submit-spinner #fff + rgba(255,255,255,0.3) → tokeny (vzor StructureCheckPanel.css spinner var(--node-inflight-border)/var(--badge-progress-fg)); B2 ř.67 checked-item background rgba(22,39,22,0.4) → token (--badge-done-bg-alpha nebo color-mix); pozn. manual/index.html:941 replikuje stejnou hardcoded hodnotu → opravit i v manuálu. Advisory: A1 Projects.css:411 :focus místo :focus-visible; A2 3× touch target <44px (fi-add-btn:586, fi-remove-btn:593, cockpit-repo-rename-input:337); A3 submit-spinner stav chybí v manuálu; A4 ConnectRepoDialog dialog layout chybí v manuálu + footer padding asymetrie."
+cost: { model: sonnet, input_tokens: 53855, output_tokens: 0, credits: 0.0 }
+time: { started: null, ended: null, seconds: 119 }
+note: "FAIL → ui-system (Leonard). 2 blockery (hardcoded barvy), 4 advisory."
