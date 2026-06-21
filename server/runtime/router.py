@@ -161,3 +161,30 @@ async def destroy_environment(
     return JSONResponse(
         status_code=http_status, content=env.model_dump(exclude_none=False)
     )
+
+
+# --- workspace endpoints ---
+
+
+@router.get("/environments/{project_id}/git", tags=["workspace"])
+async def get_git_status(
+    project_id: str = Path(pattern=r"^[A-Za-z0-9_-]+$", min_length=1, max_length=128),
+    _auth: None = Depends(verify_service_token),
+    service: LifecycleService = Depends(get_lifecycle_service),
+) -> JSONResponse:
+    """Return git status for a ready environment (RCP-A11, AC-6)."""
+    result = await service.get_git_status(project_id)
+    return JSONResponse(status_code=200, content=result.model_dump())
+
+
+@router.get("/environments/{project_id}/files", tags=["workspace"])
+async def list_files(
+    project_id: str = Path(pattern=r"^[A-Za-z0-9_-]+$", min_length=1, max_length=128),
+    prefix: str = "",
+    suffix: str = "",
+    _auth: None = Depends(verify_service_token),
+    service: LifecycleService = Depends(get_lifecycle_service),
+) -> JSONResponse:
+    """List files in a ready environment workspace (RCP-A12, AC-7)."""
+    result = await service.list_files(project_id, prefix=prefix, suffix=suffix)
+    return JSONResponse(status_code=200, content=result.model_dump())

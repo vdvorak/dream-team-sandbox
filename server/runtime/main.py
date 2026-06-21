@@ -17,17 +17,18 @@ Note: state persists in-memory for the duration of the process. Restart = empty 
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 
 from .config import get_runtime_settings
-from .enforcement.cage import CageEnforcementProvider
 from .enforcement.dev import DevEnforcementProvider
 from .errors import RuntimeApiError, runtime_api_error_handler, validation_error_handler
 from .repository import EnvironmentRepository
 from .router import get_lifecycle_service, get_service_token, router
 from .service import LifecycleService
+from .workspace import WorkspaceAccessor
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ logging.basicConfig(
 def create_runtime_app(
     service_token: str | None = None,
     enforcement_provider_override=None,
+    workspace_accessor_override=None,
 ) -> FastAPI:
     """Create and configure the runtime control-plane FastAPI application.
 
@@ -47,6 +49,8 @@ def create_runtime_app(
         service_token: Override the service token (for testing). If None, uses settings.
         enforcement_provider_override: Inject a specific provider instance (for testing).
             If None, uses the configured enforcement_provider setting.
+        workspace_accessor_override: Inject a WorkspaceAccessor instance (for testing).
+            If None, creates one from settings.workspace_root.
     """
     settings = get_runtime_settings()
     effective_token = (
@@ -58,8 +62,18 @@ def create_runtime_app(
     else:
         provider = _build_provider(settings)
 
+    if workspace_accessor_override is not None:
+        workspace_accessor = workspace_accessor_override
+    else:
+        workspace_root = Path(settings.workspace_root)
+        workspace_accessor = WorkspaceAccessor(workspace_root=workspace_root)
+
     repository = EnvironmentRepository()
-    service = LifecycleService(repository=repository, provider=provider)
+    service = LifecycleService(
+        repository=repository,
+        provider=provider,
+        workspace_accessor=workspace_accessor,
+    )
 
     app = FastAPI(
         title="Runtime Control Plane",
@@ -99,10 +113,14 @@ def _build_provider(settings):
     if ptype == "dev":
         return DevEnforcementProvider(mode=settings.dev_provider_mode)
     if ptype == "cage":
-        # CageEnforcementProvider is a stub in slice 1. It will raise NotImplementedError
-        # on any call, which triggers the 503 path in service (unexpected exception).
-        # For slice 1 this is acceptable — cage integration is OUT of scope.
-        return CageEnforcementProvider()
+        from .enforcement.cage import CageEnforcementProvider
+        from server.cage.providers.fly_provider import FlyProvider
+
+        cage_runtime = FlyProvider(
+            api_token=settings.fly_api_token,
+            app_name=settings.fly_app_name,
+        )
+        return CageEnforcementProvider(cage_runtime=cage_runtime)
     # Unknown provider → fail at startup rather than silently operating insecure.
     raise ValueError(
         f"Unknown enforcement_provider {ptype!r}. Must be 'dev' or 'cage'."

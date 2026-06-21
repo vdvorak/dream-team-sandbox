@@ -30,6 +30,13 @@ class RuntimeSettings(BaseSettings):
     # In production this is a secret; in tests it is overridden directly.
     service_token: str = "dev-token-change-me-in-production"
 
+    # Fly.io provider config (only used when enforcement_provider=cage).
+    fly_api_token: str = ""
+    fly_app_name: str = ""
+
+    # Workspace root path — injectable for tests (default matches production cage layout).
+    workspace_root: str = "/workspace"
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

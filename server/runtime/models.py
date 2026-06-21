@@ -93,3 +93,34 @@ class ErrorResponse(BaseModel):
     code: str
     message: str
     detail: dict | None = None
+
+
+# --- Workspace response models (RCP-A11, RCP-A12) ---
+
+
+class GitStatusResponse(BaseModel):
+    """Response for GET /environments/{project_id}/git (RCP-A11).
+
+    All paths are relative — no absolute paths, no workspace internals (substrát-noun).
+    """
+
+    branch: str
+    dirty: bool
+    changed_files: list[str]
+    last_commit: str | None = None
+
+
+class FileEntry(BaseModel):
+    """A single file or directory entry (RCP-A12)."""
+
+    path: str           # relative path (no absolute paths)
+    kind: str           # "file" | "dir"
+
+
+class FileListResponse(BaseModel):
+    """Response for GET /environments/{project_id}/files (RCP-A12).
+
+    files: list of FileEntry; cage internals are excluded; paths are relative.
+    """
+
+    files: list[FileEntry]

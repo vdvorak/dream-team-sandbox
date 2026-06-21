@@ -1,31 +1,49 @@
-"""CageEnforcementProvider — STUB for slice 1.
+"""CageEnforcementProvider — real implementation via CageRuntimeProvider (RCP-A10).
 
-Real cage integration is OUT of scope for slice 1.
+This provider bridges the EnforcementProvider contract and the substrate-specific
+CageRuntimeProvider (e.g. FlyProvider). It is substrate-blind: it only calls the
+CageRuntimeProvider interface and translates results to the typed EnforcementOutcome.
 
-WHY this stub exists: the Protocol boundary is defined and the attachment point
-is documented so that the slice 2 implementor knows exactly where to wire in the
-real cage calls without touching service.py or any other layer.
+WHY substrate-blind (RCP-A10):
+  - internal_code goes only to logs — NEVER into app-facing responses (RCP-A5).
+  - This class does not import FlyProvider or any Fly-specific type.
+  - Unexpected exceptions (not CageError subclasses) propagate upward; the service
+    layer translates them to 503 ERR_RUNTIME_UNAVAILABLE.
 
-Integration notes for the implementor of the real provider:
-  - Import CageError hierarchy from server.cage.errors (read-only per RCP-A2 / reuse decision).
-  - Translate each CageError subclass to EnforcementFailed with the appropriate kind:
-      - Network/availability errors → FailureKind.provider_unreachable
-      - Policy/enforcement errors   → FailureKind.provider_error
-  - Pass e.code as internal_code (kept server-side, NEVER forwarded to client per RCP-A5).
-  - The service layer translates kind → app-facing error code; it never sees internal_code.
+Wiring (main.py / config):
+  cage_runtime = FlyProvider(api_token=..., app_name=...)
+  provider = CageEnforcementProvider(cage_runtime=cage_runtime)
 """
 
 from __future__ import annotations
 
-from .provider import EnforcementOutcome, ProviderHealth, RepoSpec
+import logging
+
+from server.cage.errors import CageError, ProxyDownError
+from server.cage.runtime import CageRuntimeProvider
+
+from .provider import (
+    ConnectionHandle,
+    EnforcementActive,
+    EnforcementFailed,
+    EnforcementOutcome,
+    FailureKind,
+    ProviderHealth,
+    RepoSpec,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class CageEnforcementProvider:
-    """Stub — cage enforcement provider attachment point (slice 1 placeholder).
+    """Real enforcement provider — delegates workspace lifecycle to CageRuntimeProvider.
 
-    Replace this NotImplementedError body with real cage calls in the next wave.
-    See module docstring for integration notes.
+    Translates CageError hierarchy to typed EnforcementOutcome. Unexpected exceptions
+    (infrastructure failures outside the CageError hierarchy) propagate to the service.
     """
+
+    def __init__(self, cage_runtime: CageRuntimeProvider) -> None:
+        self._runtime = cage_runtime
 
     async def ensure_active(
         self,
@@ -33,23 +51,49 @@ class CageEnforcementProvider:
         repo: RepoSpec,
         tool: str,
     ) -> EnforcementOutcome:
-        # TODO(slice-2): wire in real cage operations here.
-        # Pattern:
-        #   try:
-        #       result = await cage_deploy.ensure_workspace(project_id, repo.url, repo.ref, tool)
-        #       handle = ConnectionHandle(control_url=result.control_url, terminal_url=result.terminal_url)
-        #       return EnforcementActive(handle=handle)
-        #   except ProxyDownError as e:
-        #       return EnforcementFailed(FailureKind.provider_unreachable, internal_code=e.code)
-        #   except CageError as e:
-        #       return EnforcementFailed(FailureKind.provider_error, internal_code=e.code)
-        raise NotImplementedError(
-            "CageEnforcementProvider is a stub. Real cage integration is deferred to slice 2. "
-            "See server/runtime/enforcement/cage.py docstring for wiring instructions."
-        )
+        """Ensure a workspace is running; return typed outcome (never raises expected errors).
+
+        On success → EnforcementActive with opaque ConnectionHandle.
+        On CageError → EnforcementFailed with appropriate FailureKind.
+        Unexpected exceptions propagate (service catches → 503).
+        """
+        try:
+            handle = await self._runtime.start(
+                project_id=project_id,
+                repo_url=repo.url,
+                ref=repo.ref,
+                tool=tool,
+            )
+            return EnforcementActive(
+                handle=ConnectionHandle(
+                    control_url=handle.control_url,
+                    terminal_url=handle.terminal_url,
+                )
+            )
+        except ProxyDownError as e:
+            # Network/availability failure — provider unreachable.
+            logger.warning(
+                "cage_enforcement.ensure_active: proxy_down project_id=%s internal_code=%s",
+                project_id,
+                e.code,  # stays server-side (RCP-A5)
+            )
+            return EnforcementFailed(
+                kind=FailureKind.provider_unreachable,
+                internal_code=e.code,
+            )
+        except CageError as e:
+            # Policy or other cage error — provider responded but enforcement failed.
+            logger.warning(
+                "cage_enforcement.ensure_active: cage_error project_id=%s internal_code=%s",
+                project_id,
+                e.code,  # stays server-side (RCP-A5)
+            )
+            return EnforcementFailed(
+                kind=FailureKind.provider_error,
+                internal_code=e.code,
+            )
+        # Any other exception propagates — service will catch and return 503.
 
     async def health(self) -> ProviderHealth:
-        # TODO(slice-2): query cage health endpoint and translate to ProviderHealth.
-        raise NotImplementedError(
-            "CageEnforcementProvider.health() is a stub. Deferred to slice 2."
-        )
+        """Delegate health check to the underlying runtime provider."""
+        return await self._runtime.health()

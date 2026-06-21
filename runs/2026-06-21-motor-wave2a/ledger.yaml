@@ -92,3 +92,17 @@ agent: ted-architect
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: backend
+outcome: PASS
+summary: CageRuntimeProvider Protocol + FlyProvider (Fly.io adapter) + CageEnforcementProvider
+  (real impl) + WorkspaceAccessor (git/files, path sandbox) + AC-6/7 routes. 45 new
+  tests, 288/288 PASS.
+outputs:
+- type: server-code
+- type: unit-tests
+agent: bob-backend
+phase: T2
+time:
+  seconds: 0

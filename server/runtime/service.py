@@ -31,14 +31,24 @@ from .enforcement.provider import (
 )
 from .errors import (
     ERR_ENVIRONMENT_NOT_FOUND,
+    ERR_ENVIRONMENT_NOT_READY,
     ERR_PROVISION_FAILED,
     ERR_REPO_MISMATCH,
     ERR_RUNTIME_UNAVAILABLE,
     ERR_TOOL_NOT_ALLOWED,
     RuntimeApiError,
 )
-from .models import CONTRACT_VERSION, Connection, Environment, RepoState
+from .models import (
+    CONTRACT_VERSION,
+    Connection,
+    Environment,
+    FileEntry,
+    FileListResponse,
+    GitStatusResponse,
+    RepoState,
+)
 from .repository import EnvironmentRecord, EnvironmentRepository
+from .workspace import WorkspaceAccessor
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +95,13 @@ class LifecycleService:
         self,
         repository: EnvironmentRepository,
         provider: EnforcementProvider,
+        workspace_accessor: WorkspaceAccessor | None = None,
     ) -> None:
         self._repo = repository
         self._provider = provider
+        # WorkspaceAccessor is injectable for testability (RCP-A11/A12).
+        # In production it is created from config.workspace_root.
+        self._workspace_accessor = workspace_accessor
         # Per-project-id locks. Protects read-modify-write within a single project_id.
         # Different project_ids run concurrently (lock per id, not global).
         self._locks: dict[str, asyncio.Lock] = {}
@@ -326,6 +340,91 @@ class LifecycleService:
         return HealthResult(
             status="ok", contract_version=CONTRACT_VERSION, http_status=200
         )
+
+    # --- workspace accessor ---
+
+    async def get_git_status(self, project_id: str) -> GitStatusResponse:
+        """Return git status for a ready environment (RCP-A11).
+
+        - Non-existent project_id → 404 ERR_ENVIRONMENT_NOT_FOUND
+        - Non-ready status → 409 ERR_ENVIRONMENT_NOT_READY
+        - Response MUST NOT contain absolute paths or workspace internals (substrát-noun).
+        """
+        record = self._repo.get(project_id)
+        if record is None:
+            raise RuntimeApiError(
+                code=ERR_ENVIRONMENT_NOT_FOUND,
+                message="Environment not found",
+                http_status=404,
+            )
+        if record.status != "ready":
+            raise RuntimeApiError(
+                code=ERR_ENVIRONMENT_NOT_READY,
+                message=f"Environment is not ready (current status: {record.status})",
+                http_status=409,
+            )
+
+        accessor = self._workspace_accessor
+        if accessor is None:
+            # Fallback: no accessor configured → return empty status (dev mode).
+            logger.warning(
+                "get_git_status: no workspace_accessor configured for project_id=%s",
+                project_id,
+            )
+            return GitStatusResponse(
+                branch="",
+                dirty=False,
+                changed_files=[],
+                last_commit=None,
+            )
+
+        git_status = await accessor.git_status()
+        return GitStatusResponse(
+            branch=git_status.branch,
+            dirty=git_status.dirty,
+            changed_files=git_status.changed_files,
+            last_commit=git_status.last_commit,
+        )
+
+    async def list_files(
+        self,
+        project_id: str,
+        prefix: str = "",
+        suffix: str = "",
+    ) -> FileListResponse:
+        """Return file listing for a ready environment (RCP-A12).
+
+        - Non-existent project_id → 404 ERR_ENVIRONMENT_NOT_FOUND
+        - Non-ready status → 409 ERR_ENVIRONMENT_NOT_READY
+        - Path traversal → 403 ERR_PATH_ESCAPE (raised by WorkspaceAccessor)
+        - Cage internals are excluded (enforced by WorkspaceAccessor)
+        """
+        record = self._repo.get(project_id)
+        if record is None:
+            raise RuntimeApiError(
+                code=ERR_ENVIRONMENT_NOT_FOUND,
+                message="Environment not found",
+                http_status=404,
+            )
+        if record.status != "ready":
+            raise RuntimeApiError(
+                code=ERR_ENVIRONMENT_NOT_READY,
+                message=f"Environment is not ready (current status: {record.status})",
+                http_status=409,
+            )
+
+        accessor = self._workspace_accessor
+        if accessor is None:
+            logger.warning(
+                "list_files: no workspace_accessor configured for project_id=%s",
+                project_id,
+            )
+            return FileListResponse(files=[])
+
+        # WorkspaceAccessor.list_files raises RuntimeApiError(403) on path escape.
+        raw_entries = accessor.list_files(prefix=prefix, suffix=suffix)
+        files = [FileEntry(path=e["path"], kind=e["kind"]) for e in raw_entries]
+        return FileListResponse(files=files)
 
 
 # --- helpers ---
