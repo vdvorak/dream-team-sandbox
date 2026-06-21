@@ -93,3 +93,21 @@ outputs:
 - type: acceptance
 - type: has_ui
 agent: vision-po
+---
+run: 2026-06-21-runtime-contract
+node: spec-gate
+outcome: PASS
+phase: T1
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 23
+note: spec 100% agnostický, struktura+brevity OK, acceptance OK.
+outputs:
+- type: gate-output
+agent: sheldon-spec

@@ -21,14 +21,16 @@ run: 2026-06-21-runtime-contract
 wave_base: bae4948c571abc581856361d8da5cffee372ed02
 graph: delivery
 status: in_progress
-active_node: product
+active_node: spec-gate
 frontier: []
 completed:
 - intake
 - product
+- spec-gate
 outcomes:
   intake: PASS
   product: PASS
+  spec-gate: PASS
 skipped: []
 counters:
   spec-gate->product: 1
@@ -56,14 +58,16 @@ findings:
     mimo sandbox". Acceptance je OK (neměnit).'
 return_payload: {}
 model_overrides: {}
-epoch: 4
+epoch: 5
 type_versions:
   spec: 4
   acceptance: 3
   has_ui: 3
+  gate-output: 5
 node_versions:
   intake: 1
   product: 4
+  spec-gate: 5
 ```
 
 ## Lidský přehled
