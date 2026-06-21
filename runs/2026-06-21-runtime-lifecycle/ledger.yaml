@@ -337,3 +337,31 @@ agent: vitek-quality
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: backend
+outcome: PASS
+changed:
+- server-code
+- unit-tests
+flags:
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+tier: XS
+note: 'Re-flow po code-lint FAIL: aplikován mechanický ruff autofix (ruff format na
+  6 souborů + ruff check --fix odstranil 3 F401). Žádná změna logiky/chování — čistě
+  formátování + dead imports. Re-verifikováno: ruff format --check + ruff check clean,
+  49/49 testů PASS. (Mechanický autofix provedl orchestrátor — nulový engineering
+  úsudek; ekvivalent --fix u vlastníka kódu.)
+
+  '
+outputs:
+- type: server-code
+  path: server/runtime/
+- type: unit-tests
+  path: tests/server/unit/test_runtime_lifecycle.py
+agent: bob-backend
+phase: T2
+time:
+  seconds: 0
