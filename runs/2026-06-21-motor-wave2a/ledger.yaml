@@ -129,3 +129,23 @@ agent: joey-qa
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: architecture
+outcome: PASS
+flags:
+  touches_db: false
+  touches_server: true
+  has_ui: false
+  touches_shared_ui: false
+  has_deploy: false
+summary: PASS — gap je čistě testovací (2 chybějící integration testy). Bob přidá
+  test_rcp6d + test_rcp7f s helper assert_no_substrate_nouns().
+outputs:
+- type: contract
+- type: error-codes
+- type: reuse-decision
+agent: ted-architect
+phase: T2
+time:
+  seconds: 0
