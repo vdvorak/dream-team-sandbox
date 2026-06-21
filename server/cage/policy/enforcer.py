@@ -17,7 +17,6 @@ Fail-closed (CE-2): apply selže → PolicyApplyFailedError → cage-deploy ABOR
 from __future__ import annotations
 
 import abc
-import json
 from dataclasses import dataclass
 from typing import Any, Callable
 

@@ -4,9 +4,7 @@ Acceptance vazba: CE-2 (fail-closed všude), CE-1/I1 (policy PŘED deploy machin
 contracts §6 (pořadí kroků).
 """
 
-import pytest
 
-from server.cage.deploy import drift
 from server.cage.deploy.cage_deploy import DeployContext, run_deploy
 from server.cage.deploy.drift import WORKSPACE_DEF_FILES
 from server.cage.policy.enforcer import FlyNetworkPolicyAdapter

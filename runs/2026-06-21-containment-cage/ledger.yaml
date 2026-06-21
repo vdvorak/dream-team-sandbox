@@ -247,3 +247,22 @@ outputs:
 - type: server-code
 - type: unit-tests
 agent: bob-backend
+---
+run: 2026-06-21-containment-cage
+node: code-lint
+outcome: PASS
+phase: T2
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 93
+note: F401 4 unused imports auto-fixnuty (ruff --fix), F401 čistý, py_compile OK,
+  58/58 testů PASS. Advisory (docstrings/anotace/E501) → T3 quality audit.
+outputs:
+- type: gate-output
+agent: vitek-quality

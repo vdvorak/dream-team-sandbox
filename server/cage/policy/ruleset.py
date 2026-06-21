@@ -12,7 +12,7 @@ Pořadí semantiky (závazné): explicit ALLOW (H1–H3) → explicit DENY/DROP 
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 # --- Spike-to-confirm parametry (rozhodnutí (c), contracts §7) -----------------
