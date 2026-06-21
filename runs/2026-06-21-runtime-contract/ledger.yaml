@@ -111,3 +111,22 @@ note: spec 100% agnostický, struktura+brevity OK, acceptance OK.
 outputs:
 - type: gate-output
 agent: sheldon-spec
+---
+run: 2026-06-21-runtime-contract
+node: feasibility
+outcome: PASS
+phase: T1
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: false
+  touches_shared_ui: false
+  has_deploy: false
+note: feasibility systému prokázána v minulé wave (Tony — 3-vrstvý model + de-facto
+  interface implementovatelné); tahle wave formalizuje fungující rozhraní do kontraktu,
+  implementovatelnost vlastní ted (architecture) + heimdall review.
+outputs:
+- type: gate-output
+agent: tony-cto
+time:
+  seconds: 0
