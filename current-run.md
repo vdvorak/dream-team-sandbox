@@ -21,7 +21,7 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: feasibility
+active_node: architecture
 frontier:
 - qa
 completed:
@@ -166,7 +166,7 @@ findings:
     (W3 healthz 503 v OpenAPI = advisory pre-existing, odloženo slice 2.)'
 return_payload: {}
 model_overrides: {}
-epoch: 22
+epoch: 23
 type_versions:
   spec: 19
   acceptance: 20
@@ -179,7 +179,7 @@ node_versions:
   intake: 1
   spec-gate: 21
   feasibility: 22
-  architecture: 11
+  architecture: 23
   backend: 13
   code-lint: 14
   qa: 15

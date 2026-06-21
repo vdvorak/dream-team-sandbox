@@ -559,3 +559,22 @@ agent: tony-cto
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: architecture
+outcome: PASS
+changed: none
+flags:
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+note: Re-flow no-op (acceptance doc-only fix). Kontrakt v1.1.0 nezměněn (žádná změna
+  nutná), reuse-decision beze změny. changed=none => backend zůstává platný.
+outputs:
+- type: contract
+- type: error-codes
+- type: reuse-decision
+agent: ted-architect
+phase: T2
+time:
+  seconds: 0
