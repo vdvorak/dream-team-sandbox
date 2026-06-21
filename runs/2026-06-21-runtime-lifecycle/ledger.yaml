@@ -547,3 +547,15 @@ agent: sheldon-spec
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: feasibility
+outcome: PASS
+note: Re-flow no-op (acceptance doc-only fix). Spec a stack nezměněny, žádný nový
+  tech dopad. Feasibility verdikt beze změny.
+outputs:
+- type: gate-output
+agent: tony-cto
+phase: T1
+time:
+  seconds: 0
