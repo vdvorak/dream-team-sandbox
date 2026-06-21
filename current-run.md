@@ -17,95 +17,32 @@ archivuje do handoffu a soubor se resetuje (`status: idle`, `run: null`). Tohle 
 **runtime** soubor (projekt-specifický, synced se nepřepisuje).
 
 ```yaml
-run: 2026-06-21-motor-wave2a
-wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
+run: null
+wave_base: null
 graph: delivery
-status: in_progress
-active_node: done
+status: idle
+active_node: null
 frontier: []
-completed:
-- intake
-- product
-- spec-gate
-- feasibility
-- backend
-- code-lint
-- architecture
-- qa
-- security
-- l2-review
-- performance
-- spec-audit
-- code-quality
-- audit-join
-- done
-outcomes:
-  intake: PASS
-  product: PASS
-  spec-gate: PASS
-  feasibility: PASS
-  backend: PASS
-  code-lint: PASS
-  architecture: PASS
-  qa: PASS
-  performance: PASS
-  spec-audit: PASS
-  security: PASS
-  code-quality: PASS
-  audit-join: PASS
-  l2-review: ACK
-  done: DONE
+completed: []
+outcomes: {}
 skipped: []
-counters:
-  qa->architecture: 1
+counters: {}
 awaiting_human: []
 halt_gate: null
-last_outcome: DONE
-class: feature
-flags:
-  has_ui: false
-  touches_db: false
-  touches_server: true
-  touches_shared_ui: false
-  has_deploy: false
+last_outcome: null
+class: null
+flags: {}
 note: null
 pending_delegations: []
-findings:
-- node: qa
-  severity: blocking
-  returns_to: architecture
-  signature: ''
+findings: []
 return_payload: {}
 model_overrides: {}
-epoch: 20
-type_versions:
-  spec: 2
-  acceptance: 2
-  has_ui: 2
-  gate-output: 17
-  contract: 9
-  error-codes: 9
-  reuse-decision: 9
-  server-code: 10
-  unit-tests: 10
-node_versions:
-  intake: 1
-  product: 2
-  spec-gate: 3
-  feasibility: 4
-  backend: 10
-  code-lint: 11
-  architecture: 9
-  qa: 12
-  security: 13
-  l2-review: 19
-  performance: 15
-  spec-audit: 16
-  code-quality: 17
-  audit-join: 18
-  done: 20
+epoch: 0
+type_versions: {}
+node_versions: {}
 ```
 
 ## Lidský přehled
 
-<orchestrátor sem píše 1-3 věty: co se zrovna dělá, na co se čeká, proč blocked>
+Idle — wave `2026-06-21-motor-wave2a` uzavrena (terminal_reached: true, DONE, 2026-06-21).
+Dalsi wave: 2b (AC-8 PTY/terminal) nebo 2c (Fly deploy + hardening) dle priority uzivatele.

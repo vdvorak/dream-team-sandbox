@@ -20,18 +20,37 @@ closed_waves:
       touches_server: true
       touches_shared_ui: false
       has_ui: false
+  2026-06-21-motor-wave2a:
+    closed_at: '2026-06-21T00:00:00.000000+00:00'
+    status: done
+    wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
+    class: feature
+    nodes: 15
+    last_outcome: DONE
+    return_loops: 0
+    summary: runs/2026-06-21-motor-wave2a/summary.md
+    ledger: runs/2026-06-21-motor-wave2a/ledger.yaml
+    touches:
+      touches_db: false
+      touches_server: true
+      touches_shared_ui: false
+      has_ui: false
 ```
 <!-- ENGINE:STATE END -->
 
 ## Aktualni fokus
 
-🔄 **Wave 2a — MOTOR real: CageEnforcementProvider + provider-agnostická cage runtime vrstva + AC-6/AC-7 (2026-06-21, in progress)**
-Aktualni wave: `2026-06-21-motor-wave2a`. Implementuje reálný motor bez PTY:
-- `server/cage/runtime.py` — nová provider-agnostická lifecycle vrstva (start/stop/status), oddelena od deploy orchestrace. Provider abstrakce pro zero-vendor-lock (Fly.io ted, snadna migrace pozdeji).
-- `CageEnforcementProvider` — nahrazeni STUB realnou integraci na `server/cage/**`.
-- AC-6 `getGitStatus` — git status nad realnym workspace.
-- AC-7 `listFiles` — soubory nad realnym workspace (sandboxed).
-Zbytek (AC-8 PTY/terminal = wave 2b; Fly infra deploy + hardening = wave 2c) = odlozeno.
+**Zadna aktivni wave.** Wave `2026-06-21-motor-wave2a` uzavrena (terminal_reached: true, DONE).
+Dalsi krok: wave 2b (AC-8 PTY/terminal) nebo wave 2c (Fly deploy + advisory hardening) dle priority.
+
+✅ **Wave 2a — MOTOR real: CageEnforcementProvider + provider-agnostická cage runtime vrstva + AC-6/AC-7 HOTOVO (2026-06-21).**
+- `server/cage/runtime.py` — CageRuntimeProvider Protocol (provider-agnosticka lifecycle vrstva).
+- `server/cage/providers/fly_provider.py` — FlyProvider (Fly.io adapter, httpx, opaque URL).
+- `server/runtime/enforcement/cage.py` — CageEnforcementProvider (realna impl, nahrazeni STUB).
+- `server/runtime/workspace.py` — WorkspaceAccessor (git subprocess, list_files, path sandbox).
+- `server/runtime/router.py` + `service.py` — AC-6 GET /git, AC-7 GET /files.
+- `contracts/api/runtime.openapi.yaml` + `rules/` — prefix→path rename.
+- 47 testu PASS.
 
 ✅ **Runtime control-plane lifecycle core (slice 1) HOTOVO (2026-06-21).** PATER RUNTIMU
 postavena — 5 operaci stavoveho automatu (ensure/get/sleep/destroy/healthz), fail-closed
@@ -67,9 +86,9 @@ T1+T2 hotovo, T3 qa staticky (128/128); zive AC + deploy = budouci motor-extrakc
 
 ## Open Items (budouci, gated)
 
-- [x] **Wave 2a (in progress):** CageEnforcementProvider + provider-agnostická cage runtime vrstva (`server/cage/runtime.py`) + AC-6 git status + AC-7 listFiles. Wave `2026-06-21-motor-wave2a`.
-- [ ] **Wave 2b:** AC-8 PTY/terminal (WebSocket) — gated na wave 2a.
-- [ ] **Wave 2c:** Produkční deploy (Fly infra + secrets, build image, staging → produkce) + advisory hardening — gated na wave 2b.
+- [x] **Wave 2a (hotovo):** CageEnforcementProvider + provider-agnostická cage runtime vrstva (`server/cage/runtime.py`) + AC-6 git status + AC-7 listFiles. Wave `2026-06-21-motor-wave2a`. 47 testu PASS.
+- [ ] **Wave 2b:** AC-8 PTY/terminal (WebSocket) — gated na wave 2a (splneno).
+- [ ] **Wave 2c:** Produkční deploy (Fly infra + secrets, build image, staging → produkce) + advisory hardening z wave 2a (A1/A2/W1-W3/SEC-1-3/EXT-1) — gated na wave 2b.
 - [ ] **Produkcni deploy (wave 2c):** Fly infra + secrets, build image (vlastni verzovany),
       staging → produkce. Vedome odlozeno z wave `runtime-lifecycle`, zafazeno do wave 2c.
 - [ ] **Advisory hardening (impl-time, neblokujici):** security — dev-token fail-fast guard,
