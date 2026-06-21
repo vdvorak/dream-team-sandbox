@@ -21,7 +21,7 @@ run: 2026-06-21-motor-wave2a
 wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
 graph: delivery
 status: in_progress
-active_node: backend
+active_node: code-lint
 frontier: []
 completed:
 - intake
@@ -61,12 +61,12 @@ findings:
   signature: ''
 return_payload: {}
 model_overrides: {}
-epoch: 10
+epoch: 11
 type_versions:
   spec: 2
   acceptance: 2
   has_ui: 2
-  gate-output: 7
+  gate-output: 11
   contract: 9
   error-codes: 9
   reuse-decision: 9
@@ -78,7 +78,7 @@ node_versions:
   spec-gate: 3
   feasibility: 4
   backend: 10
-  code-lint: 7
+  code-lint: 11
   architecture: 9
 ```
 

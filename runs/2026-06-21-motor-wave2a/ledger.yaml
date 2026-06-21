@@ -163,3 +163,15 @@ agent: bob-backend
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: code-lint
+outcome: PASS
+summary: 'PASS — žádný BLOCKER. Advisory: chybí -> None anotace na assert_no_substrate_nouns
+  helper.'
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T2
+time:
+  seconds: 0
