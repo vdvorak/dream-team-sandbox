@@ -1,0 +1,50 @@
+---
+cache_key: template-current-run-v1.0
+type: template
+---
+
+# current-run.md — strojový stav běhu pipeline
+
+Formalizuje koncept `flow.md §current-wave.md` jako **strojově čitelný** stav grafu
+(`pipeline/delivery.yaml`). Vlastní orchestrátor. Čte:
+`scripts/pipeline/state.sh` (reporting — „hej Watsone") a `scripts/pipeline/next.sh`
+(další uzel). Jeden běh = jedna wave.
+
+Routing řídí **dataflow frontier** (`run.sh drive` → `next.sh --emit frontier`): uzel je
+*ready*, když doběhli všichni jeho aktivní producenti. Orchestrátor po dokončení uzlu
+volá `run.sh done` (posune `completed`/`outcomes`/`frontier`). Po uzavření wave se stav
+archivuje do handoffu a soubor se resetuje (`status: idle`, `run: null`). Tohle je
+**runtime** soubor (projekt-specifický, synced se nepřepisuje).
+
+```yaml
+run: 2026-06-21-containment-cage
+wave_base: d15032c244be306133f70d7bbd9d271a2b976e6f
+graph: delivery
+status: in_progress
+active_node: intake
+frontier: []
+completed:
+- intake
+outcomes:
+  intake: PASS
+skipped: []
+counters: {}
+awaiting_human: []
+halt_gate: null
+last_outcome: PASS
+class: feature
+flags: {}
+note: null
+pending_delegations: []
+findings: []
+return_payload: {}
+model_overrides: {}
+epoch: 1
+type_versions: {}
+node_versions:
+  intake: 1
+```
+
+## Lidský přehled
+
+<orchestrátor sem píše 1-3 věty: co se zrovna dělá, na co se čeká, proč blocked>

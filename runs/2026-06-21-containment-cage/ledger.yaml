@@ -1,0 +1,11 @@
+---
+run: 2026-06-21-containment-cage
+node: intake
+outcome: PASS
+class: feature
+note: Containment cage pro dream-team-app — out-of-band security jail (default-deny
+  egress, allowlist-only).
+agent: null
+phase: null
+time:
+  seconds: 0
