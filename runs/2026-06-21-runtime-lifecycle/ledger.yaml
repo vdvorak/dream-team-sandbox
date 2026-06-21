@@ -578,3 +578,15 @@ agent: ted-architect
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: qa
+outcome: PASS
+note: Re-flow no-op (acceptance doc-only fix; kód/testy nezměněny). Orchestrátor re-verifikoval
+  celou suite 243/243 PASS. AC pokrytí beze změny.
+outputs:
+- type: gate-output
+agent: joey-qa
+phase: T3
+time:
+  seconds: 0
