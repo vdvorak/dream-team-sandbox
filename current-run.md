@@ -21,7 +21,7 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: spec-audit
+active_node: audit-join
 frontier: []
 completed:
 - intake
@@ -36,6 +36,7 @@ completed:
 - code-quality
 - product
 - spec-audit
+- audit-join
 outcomes:
   intake: PASS
   spec-gate: PASS
@@ -49,6 +50,7 @@ outcomes:
   code-quality: PASS
   spec-audit: PASS
   product: PASS
+  audit-join: PASS
 skipped: []
 counters:
   spec-gate->product: 0
