@@ -186,3 +186,14 @@ agent: joey-qa
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: performance
+outcome: FAIL
+summary: 'BLOCKER B1: httpx.AsyncClient vytváří novou instanci per request (nikdy
+  nezavřen, žádný TCP reuse). Advisory: list_files blokuje event loop (sync rglob),
+  git subprocess bez timeout, get_git_status/list_files mimo per-project lock.'
+agent: optimus-perf
+phase: T3
+time:
+  seconds: 0

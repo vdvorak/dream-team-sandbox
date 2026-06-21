@@ -21,7 +21,7 @@ run: 2026-06-21-motor-wave2a
 wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
 graph: delivery
 status: in_progress
-active_node: qa
+active_node: performance
 frontier: []
 completed:
 - intake
@@ -41,12 +41,13 @@ outcomes:
   code-lint: PASS
   architecture: PASS
   qa: PASS
+  performance: FAIL
 skipped: []
 counters:
   qa->architecture: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false
