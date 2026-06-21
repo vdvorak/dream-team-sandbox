@@ -34,3 +34,25 @@ agent: vision-po
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: spec-gate
+outcome: PASS
+outputs:
+- type: gate-output
+findings:
+- node: spec-gate
+  severity: advisory
+  returns_to: null
+  signature: 'RCP-7 sekce v acceptance nenesla tag [security] — bezpecnostni invariant
+    (path traversal / ERR_PATH_ESCAPE) musi byt oznacen. Opraveno inline: RCP-7 header
+    + RCP-7c radek.'
+note: 'spec-gate PASS (intrinsic profil). Spec cista: zadne HTTP kody, zadne stack-nouns,
+  zadne soubory/cesty. Struktura OK (Cil/Aktor/Scenar/Chovani/Scope/Edge cases). Featura
+  check OK (nova schopnost, ne refaktoring). Brevity: 99 r (OK). Coverage: vsechna
+  chovani ze spec maji AC (RCP-1..14 + RCP-6/7 nove). Advisory: doplnen [security]
+  tag na RCP-7 (path traversal).'
+agent: sheldon-spec
+phase: T1
+time:
+  seconds: 0

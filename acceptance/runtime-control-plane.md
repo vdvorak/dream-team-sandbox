@@ -197,7 +197,7 @@ Ref: AC-6.
 
 ---
 
-## RCP-7 — seznam souborů v prostředí `[integration]` `[automated]`
+## RCP-7 — seznam souborů v prostředí `[integration]` `[automated]` `[security]`
 
 Ref: AC-7.
 
@@ -205,7 +205,7 @@ Ref: AC-7.
 |---|---|---|
 | 7a | `GET /v1/environments/{project_id}/files` (bez parametru nebo `path=/`) na `ready` prostředí | `200` se seznamem souborů a složek v workspace root |
 | 7b | `GET /v1/environments/{project_id}/files?path=<validní-podadresář>` | `200` se seznamem obsahu daného podadresáře |
-| 7c | `GET /v1/environments/{project_id}/files?path=../../etc/passwd` nebo jiný path traversal mimo workspace | `403 ERR_PATH_ESCAPE`; nikdy `5xx`; žádný obsah mimo workspace |
+| 7c | `GET /v1/environments/{project_id}/files?path=../../etc/passwd` nebo jiný path traversal mimo workspace | `403 ERR_PATH_ESCAPE`; nikdy `5xx`; žádný obsah mimo workspace `[security]` |
 | 7d | `GET /v1/environments/{project_id}/files` na prostředí v jiném stavu než `ready` | `409 ERR_ENVIRONMENT_NOT_READY`; nikdy `5xx` |
 | 7e | `GET /v1/environments/{project_id}/files` pro neexistující `project_id` | `404 ERR_ENVIRONMENT_NOT_FOUND` |
 | 7f | Response body neobsahuje interní workspace layout (overlay dirs, entrypoint.sh apod.) | Ověření: interní artefakty cage nejsou viditelné klientovi |
