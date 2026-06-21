@@ -365,3 +365,15 @@ agent: bob-backend
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: code-lint
+outcome: PASS
+note: Re-verifikováno orchestrátorem po autofixu — ruff format --check (14 files already
+  formatted) + ruff check (All checks passed) clean; 49/49 testů PASS. File-size OK.
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T2
+time:
+  seconds: 0
