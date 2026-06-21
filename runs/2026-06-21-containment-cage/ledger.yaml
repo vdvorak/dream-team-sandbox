@@ -185,3 +185,35 @@ note: feasibility PASS; obě díry potvrzeny v kódu; I8/I9 už drží; žádný
 outputs:
 - type: gate-output
 agent: tony-cto
+---
+run: 2026-06-21-containment-cage
+node: architecture
+outcome: PASS
+phase: T2
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: true
+changed:
+- contract
+- error-codes
+- rules
+tier: L
+cost:
+  model: opus
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 356
+note: 3-vrstvý enforcement (H1-H7), de-root sekvence 0-4, overlay+drift, 11 error
+  codes, CE-1..CE-9; 4 body pro heimdall spike.
+outputs:
+- type: contract
+- type: error-codes
+- type: reuse-decision
+agent: ted-architect

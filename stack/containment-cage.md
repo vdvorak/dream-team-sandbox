@@ -36,3 +36,15 @@ přes cage-deploy, ne přes repo appky.
 ## Proxy env injekt
 
 - `$http_proxy=http://127.0.0.1:4750` — injektuje entrypoint klece před execem agenta.
+
+## Extraction Candidates
+
+> Sleduje opakovatelné patterny, které jsou dnes feature-local, ale mají potenciál stát se
+> sdíleným modulem (per constitution §Reuse policy). Aktualizuje ted-architect při decision pass.
+
+| pattern | stav | trigger pro extract-shared |
+|---|---|---|
+| **host-policy applier** (`ruleset H1–H7 → enforcer adapter`) | feature-local (cage) | při přidání druhého enforceru (VPS nftables na hypervisor hostu) → extract-shared modul s ruleset abstrakcí; Fly Network Policy a VPS nftables se stanou dvěma adaptéry nad stejným rulesetem. Substrát-agnostika (constitution §Přenositelnost) tento extract předpokládá. |
+| **fail-closed deploy guard** (abort wrapper kolem každého enforcement kroku) | feature-local (cage-deploy) | pokud vznikne druhá deploy obálka se stejnou fail-closed sémantikou → extract. Dnes 1 výskyt = ponechat lokální. |
+
+Pozn.: žádný extract teď neprovádět (1 substrát, 1 deploy cesta). Záznam je tracker pro fázi VPS.
