@@ -21,28 +21,36 @@ run: 2026-06-21-containment-cage
 wave_base: d15032c244be306133f70d7bbd9d271a2b976e6f
 graph: delivery
 status: in_progress
-active_node: intake
+active_node: product
 frontier: []
 completed:
 - intake
+- product
 outcomes:
   intake: PASS
+  product: PASS
 skipped: []
 counters: {}
 awaiting_human: []
 halt_gate: null
 last_outcome: PASS
 class: feature
-flags: {}
+flags:
+  has_ui: false
+  has_db: false
+  has_deploy: true
 note: null
 pending_delegations: []
 findings: []
 return_payload: {}
 model_overrides: {}
-epoch: 1
-type_versions: {}
+epoch: 2
+type_versions:
+  spec: 2
+  acceptance: 2
 node_versions:
   intake: 1
+  product: 2
 ```
 
 ## Lidský přehled

@@ -9,3 +9,32 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-containment-cage
+node: product
+outcome: PASS
+flags:
+  has_ui: false
+  has_db: false
+  has_deploy: true
+changed:
+- spec
+- acceptance
+tier: M
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 126
+note: spec + acceptance (I1-I11) hotové; 2 otázky pro Tonyho (shadow-build sync, workspace
+  PAT rotace).
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
+phase: T1
