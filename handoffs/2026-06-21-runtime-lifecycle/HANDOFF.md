@@ -76,6 +76,21 @@ Deploy track (devops/deploy): **vedome preskocen** — odlozeno na slice 2.
 | PTY/terminal (AC-8), git status (AC-6), file-read (AC-7) | Deferred — slice 2 |
 | Produkcni deploy (Fly infra, secrets, image, staging→prod) | Deferred — slice 2 |
 
+## Live demo verifikace (2026-06-21, po uzavreni wave)
+
+Slice 1 empiricky overen za behu (uvicorn lokalne, dev provider), ne jen unit/integration testy:
+
+- **Normalni lifecycle** (provider `active`): healthz `200 ok` · ensure bez tokenu `401 ERR_UNAUTHORIZED`
+  · ensure s tokenem `200 ready` + neprůhledny handle (`https://rt.<opaque>.example/control/...`,
+  `wss://.../terminal/...`, zadny substrat-noun) · get `ready` · ensure-znovu idempotent · jine repo
+  `409 ERR_REPO_MISMATCH` · bypass pole `firewall:off` → `400 ERR_INVALID_REQUEST` (ZED nelze oslabit)
+  · sleep `asleep` (connection→null) · destroy `destroyed`.
+- **Fail-closed** (provider `down`): healthz `503 degraded` · ensure `ERR_RUNTIME_UNAVAILABLE`
+  (nikdy ready) · get zustava `provisioning` (connection null). **Potvrzeno: bez aktivni ZDI se
+  prostredi NIKDY nestane ready.**
+
+Spusteni: `ENFORCEMENT_PROVIDER=dev DEV_PROVIDER_MODE=active|fail|down SERVICE_TOKEN=... uvicorn server.runtime.main:app`.
+
 ## Pouceni z wave (logy pro dalsi iterace)
 
 1. **Spec-gate depth-first:** Sheldon vracel kategorie agnostika-leaku po davkach (ne

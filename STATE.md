@@ -29,7 +29,8 @@ closed_waves:
 postavena — 5 operaci stavoveho automatu (ensure/get/sleep/destroy/healthz), fail-closed
 EnforcementProvider kontrakt (uzavreny typ), 3-vrstvova architektura (router/service/repository).
 243/243 testu PASS. Kontrakt bumpnut v1.0.0 → v1.1.0 (ERR_INVALID_REQUEST, non-breaking).
-Deploy track vedome odlozen na slice 2 (realny motor + cloud infra).
+Deploy track vedome odlozen na slice 2 (realny motor + cloud infra). Slice 1 navic
+empiricky overen zivym demem (curl: cely lifecycle + fail-closed v 'down' rezimu → nikdy ready).
 
 ### Wave `2026-06-21-runtime-lifecycle` — completed (15 nodes, vsechny PASS, return_loops: 1)
 - intake · product · spec-gate (3 kola resolve-loop; strukturalni lean prepis) · feasibility ·
