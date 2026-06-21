@@ -20,21 +20,19 @@ archivuje do handoffu a soubor se resetuje (`status: idle`, `run: null`). Tohle 
 run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
-status: in_progress
-active_node: product
+status: blocked
+active_node: spec-gate
 frontier: []
 completed:
 - intake
-- product
 outcomes:
   intake: PASS
-  product: PASS
 skipped: []
 counters:
-  spec-gate->product: 2
+  spec-gate->product: 3
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false
@@ -42,7 +40,7 @@ flags:
   touches_server: true
   touches_shared_ui: false
   has_deploy: false
-note: null
+note: 'BLOCKER: spec-gate->product dosáhl 3× — eskaluj o roli výš (constitution)'
 pending_delegations: []
 findings:
 - node: spec-gate
@@ -94,16 +92,69 @@ findings:
     error kód, název pole schématu, endpoint token, tool/command name, role/agent
     reference, file-path. Tohle musí být POSLEDNÍ cleanup — žádný další výskyt téhož
     druhu.'
-return_payload: {}
+- node: spec-gate
+  severity: blocking
+  returns_to: product
+  signature: 'STRUKTURÁLNÍ fix (ne další kosmetika): spec má být ČISTĚ BEHAVIORÁLNÍ.
+    Vyhodit VŠECHNO "jak" — to patří downstream (architecture/contract/rules/stack),
+    ne do product specu:
+
+    - Auth mechanismus (mTLS / service token) → smazat; behaviorálně: "klient se autentizuje;
+    neověřená identita → odmítnuto". (Mechanismus žije v kontraktu §3.)
+
+    - Datová pole volání (project_id, repo.url, tool, phase, contract_version, connection,
+    Environment jako typ) → smazat schema-tvary; behaviorálně: "zajisti prostředí
+    pro projekt ze zdrojového repozitáře".
+
+    - Storage/concurrency mechanika (in-memory store, serializace) → smazat; behaviorálně:
+    "souběžné zajištění → jediné prostředí (idempotentně); stav přežívá mezi voláními".
+
+    - Stub/dev provider jako test-double → behaviorálně: "enforcement je delegován
+    na zaměnitelný provider; lokální varianta nevynucuje reálný enforcement".
+
+    - CELÁ sekce §Enforcement-provider rozhraní s funkčními signaturami provision()/teardown()/sleep()/health()
+    → SMAZAT ze specu. Návrh tohoto rozhraní je práce uzlu `architecture` (ted-architect),
+    ne product specu. Spec smí jen: "server deleguje enforcement na zaměnitelný provider;
+    provider garantuje aktivní enforcement nebo vrátí chybu; klient dostane connection
+    handle JEN když je enforcement aktivní (fail-closed)".
+
+    Výsledek = krátký behaviorální dokument (operace jako doménové akce, stavový automat,
+    idempotence, fail-closed garance, standalone). Žádné signatury, schémata, mechaniky.'
+return_payload:
+  product:
+  - 'STRUKTURÁLNÍ fix (ne další kosmetika): spec má být ČISTĚ BEHAVIORÁLNÍ. Vyhodit
+    VŠECHNO "jak" — to patří downstream (architecture/contract/rules/stack), ne do
+    product specu:
+
+    - Auth mechanismus (mTLS / service token) → smazat; behaviorálně: "klient se autentizuje;
+    neověřená identita → odmítnuto". (Mechanismus žije v kontraktu §3.)
+
+    - Datová pole volání (project_id, repo.url, tool, phase, contract_version, connection,
+    Environment jako typ) → smazat schema-tvary; behaviorálně: "zajisti prostředí
+    pro projekt ze zdrojového repozitáře".
+
+    - Storage/concurrency mechanika (in-memory store, serializace) → smazat; behaviorálně:
+    "souběžné zajištění → jediné prostředí (idempotentně); stav přežívá mezi voláními".
+
+    - Stub/dev provider jako test-double → behaviorálně: "enforcement je delegován
+    na zaměnitelný provider; lokální varianta nevynucuje reálný enforcement".
+
+    - CELÁ sekce §Enforcement-provider rozhraní s funkčními signaturami provision()/teardown()/sleep()/health()
+    → SMAZAT ze specu. Návrh tohoto rozhraní je práce uzlu `architecture` (ted-architect),
+    ne product specu. Spec smí jen: "server deleguje enforcement na zaměnitelný provider;
+    provider garantuje aktivní enforcement nebo vrátí chybu; klient dostane connection
+    handle JEN když je enforcement aktivní (fail-closed)".
+
+    Výsledek = krátký behaviorální dokument (operace jako doménové akce, stavový automat,
+    idempotence, fail-closed garance, standalone). Žádné signatury, schémata, mechaniky.'
 model_overrides: {}
-epoch: 6
+epoch: 7
 type_versions:
-  spec: 6
-  acceptance: 5
-  has_ui: 5
+  spec: 7
+  acceptance: 7
+  has_ui: 7
 node_versions:
   intake: 1
-  product: 6
 ```
 
 ## Lidský přehled
