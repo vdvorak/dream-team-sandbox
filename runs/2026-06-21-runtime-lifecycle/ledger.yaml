@@ -409,3 +409,25 @@ agent: optimus-perf
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: security
+outcome: PASS
+note: 'PASS, žádný blocking. F1-F8 clean + doménové invarianty ověřeny: fail-closed
+  jediný bod (service.py:197 za EnforcementActive), ZEĎ-disjunktnost (extra=forbid
+  na EnsureRequest+repo, bypass->400 nikdy k provideru), nepropustnost (překlad dle
+  kind, guard na non-app-facing code, žádný cage kód leak), agnostika (opaque handle
+  bez substrát-nounu), BYOK (žádné token pole), auth (401 ne 5xx, healthz veřejné
+  neleakuje). 123 testů potvrzuje.
+
+  Advisory pro slice 2: A1) config.py dev service_token bez production fail-fast guardu
+  (až přijde mTLS/cage); A2) router.py token compare není constant-time (hmac.compare_digest
+  až při hardeningu).
+
+  '
+outputs:
+- type: gate-output
+agent: heimdall-security
+phase: T3
+time:
+  seconds: 0

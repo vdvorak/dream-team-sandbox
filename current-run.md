@@ -21,10 +21,9 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: performance
+active_node: security
 frontier:
 - spec-audit
-- security
 - code-quality
 completed:
 - intake
@@ -36,6 +35,7 @@ completed:
 - code-lint
 - qa
 - performance
+- security
 outcomes:
   intake: PASS
   product: PASS
@@ -46,6 +46,7 @@ outcomes:
   code-lint: PASS
   qa: PASS
   performance: PASS
+  security: PASS
 skipped: []
 counters:
   spec-gate->product: 0
@@ -145,12 +146,12 @@ findings:
   signature: resolve-loop counter 3->0 @ 2026-06-21T18:24:45.694413+00:00
 return_payload: {}
 model_overrides: {}
-epoch: 16
+epoch: 17
 type_versions:
   spec: 8
   acceptance: 7
   has_ui: 7
-  gate-output: 16
+  gate-output: 17
   reuse-decision: 11
   server-code: 13
   unit-tests: 13
@@ -164,6 +165,7 @@ node_versions:
   code-lint: 14
   qa: 15
   performance: 16
+  security: 17
 ```
 
 ## Lidský přehled
