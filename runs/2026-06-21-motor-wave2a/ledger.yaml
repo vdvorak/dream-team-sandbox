@@ -1,0 +1,20 @@
+---
+run: 2026-06-21-motor-wave2a
+node: intake
+outcome: PASS
+class: feature
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: false
+outputs:
+- type: backlog-item
+  path: backlog/motor-wave2a.md
+note: 'Wave 2a — motor real: CageEnforcementProvider + provider-agnosticka runtime
+  vrstva + AC-6/7. Zadne UI, zadna DB, server touches. Deploy deferred (wave 2c).'
+agent: null
+phase: null
+time:
+  seconds: 0

@@ -25,6 +25,14 @@ closed_waves:
 
 ## Aktualni fokus
 
+🔄 **Wave 2a — MOTOR real: CageEnforcementProvider + provider-agnostická cage runtime vrstva + AC-6/AC-7 (2026-06-21, in progress)**
+Aktualni wave: `2026-06-21-motor-wave2a`. Implementuje reálný motor bez PTY:
+- `server/cage/runtime.py` — nová provider-agnostická lifecycle vrstva (start/stop/status), oddelena od deploy orchestrace. Provider abstrakce pro zero-vendor-lock (Fly.io ted, snadna migrace pozdeji).
+- `CageEnforcementProvider` — nahrazeni STUB realnou integraci na `server/cage/**`.
+- AC-6 `getGitStatus` — git status nad realnym workspace.
+- AC-7 `listFiles` — soubory nad realnym workspace (sandboxed).
+Zbytek (AC-8 PTY/terminal = wave 2b; Fly infra deploy + hardening = wave 2c) = odlozeno.
+
 ✅ **Runtime control-plane lifecycle core (slice 1) HOTOVO (2026-06-21).** PATER RUNTIMU
 postavena — 5 operaci stavoveho automatu (ensure/get/sleep/destroy/healthz), fail-closed
 EnforcementProvider kontrakt (uzavreny typ), 3-vrstvova architektura (router/service/repository).
@@ -59,11 +67,11 @@ T1+T2 hotovo, T3 qa staticky (128/128); zive AC + deploy = budouci motor-extrakc
 
 ## Open Items (budouci, gated)
 
-- [ ] **Realny MOTOR (slice 2):** CageEnforcementProvider → realna integrace na `server/cage/**`;
-      realne klonovani repa; realne spusteni agenta v kontejneru; PTY/terminal (AC-8); git status
-      (AC-6); file-read (AC-7).
-- [ ] **Produkcni deploy (slice 2):** Fly infra + secrets, build image (vlastni verzovany),
-      staging → produkce. Vedome odlozeno z wave `runtime-lifecycle`.
+- [x] **Wave 2a (in progress):** CageEnforcementProvider + provider-agnostická cage runtime vrstva (`server/cage/runtime.py`) + AC-6 git status + AC-7 listFiles. Wave `2026-06-21-motor-wave2a`.
+- [ ] **Wave 2b:** AC-8 PTY/terminal (WebSocket) — gated na wave 2a.
+- [ ] **Wave 2c:** Produkční deploy (Fly infra + secrets, build image, staging → produkce) + advisory hardening — gated na wave 2b.
+- [ ] **Produkcni deploy (wave 2c):** Fly infra + secrets, build image (vlastni verzovany),
+      staging → produkce. Vedome odlozeno z wave `runtime-lifecycle`, zafazeno do wave 2c.
 - [ ] **Advisory hardening (impl-time, neblokujici):** security — dev-token fail-fast guard,
       constant-time compare; code-quality — type anotace (mypy strict), test-helper dedup,
       healthz 503 v OpenAPI (W3); perf — lock-dict GC, perf acceptance targets formalizovat.
