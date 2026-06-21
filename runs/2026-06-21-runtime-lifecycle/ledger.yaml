@@ -431,3 +431,23 @@ agent: heimdall-security
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: code-quality
+outcome: PASS
+note: 'PASS - jen advisory, žádný blocking. Typy/SRP/swallowed-exceptions/duplikáty
+  produkčního kódu OK; CageEnforcementProvider stub správně označen (ne tichý no-op);
+  error nepropustnost (from None) korektní.
+
+  Advisory (improvements/code-quality.md): A1) main.py create_runtime_app/_build_provider
+  chybí type anotace na provider override; A2) check_keys test-helper 4x duplikován
+  -> extract do tests/conftest; A3) service.py:154 lehce WHAT komentář; A4) status/phase
+  holé str místo Literal; A5) auth.py prázdný placeholder (smazat nebo __all__=[]).
+
+  '
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T3
+time:
+  seconds: 0
