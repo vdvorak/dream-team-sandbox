@@ -21,16 +21,18 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: spec-gate
+active_node: feasibility
 frontier: []
 completed:
 - intake
 - product
 - spec-gate
+- feasibility
 outcomes:
   intake: PASS
   product: PASS
   spec-gate: PASS
+  feasibility: PASS
 skipped: []
 counters:
   spec-gate->product: 0
@@ -130,16 +132,17 @@ findings:
   signature: resolve-loop counter 3->0 @ 2026-06-21T18:24:45.694413+00:00
 return_payload: {}
 model_overrides: {}
-epoch: 9
+epoch: 10
 type_versions:
   spec: 8
   acceptance: 7
   has_ui: 7
-  gate-output: 9
+  gate-output: 10
 node_versions:
   intake: 1
   product: 8
   spec-gate: 9
+  feasibility: 10
 ```
 
 ## Lidský přehled

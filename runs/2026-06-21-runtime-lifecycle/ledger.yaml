@@ -230,3 +230,25 @@ agent: sheldon-spec
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: feasibility
+outcome: PASS
+note: 'Feasible. Stack = Python 3.12 + FastAPI >=0.115 + Pydantic v2 + uvicorn + pytest-asyncio
+  (zapsáno stack/runtime-control-plane.md), žádný nový dep, has_db=false drží.
+
+  Rizika pro architecture/backend — A) tool validace musí vrátit 400 ERR_TOOL_NOT_ALLOWED,
+  ne 422 (allowlist v service vrstvě, ne Pydantic enum); B) error envelope {code,message,detail},
+  ne scaffold {code,details}; C) OpenAPI drift anyOf vs oneOf tolerovat (kontrakt
+  = autorita); D) additionalProperties false i na vnořeném repo objektu (bypass přes
+  repo.firewall); E) dev-provider connection URL bez substrát-nounu a bez portu 808x.
+
+  Model: architecture=opus, backend=sonnet, qa=sonnet (defaulty).
+
+  '
+outputs:
+- type: gate-output
+agent: tony-cto
+phase: T1
+time:
+  seconds: 0
