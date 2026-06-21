@@ -1,0 +1,11 @@
+---
+run: 2026-06-21-runtime-contract
+node: intake
+outcome: PASS
+class: feature
+note: Runtime identita + app↔runtime kontrakt + boundary audit (docs-only wave, žádný
+  kód/deploy).
+agent: null
+phase: null
+time:
+  seconds: 0
