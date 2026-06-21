@@ -21,7 +21,7 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: audit-join
+active_node: l2-review
 frontier: []
 completed:
 - intake
@@ -37,6 +37,7 @@ completed:
 - product
 - spec-audit
 - audit-join
+- l2-review
 outcomes:
   intake: PASS
   spec-gate: PASS
@@ -51,13 +52,14 @@ outcomes:
   spec-audit: PASS
   product: PASS
   audit-join: PASS
+  l2-review: ACK
 skipped: []
 counters:
   spec-gate->product: 0
   spec-audit->product: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: ACK
 class: feature
 flags:
   has_ui: false
@@ -168,7 +170,7 @@ findings:
     (W3 healthz 503 v OpenAPI = advisory pre-existing, odloženo slice 2.)'
 return_payload: {}
 model_overrides: {}
-epoch: 26
+epoch: 27
 type_versions:
   spec: 19
   acceptance: 20
@@ -190,6 +192,7 @@ node_versions:
   code-quality: 18
   product: 20
   spec-audit: 26
+  l2-review: 27
 ```
 
 ## Lidský přehled

@@ -620,3 +620,14 @@ agent: sheldon-spec
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: l2-review
+outcome: ACK
+note: Uživatel viděl hotový ověřený slice 1 (243/243 testů, security PASS) a rozhodl
+  odložit produkční deploy na slice 2 (reálný motor/klec + cloud infra). L2 informativní
+  ACK.
+agent: null
+phase: null
+time:
+  seconds: 0
