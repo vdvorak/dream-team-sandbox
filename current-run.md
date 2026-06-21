@@ -20,8 +20,8 @@ archivuje do handoffu a soubor se resetuje (`status: idle`, `run: null`). Tohle 
 run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
-status: in_progress
-active_node: l2-review
+status: done
+active_node: done
 frontier: []
 completed:
 - intake
@@ -38,6 +38,7 @@ completed:
 - spec-audit
 - audit-join
 - l2-review
+- done
 outcomes:
   intake: PASS
   spec-gate: PASS
@@ -53,6 +54,7 @@ outcomes:
   product: PASS
   audit-join: PASS
   l2-review: ACK
+  done: DONE
 skipped: []
 counters:
   spec-gate->product: 0

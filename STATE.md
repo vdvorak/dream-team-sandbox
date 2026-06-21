@@ -1,7 +1,26 @@
 # STATE.md — dream-team-sandbox
 
 <!-- ENGINE:STATE START -->
-closed_waves: []
+<!-- Strojově psané enginem na terminálu `done` (statewrite.py) — NEEDITUJ ručně.
+     Uzavřené vlny = FAKTA o tom, co je hotové; lidský narativ pod markerem je pro PŘÍBĚH. -->
+```yaml
+closed_waves:
+  2026-06-21-runtime-lifecycle:
+    closed_at: '2026-06-21T19:27:39.714400+00:00'
+    status: done
+    wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
+    class: feature
+    nodes: 15
+    last_outcome: ACK
+    return_loops: 1
+    summary: runs/2026-06-21-runtime-lifecycle/summary.md
+    ledger: runs/2026-06-21-runtime-lifecycle/ledger.yaml
+    touches:
+      touches_db: false
+      touches_server: true
+      touches_shared_ui: false
+      has_ui: false
+```
 <!-- ENGINE:STATE END -->
 
 ## Aktualni fokus
