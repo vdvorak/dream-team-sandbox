@@ -21,7 +21,7 @@ run: 2026-06-21-motor-wave2a
 wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
 graph: delivery
 status: in_progress
-active_node: audit-join
+active_node: l2-review
 frontier: []
 completed:
 - intake
@@ -58,7 +58,7 @@ counters:
   qa->architecture: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: ACK
 class: feature
 flags:
   has_ui: false
@@ -75,7 +75,7 @@ findings:
   signature: ''
 return_payload: {}
 model_overrides: {}
-epoch: 18
+epoch: 19
 type_versions:
   spec: 2
   acceptance: 2
@@ -96,7 +96,7 @@ node_versions:
   architecture: 9
   qa: 12
   security: 13
-  l2-review: 14
+  l2-review: 19
   performance: 15
   spec-audit: 16
   code-quality: 17

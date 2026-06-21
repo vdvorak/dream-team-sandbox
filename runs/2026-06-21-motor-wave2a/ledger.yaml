@@ -301,3 +301,13 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: l2-review
+outcome: ACK
+summary: 'Všechny BLOCKERy opraveny a ověřeny re-auditem. Advisory nálezy: A1 (sync
+  rglob), A2 (git timeout), W1-W3, W8, dup FlyProvider — uložit do improvements/.'
+agent: null
+phase: null
+time:
+  seconds: 0
