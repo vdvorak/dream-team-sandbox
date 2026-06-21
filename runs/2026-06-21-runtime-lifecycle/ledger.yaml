@@ -188,3 +188,33 @@ agent: sheldon-spec
 phase: T1
 time:
   seconds: 0
+---
+intervened: spec-gate->product
+kind: resolve-loop
+prev_count: 3
+at: '2026-06-21T18:24:45.694413+00:00'
+---
+run: 2026-06-21-runtime-lifecycle
+node: product
+outcome: PASS
+changed:
+- spec
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: false
+tier: S
+note: Definitivní lean behaviorální přepis (89 ř.) — celá §Enforcement-provider/auth/storage/schémata
+  vyhozeny (přesun do architecture/contract/stack). Orchestrátor ověřil grepem CLEAN
+  + obsahově kompletní.
+outputs:
+- type: spec
+  path: specs/runtime-control-plane.md
+- type: acceptance
+  path: acceptance/runtime-control-plane.md
+agent: vision-po
+phase: T1
+time:
+  seconds: 0
