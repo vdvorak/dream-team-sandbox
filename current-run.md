@@ -21,7 +21,7 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: code-lint
+active_node: qa
 frontier: []
 completed:
 - intake
@@ -31,6 +31,7 @@ completed:
 - architecture
 - backend
 - code-lint
+- qa
 outcomes:
   intake: PASS
   product: PASS
@@ -39,6 +40,7 @@ outcomes:
   architecture: PASS
   backend: PASS
   code-lint: PASS
+  qa: PASS
 skipped: []
 counters:
   spec-gate->product: 0
@@ -138,12 +140,12 @@ findings:
   signature: resolve-loop counter 3->0 @ 2026-06-21T18:24:45.694413+00:00
 return_payload: {}
 model_overrides: {}
-epoch: 14
+epoch: 15
 type_versions:
   spec: 8
   acceptance: 7
   has_ui: 7
-  gate-output: 14
+  gate-output: 15
   reuse-decision: 11
   server-code: 13
   unit-tests: 13
@@ -155,6 +157,7 @@ node_versions:
   architecture: 11
   backend: 13
   code-lint: 14
+  qa: 15
 ```
 
 ## Lidský přehled

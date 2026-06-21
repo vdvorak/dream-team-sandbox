@@ -377,3 +377,16 @@ agent: vitek-quality
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: qa
+outcome: PASS
+note: 74 integration testů (tests/integration/test_runtime_lifecycle_integration.py),
+  236/236 celá suite PASS, 11/11 in-scope AC (RCP-1,2,3,4,5,9,10,11,12,13,14) pokryto
+  end-to-end HTTP black-box. Žádný server defekt.
+outputs:
+- type: gate-output
+agent: joey-qa
+phase: T3
+time:
+  seconds: 0
