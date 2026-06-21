@@ -162,3 +162,24 @@ outputs:
 - type: error-codes
 - type: reuse-decision
 agent: ted-architect
+---
+run: 2026-06-21-runtime-contract
+node: security
+outcome: PASS
+phase: T3
+severity: advisory
+cost:
+  model: opus
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 73
+note: ZEĎ-disjunktnost (additionalProperties:false) + fail-closed + no-leak + BYOK
+  + auth OK; 2 advisory (phase + Error.detail leak kanály → impl scrub + contract-test).
+  Boundary audit doc napsán.
+outputs:
+- type: gate-output
+agent: heimdall-security
