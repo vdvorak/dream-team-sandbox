@@ -1,0 +1,12 @@
+---
+run: 2026-06-21-runtime-lifecycle
+node: intake
+outcome: PASS
+class: feature
+note: Implementace runtime control-plane (páteř) — lifecycle slice (healthz + ensure/get/sleep/destroy
+  + Environment FSM + fail-closed ZEĎ provider). Net-new standalone, NE cross-repo
+  extrakce.
+agent: null
+phase: null
+time:
+  seconds: 0

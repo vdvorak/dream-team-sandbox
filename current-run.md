@@ -17,71 +17,32 @@ archivuje do handoffu a soubor se resetuje (`status: idle`, `run: null`). Tohle 
 **runtime** soubor (projekt-specifický, synced se nepřepisuje).
 
 ```yaml
-run: 2026-06-21-runtime-contract
-wave_base: null
+run: 2026-06-21-runtime-lifecycle
+wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: spec-audit
+active_node: intake
 frontier: []
 completed:
 - intake
-- product
-- spec-gate
-- feasibility
-- architecture
-- security
-- spec-audit
 outcomes:
   intake: PASS
-  product: PASS
-  spec-gate: PASS
-  feasibility: PASS
-  architecture: PASS
-  security: PASS
-  spec-audit: PASS
 skipped: []
-counters:
-  spec-gate->product: 1
+counters: {}
 awaiting_human: []
 halt_gate: null
 last_outcome: PASS
 class: feature
-flags:
-  has_ui: false
-  touches_db: false
-  touches_server: false
-  touches_shared_ui: false
-  has_deploy: false
+flags: {}
 note: null
 pending_delegations: []
-findings:
-- node: spec-gate
-  severity: blocking
-  returns_to: product
-  signature: 'spec-agnostika v specs/runtime-contract.md (7 míst): ř.20 "curl / CLI"
-    → "generický klient bez aplikačního kódu"; ř.34 "healthz" → "zdravotní dotaz";
-    ř.73 "HTTP+JSON" → smazat protokol; ř.79 "OpenAPI artefakt" → "verzovaný kontrakt";
-    ř.91 "viz kontrakt (Ted)" → smazat jméno agenta; ř.93 "Ted definuje idempotency
-    klíč/mutex" → "konkrétní mechaniku určí kontrakt"; ř.96 "listFiles" → "čtení souborů
-    mimo sandbox". Acceptance je OK (neměnit).'
+findings: []
 return_payload: {}
 model_overrides: {}
-epoch: 9
-type_versions:
-  spec: 4
-  acceptance: 3
-  has_ui: 3
-  gate-output: 9
-  contract: 7
-  error-codes: 7
+epoch: 1
+type_versions: {}
 node_versions:
   intake: 1
-  product: 4
-  spec-gate: 5
-  feasibility: 6
-  architecture: 7
-  security: 8
-  spec-audit: 9
 ```
 
 ## Lidský přehled
