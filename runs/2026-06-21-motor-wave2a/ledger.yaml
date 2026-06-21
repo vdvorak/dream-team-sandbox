@@ -266,3 +266,16 @@ agent: optimus-perf
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: spec-audit
+outcome: PASS
+summary: Drift opraven — prefix→path konzistentně v OpenAPI, rules, router, service,
+  workspace, testech. Acceptance byla správná. Kosmetika (description, test name)
+  opravena přímo.
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T3
+time:
+  seconds: 0
