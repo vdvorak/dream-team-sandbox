@@ -106,3 +106,16 @@ agent: bob-backend
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: code-lint
+outcome: PASS
+summary: 'PASS — žádný BLOCKER. Advisory: W1-W9 (typing gaps, WHAT comments, silent
+  drop bez logu, sleep bez stop call). Extraction candidate: FlyProvider._find_machine_id.
+  Uložit do improvements/code-quality.md.'
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T2
+time:
+  seconds: 0
