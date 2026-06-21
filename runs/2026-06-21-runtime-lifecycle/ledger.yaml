@@ -509,3 +509,28 @@ agent: sheldon-spec
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: product
+outcome: PASS
+changed:
+- acceptance
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: false
+tier: XS
+note: Re-flow po spec-audit FAIL - acceptance sesynchronizován s kontraktem v1.1.0
+  (6 řádků - AC-1g 422->400 ERR_INVALID_REQUEST, AC-1b/9a verze 1.1.0, AC-1h/12b/13b
+  doplněn kód). Spec ani kód nedotčeny. Chování beze změny (kód už to dělal správně).
+outputs:
+- type: spec
+  path: specs/runtime-control-plane.md
+- type: acceptance
+  path: acceptance/runtime-control-plane.md
+agent: vision-po
+phase: T1
+time:
+  seconds: 0

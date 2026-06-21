@@ -21,8 +21,9 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: spec-audit
-frontier: []
+active_node: product
+frontier:
+- qa
 completed:
 - intake
 - spec-gate
@@ -34,6 +35,7 @@ completed:
 - performance
 - security
 - code-quality
+- product
 outcomes:
   intake: PASS
   spec-gate: PASS
@@ -46,13 +48,14 @@ outcomes:
   security: PASS
   code-quality: PASS
   spec-audit: FAIL
+  product: PASS
 skipped: []
 counters:
   spec-gate->product: 0
   spec-audit->product: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: FAIL
+last_outcome: PASS
 class: feature
 flags:
   has_ui: false
@@ -161,27 +164,12 @@ findings:
     kódu -> doplň "400 ERR_INVALID_REQUEST".
 
     (W3 healthz 503 v OpenAPI = advisory pre-existing, odloženo slice 2.)'
-return_payload:
-  product:
-  - 'acceptance/runtime-control-plane.md nesesynchronizován s kontraktem v1.1.0 (kód
-    je správně, chyba jen v acceptance dokumentu):
-
-    F1 (BLOCKER): AC-1g dovoluje "422 ERR_CLONE_FAILED nebo validační 400" pro syntakticky
-    chybné repo.url. Kontrakt v1.1.0 §8: malformed URL = schema chyba = výhradně 400
-    ERR_INVALID_REQUEST; ERR_CLONE_FAILED (422) je JEN runtime selhání klonu (validní
-    url, nedostupný). Oprav AC-1g: PASS = 400 ERR_INVALID_REQUEST; 422 = FAIL.
-
-    W1: AC-1b a AC-9a testují contract_version "1.0.0" -> oprav na "1.1.0".
-
-    W2: AC-1h, AC-12b, AC-13b PASS jen "400 (additionalProperties odmítnuto)" bez
-    kódu -> doplň "400 ERR_INVALID_REQUEST".
-
-    (W3 healthz 503 v OpenAPI = advisory pre-existing, odloženo slice 2.)'
+return_payload: {}
 model_overrides: {}
-epoch: 19
+epoch: 20
 type_versions:
   spec: 19
-  acceptance: 19
+  acceptance: 20
   has_ui: 19
   gate-output: 18
   reuse-decision: 11
@@ -198,6 +186,7 @@ node_versions:
   performance: 16
   security: 17
   code-quality: 18
+  product: 20
 ```
 
 ## Lidský přehled

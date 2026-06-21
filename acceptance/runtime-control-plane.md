@@ -39,13 +39,13 @@ Ref: AC-1.
 | # | Podmínka | PASS |
 |---|---|---|
 | 1a | `POST /v1/environments/{id}/ensure` s platným `project_id`, `repo.url`, `tool` | `200` s `status: ready` nebo `202` s `status: provisioning` + hlavička `Retry-After` |
-| 1b | Response body obsahuje `contract_version: "1.0.0"` | Přítomno v každém `Environment` objektu |
+| 1b | Response body obsahuje `contract_version: "1.1.0"` | Přítomno v každém `Environment` objektu |
 | 1c | Opakovaný `ensure` se stejným `project_id` + stejným `repo.url` na `ready` prostředí | `200 ready`; nevznikne druhé prostředí (idempotence) |
 | 1d | Souběžné `POST ensure` pro tentýž `project_id` (2+ souběžné requesty) | Výsledek = jedno prostředí; race nevrátí dvě různá `ready`; žádný `5xx` |
 | 1e | `ensure` s `repo.url` jiným než u živého prostředí | `409` s kódem `ERR_REPO_MISMATCH`; prostředí nedotčeno |
 | 1f | `ensure` s neplatným `tool` (hodnota mimo povolený seznam) | `400` s kódem `ERR_TOOL_NOT_ALLOWED` |
-| 1g | `ensure` s nevalidním `repo.url` (syntakticky chybné URI) | `422` s kódem `ERR_CLONE_FAILED` nebo validační `400`; nikdy `5xx` |
-| 1h | `ensure` s extra polem v request body (např. `"firewall": "off"`) | `400` (additionalProperties odmítnuto); nikdy tiché přijetí — AC-12c |
+| 1g | `ensure` s nevalidním `repo.url` (syntakticky chybné URI) | `400 ERR_INVALID_REQUEST` (schema-validace); `422` v tomto scénáři = FAIL; nikdy `5xx` |
+| 1h | `ensure` s extra polem v request body (např. `"firewall": "off"`) | `400 ERR_INVALID_REQUEST` (additionalProperties odmítnuto); nikdy tiché přijetí — AC-12c |
 
 ---
 
@@ -108,7 +108,7 @@ Ref: AC-9.
 
 | # | Podmínka | PASS |
 |---|---|---|
-| 9a | `GET /v1/healthz` bez auth | `200` s `status ∈ {ok, degraded}` a `contract_version: "1.0.0"` |
+| 9a | `GET /v1/healthz` bez auth | `200` s `status ∈ {ok, degraded}` a `contract_version: "1.1.0"` |
 | 9b | `contract_version` v healthz = `contract_version` v každém `Environment` response | Shoduje se (drift-check manuálně; CI fixture deferred na app-side wave) |
 | 9c | Provider nedosažitelný → healthz | `200 degraded` nebo `503`; nikdy tiché `ok` při výpadku providera |
 
@@ -152,7 +152,7 @@ Ref: AC-12.
 | # | Podmínka | PASS |
 |---|---|---|
 | 12a | Revize OpenAPI schématu (strojová validace) | Žádný parametr, query, request/response pole neumožňuje zmírnit enforcement |
-| 12b | `ensure` s extra polem simulujícím enforcement bypass | Request odmítnut `400` (additionalProperties:false) — viz RCP-1h |
+| 12b | `ensure` s extra polem simulujícím enforcement bypass | Request odmítnut `400 ERR_INVALID_REQUEST` (additionalProperties:false) — viz RCP-1h |
 | 12c | Žádná operace nevrátí detaily ZDI (ruleset, policy, capability seznam) | Grep response schématu = 0 výskytů pro `policy\|ruleset\|allowlist\|capability` jako response pole |
 
 ---
@@ -164,7 +164,7 @@ Ref: AC-13.
 | # | Podmínka | PASS |
 |---|---|---|
 | 13a | OpenAPI schéma + server code review | Žádné pole nepřijímá ani nevrací AI tool token nebo credential |
-| 13b | `EnsureRequest` odmítne jakékoli pole nesouvisející s `repo` a `tool` | `additionalProperties:false` — viz RCP-1h |
+| 13b | `EnsureRequest` odmítne jakékoli pole nesouvisející s `repo` a `tool` | `400 ERR_INVALID_REQUEST` (additionalProperties:false) — viz RCP-1h |
 
 ---
 
