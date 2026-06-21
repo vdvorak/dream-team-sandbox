@@ -208,3 +208,16 @@ agent: sheldon-spec
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: security
+outcome: PASS
+summary: 'PASS — path sandbox ověřen empiricky (4 vektory incl. dir symlink). FLY_API_TOKEN
+  neléká. Substrate izolace drží. Advisory: blacklist deny-vs-allowlist, dotfiles,
+  constant-time token compare.'
+outputs:
+- type: gate-output
+agent: heimdall-security
+phase: T3
+time:
+  seconds: 0
