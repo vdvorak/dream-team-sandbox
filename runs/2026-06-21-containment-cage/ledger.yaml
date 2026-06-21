@@ -142,3 +142,21 @@ outputs:
 - type: has_ui
 agent: vision-po
 phase: T1
+---
+run: 2026-06-21-containment-cage
+node: spec-gate
+outcome: PASS
+phase: T1
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 16
+note: spec 100% agnostický, AC otagované, stack+contracts OK. T1 spec clean.
+outputs:
+- type: gate-output
+agent: sheldon-spec

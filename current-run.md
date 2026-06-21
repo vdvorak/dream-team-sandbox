@@ -21,14 +21,16 @@ run: 2026-06-21-containment-cage
 wave_base: d15032c244be306133f70d7bbd9d271a2b976e6f
 graph: delivery
 status: in_progress
-active_node: product
+active_node: spec-gate
 frontier: []
 completed:
 - intake
 - product
+- spec-gate
 outcomes:
   intake: PASS
   product: PASS
+  spec-gate: PASS
 skipped: []
 counters:
   spec-gate->product: 2
@@ -65,14 +67,16 @@ findings:
     OK (neměnit), stack/ + contracts/ OK.'
 return_payload: {}
 model_overrides: {}
-epoch: 6
+epoch: 7
 type_versions:
   spec: 6
   acceptance: 5
   has_ui: 5
+  gate-output: 7
 node_versions:
   intake: 1
   product: 6
+  spec-gate: 7
 ```
 
 ## Lidský přehled
