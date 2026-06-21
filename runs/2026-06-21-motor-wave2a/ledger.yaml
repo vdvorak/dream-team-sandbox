@@ -243,3 +243,14 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: l2-review
+outcome: ACK
+summary: '3 BLOCKERy potvrzeny: B1 (httpx client per request), spec drift (path vs
+  prefix), W7 (silent except). Směr: Ted rozhodne o path/prefix canonical name, Bob
+  opraví vše v jednom returnu.'
+agent: null
+phase: null
+time:
+  seconds: 0
