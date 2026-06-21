@@ -311,3 +311,14 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: done
+outcome: DONE
+summary: Wave 2a kompletní. CageRuntimeProvider + FlyProvider (provider-agnostická
+  vrstva) + CageEnforcementProvider (real) + WorkspaceAccessor + AC-6 gitStatus +
+  AC-7 listFiles. 47/47 testů PASS. Všechny BLOCKERy opraveny.
+agent: null
+phase: null
+time:
+  seconds: 0
