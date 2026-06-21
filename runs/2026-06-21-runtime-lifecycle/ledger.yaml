@@ -590,3 +590,15 @@ agent: joey-qa
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: performance
+outcome: PASS
+note: Re-flow no-op (acceptance doc-only fix; žádná změna kódu). Perf verdikt beze
+  změny, všechny cesty pod cíli.
+outputs:
+- type: gate-output
+agent: optimus-perf
+phase: T3
+time:
+  seconds: 0
