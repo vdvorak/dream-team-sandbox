@@ -104,3 +104,12 @@ nový dep (stack-impact: NONE).
 
 `NONE` — vše v rámci `python-fastapi` scaffold deps. Nový target: žádný (jen server).
 Cross-target: žádný (no UI/mobile/desktop/web).
+
+## Extraction Candidates
+
+Živý registr patternů viděných napříč vlnami, ještě nezesdílených (constitution §Reuse policy).
+Architekt ČTE před každou feature, AKTUALIZUJE po ní. `pattern · výskyty · soubory`.
+
+| pattern | výskyty | soubory | poznámka |
+|---|---|---|---|
+| `EnforcementProvider` abstrakce (dvouhodnotový fail-closed výsledek + opaque handle) | 1 | `src/runtime/enforcement/provider.py` (slice 1) | **feature-local** teď. 2. spotřebitel (budoucí MOTOR/workspace provider, reálná cage integrace jako 2. konkrétní impl vedle dev) → povýšit na `extract-shared` se zápisem do `rules/`. Sledovat. |

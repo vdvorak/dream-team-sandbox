@@ -252,3 +252,35 @@ agent: tony-cto
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: architecture
+outcome: PASS
+changed:
+- reuse-decision
+flags:
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+note: 'Kontrakt v1.0.0 NEZMĚNĚN (ověřeno konzistentní, app-facing registr 10 kódů
+  = §8 1:1). Zapsáno rules/runtime-control-plane.md (RCP-A1..A8) + stack Extraction
+  Candidates.
+
+  Klíčová rozhodnutí: EnforcementProvider Protocol s uzavřeným součtovým typem EnforcementActive|EnforcementFailed
+  (fail-closed v typu); jediný fail-closed bod v service (ready jen po EnforcementActive);
+  error nepropustnost překládá service dle kind nikoli internal_code; vrstvy Router->Service->Repository,
+  in-memory repo (destroyed se nemaže), asyncio.Lock per project_id; DevEnforcementProvider
+  (default) + CageEnforcementProvider (stub, napojení na server/cage OUT).
+
+  Reuse: scaffold-only vrstvení + reuse cage errors read-only; feature-local error
+  envelope + provider. A-E vyřešeno (tool allowlist v service->400; envelope {code,message,detail};
+  anyOf~oneOf tolerováno; extra=forbid i na repo; dev URL bez substrát-nounu/808x).
+
+  '
+outputs:
+- type: reuse-decision
+  path: rules/runtime-control-plane.md
+agent: ted-architect
+phase: T2
+time:
+  seconds: 0
