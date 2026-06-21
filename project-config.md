@@ -26,7 +26,7 @@ active_targets:
 flags:
   has_ui: false
   has_db: false
-  has_server: false      # žádný vlastní aplikační server; jde o deploy-obálku + applier
+  has_server: true       # cage = server/deploy kód (applier, de-root entrypoint, cage-deploy skript) → musí být implementován a proauditován před deploy
   has_deploy: true       # cage-deploy applier (Network Policy, Smokescreen ACL, overlay)
   design_source: derive  # žádné UI
 ```
@@ -45,8 +45,8 @@ agents:
   optimus-perf: active
   vitek-quality: active
   watson-interviewer: done
+  bob-backend: active        # producent server/deploy kódu klece (applier, entrypoint, cage-deploy) — node `backend`
   # inactive — projekt nemá UI/DB/mobile/desktop/web target:
-  bob-backend: inactive
   peter-web: inactive
   chandler-db: inactive
   leonard-ui: inactive

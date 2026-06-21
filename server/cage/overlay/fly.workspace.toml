@@ -1,0 +1,49 @@
+# =============================================================================
+# fly.workspace.toml — HARDENED overlay deploy config (NAHRAZUJE appkový).
+#
+# Reuse decision: feature-local (nahradit overlayem) — kopíruje osvědčený vzor
+# appkového fly.toml (6PN-only, BEZ [http_service]).
+#
+# KRITICKÁ ZMĚNA vs. appkový fly.workspace.toml (contracts §2 overlay mapping):
+#   - appkový MÁ [http_service] (internal_port 8081, veřejný přes fly-proxy)  ← DÍRA I7
+#   - tento overlay NEMÁ [http_service] → workspace je 6PN-only, bez public IP.
+#
+# WHY (CE-8/FP-1/I7): [http_service] = fly-proxy ingress, který OBCHÁZÍ host-enforced
+# Network Policy (vrstva 2). Bez něj je veškerý egress podřízen vrstvě 2 (vynutitelnost
+# H1–H6). Pre-deploy lint (server/cage/deploy/lint.py) FAILuje, pokud se [http_service]
+# znovu objeví (ERR_INGRESS_LEAK) — re-test po každém deploy (konfig se může obnovit).
+#
+# Komunikace app→workspace: http://dream-team-workspace.internal:8081 (6PN, WireGuard).
+# =============================================================================
+
+app = 'dream-team-workspace'
+primary_region = 'fra'
+
+[build]
+  # cage-deploy buildí přes overlay Dockerfile (kombinovaný context, contracts §2).
+  dockerfile = 'server/cage/overlay/Dockerfile.workspace'
+
+# Jeden volume (Claude login persistence + workspace). Entrypoint krok 0 pre-chown
+# /data/claude-config na non-root agent uid (regrese-guard, contracts §1).
+[[mounts]]
+  source = 'dt_data'
+  destination = '/data'
+  initial_size = '6gb'
+
+# ZÁMĚRNĚ ŽÁDNÝ [http_service] — 6PN-only, žádný veřejný ingress (I7/CE-8).
+# Workspace dosažitelný jen přes Fly private network (*.internal:8081) z app machine.
+
+# Fly machine health check přes privátní síť (interní IP, :8081) — nepotřebuje public ingress.
+[[vm.checks]]
+  grace_period = '90s'
+  interval = '30s'
+  method = 'GET'
+  timeout = '10s'
+  path = '/health'
+  port = 8081
+  type = 'http'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1

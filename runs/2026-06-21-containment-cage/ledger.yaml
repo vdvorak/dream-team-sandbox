@@ -217,3 +217,33 @@ outputs:
 - type: error-codes
 - type: reuse-decision
 agent: ted-architect
+---
+run: 2026-06-21-containment-cage
+node: backend
+outcome: PASS
+phase: T2
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: true
+changed:
+- server-code
+- unit-tests
+tier: L
+cost:
+  model: opus
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 746
+note: cage implementace v server/cage/ (Python logika + overlay artefakty) + 58/58
+  unit testů; 11 error kódů; 5 dokumentovaných mezer pro heimdall spike/alfred.
+outputs:
+- type: server-code
+- type: unit-tests
+agent: bob-backend

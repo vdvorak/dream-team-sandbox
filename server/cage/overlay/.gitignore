@@ -1,0 +1,5 @@
+# Render-time build artefakt (rozhodnutí (d)): vyrenderovaný Smokescreen ACL existuje
+# jen po dobu cage-deploy buildu. NEcommituje se (CE-4/I5: CF doména je render-time z env;
+# commitnutý rendered ACL by byl čitelná konkrétní konfigurace mimo deploy kontext).
+# Cage-deploy krok 3 ho vygeneruje PŘED krokem 4 (build). Viz server/cage/deploy/cage_deploy.py.
+smokescreen-acl.rendered.yaml

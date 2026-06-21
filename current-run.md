@@ -21,7 +21,7 @@ run: 2026-06-21-containment-cage
 wave_base: d15032c244be306133f70d7bbd9d271a2b976e6f
 graph: delivery
 status: in_progress
-active_node: architecture
+active_node: backend
 frontier: []
 completed:
 - intake
@@ -29,12 +29,14 @@ completed:
 - spec-gate
 - feasibility
 - architecture
+- backend
 outcomes:
   intake: PASS
   product: PASS
   spec-gate: PASS
   feasibility: PASS
   architecture: PASS
+  backend: PASS
 skipped: []
 counters:
   spec-gate->product: 2
@@ -74,7 +76,7 @@ findings:
     OK (neměnit), stack/ + contracts/ OK.'
 return_payload: {}
 model_overrides: {}
-epoch: 9
+epoch: 10
 type_versions:
   spec: 6
   acceptance: 5
@@ -83,12 +85,15 @@ type_versions:
   contract: 9
   error-codes: 9
   rules: 9
+  server-code: 10
+  unit-tests: 10
 node_versions:
   intake: 1
   product: 6
   spec-gate: 7
   feasibility: 8
   architecture: 9
+  backend: 10
 ```
 
 ## Lidský přehled

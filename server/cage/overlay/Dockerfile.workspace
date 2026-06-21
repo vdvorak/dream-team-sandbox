@@ -1,0 +1,103 @@
+# =============================================================================
+# Dockerfile.workspace — HARDENED overlay (NAHRAZUJE naivní appkový Dockerfile).
+#
+# Reuse decision: feature-local (nahradit overlayem). Naivní appkový Dockerfile běží
+# jako root, EXPOSE 8081, bez proxy. Tento overlay přidává:
+#   - Smokescreen egress proxy binár (vrstva 1) + dedikovaný non-root uid
+#   - nftables + libcap2-bin (capsh) pro vrstvu 3 + de-root sekvenci
+#   - non-root agent user `claude` (uid 10001) — agent NIKDY neběží jako root (I6)
+#   - hardened entrypoint (de-root sekvence §1)
+#
+# BUILD CONTEXT (contracts §2): kombinovaný — appka (read-only zdroj agent.py /
+# managed-settings.json / deny-secrets.sh) + overlay (tento Dockerfile / entrypoint /
+# ACL / nftables). Cage-deploy buildí z root contextu appky a COPY overlay přes
+# build-context arg. Repo appky se NEMODIFIKUJE (overlay je read-only čtený, výstup = image).
+#
+# Opacita (CE-4/I11): ŽÁDNÝ čitelný cage artefakt v agent-dosažitelném FS. ACL je
+# 0400 root:root mimo $HOME; entrypoint je v /opt (root-owned); managed-settings v /etc.
+# Žádná "cage"/repo reference v env ani v komentářích image runtime.
+# =============================================================================
+
+# --- build stage: stáhni Smokescreen binár (build-time host; v runtime nedosažitelný, I3) ---
+FROM golang:1.22-bookworm AS proxy-build
+ARG SMOKESCREEN_VERSION=v0.0.4
+# WHY (I3): build-time-only — Smokescreen se kompiluje teď, runtime image už nemá go/network
+# k build hostům (PyPI/npmjs/releases jsou v runtime nedosažitelné).
+RUN go install github.com/stripe/smokescreen@${SMOKESCREEN_VERSION} \
+    && cp "$(go env GOPATH)/bin/smokescreen" /usr/local/bin/smokescreen
+
+# --- runtime stage: base = stejný jako appka (node:20-bookworm-slim), + hardening ---
+FROM node:20-bookworm-slim
+
+# nftables (vrstva 3), libcap2-bin (capsh — de-root), util-linux (setpriv — proxy uid).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        python3 \
+        python3-pip \
+        ca-certificates \
+        curl \
+        bash \
+        procps \
+        tmux \
+        nftables \
+        libcap2-bin \
+        util-linux \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g @anthropic-ai/claude-code
+RUN pip3 install --no-cache-dir --break-system-packages aiohttp
+
+# Smokescreen binár z build stage (vrstva 1).
+COPY --from=proxy-build /usr/local/bin/smokescreen /usr/local/bin/smokescreen
+
+# --- non-root agent user + proxy user (de-root cíl, I6) ---
+# WHY: agent uid 10001 (>1024, bind :8081 OK bez CAP_NET_BIND_SERVICE). Proxy vlastní uid
+# (contracts §1) — proxy proces je oddělen od agenta, agent nečte jeho ACL.
+RUN groupadd -g 10001 claude && useradd -u 10001 -g 10001 -m -d /home/claude -s /usr/sbin/nologin claude \
+    && useradd -r -M -s /usr/sbin/nologin smokescreen
+
+# --- appkové soubory (reuse-existing, contracts §5): agent.py / managed-settings / deny-secrets ---
+# COPY z kombinovaného build contextu (appka root). agent.py beze změny (běží non-root).
+COPY poc/workspace-container/agent.py poc/workspace-container/test_client.py /opt/agent/
+COPY poc/workspace-container/deny-secrets.sh /opt/agent/deny-secrets.sh
+RUN chmod 0755 /opt/agent/deny-secrets.sh
+
+# managed-settings.json (reuse-existing) — systémová cesta, root-owned, agent nepřebije.
+RUN mkdir -p /etc/claude-code
+COPY poc/workspace-container/managed-settings.json /etc/claude-code/managed-settings.json
+
+# --- overlay artefakty (hardened, jen ze sandboxu) ---
+# entrypoint.sh (de-root sekvence) — root-owned, agent nepíše.
+COPY server/cage/overlay/entrypoint.sh /opt/agent/entrypoint.sh
+RUN chmod 0755 /opt/agent/entrypoint.sh && chown root:root /opt/agent/entrypoint.sh
+
+# nftables vrstva 3 ruleset (default-DROP) — root-owned.
+COPY server/cage/overlay/nftables.cage.conf /etc/nftables.cage.conf
+RUN chmod 0644 /etc/nftables.cage.conf && chown root:root /etc/nftables.cage.conf
+
+# Smokescreen ACL (render-time z env, rozhodnutí (d)). cage-deploy vyrenderuje
+# smokescreen-acl.rendered.yaml; tady ji ukládáme jako 0400 root:root MIMO agent $HOME (I5).
+# WHY (I5/I11): mode 0400 root:root → agent (non-root) ji NEPŘEČTE; není v $HOME ani /workspace.
+RUN mkdir -p /etc/smokescreen
+COPY server/cage/overlay/smokescreen-acl.rendered.yaml /etc/smokescreen/acl.yaml
+RUN chmod 0400 /etc/smokescreen/acl.yaml && chown root:root /etc/smokescreen/acl.yaml
+
+ENV WORKSPACE_DIR=/workspace \
+    AGENT_PORT=8081 \
+    GIT_PAGER=cat \
+    PAGER=cat \
+    CAGE_AGENT_USER=claude \
+    CAGE_AGENT_UID=10001 \
+    CAGE_AGENT_GID=10001 \
+    CAGE_AGENT_HOME=/home/claude \
+    CAGE_PROXY_ADDR=127.0.0.1:4750 \
+    CAGE_PROXY_USER=smokescreen \
+    CAGE_ACL_PATH=/etc/smokescreen/acl.yaml
+
+# WHY (I7): ŽÁDNÝ EXPOSE veřejně — workspace je 6PN-only. Naivní appka měla EXPOSE 8081
+# (veřejný náznak). Interní :8081 je dosažitelný jen přes privátní síť (fly.workspace.toml).
+WORKDIR /workspace
+
+# Entrypoint běží jako root (de-root sekvence si sama setuidne na claude v kroku 4).
+# NEpoužíváme `USER claude` zde — root MUSÍ proběhnout kroky 1–3 (nftables/cap drop/nnp).
+ENTRYPOINT ["/opt/agent/entrypoint.sh"]
