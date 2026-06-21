@@ -21,28 +21,38 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: intake
+active_node: product
 frontier: []
 completed:
 - intake
+- product
 outcomes:
   intake: PASS
+  product: PASS
 skipped: []
 counters: {}
 awaiting_human: []
 halt_gate: null
 last_outcome: PASS
 class: feature
-flags: {}
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: false
 note: null
 pending_delegations: []
 findings: []
 return_payload: {}
 model_overrides: {}
-epoch: 1
-type_versions: {}
+epoch: 2
+type_versions:
+  spec: 2
+  acceptance: 2
 node_versions:
   intake: 1
+  product: 2
 ```
 
 ## Lidský přehled

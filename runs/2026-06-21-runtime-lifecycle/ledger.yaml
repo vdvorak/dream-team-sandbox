@@ -10,3 +10,30 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: product
+outcome: PASS
+changed:
+- spec
+- acceptance
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: false
+tier: M
+note: Slice 1 control-plane spec + acceptance (specs/runtime-control-plane.md, acceptance/runtime-control-plane.md).
+  In-scope AC-1,2,3,4,5,9,10,11,12,13,14; deferred AC-6/7/8 (git/files/terminal).
+  4 edge-case otázky vyřešeny orchestrátorem (ensure-on-destroyed=fresh per kontrakt
+  §2).
+outputs:
+- type: spec
+  path: specs/runtime-control-plane.md
+- type: acceptance
+  path: acceptance/runtime-control-plane.md
+agent: vision-po
+phase: T1
+time:
+  seconds: 0
