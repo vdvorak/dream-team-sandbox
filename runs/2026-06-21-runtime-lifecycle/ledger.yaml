@@ -602,3 +602,21 @@ agent: optimus-perf
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: spec-audit
+outcome: PASS
+note: 'Re-flow PASS - acceptance sesynchronizován s kontraktem v1.1.0. Ověřeno orchestrátorem
+  (grep): AC-1g nyní 400 ERR_INVALID_REQUEST (žádný 422 ERR_CLONE_FAILED pro schema
+  chyby), AC-1b/9a verze 1.1.0 (žádný zbylý 1.0.0), AC-1h/12b/13b doplněn ERR_INVALID_REQUEST.
+  Mapping §8 <-> OpenAPI enum <-> APP_FACING_CODES 1:1 (11 kódů), registr-disjunktnost
+  OK. F1 + W1 + W2 vyřešeno. W3 (healthz 503 v OpenAPI) = advisory pre-existing, odloženo
+  na slice 2.
+
+  '
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T3
+time:
+  seconds: 0

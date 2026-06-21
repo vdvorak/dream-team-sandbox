@@ -21,7 +21,7 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: performance
+active_node: spec-audit
 frontier: []
 completed:
 - intake
@@ -35,6 +35,7 @@ completed:
 - security
 - code-quality
 - product
+- spec-audit
 outcomes:
   intake: PASS
   spec-gate: PASS
@@ -46,7 +47,7 @@ outcomes:
   performance: PASS
   security: PASS
   code-quality: PASS
-  spec-audit: FAIL
+  spec-audit: PASS
   product: PASS
 skipped: []
 counters:
@@ -165,12 +166,12 @@ findings:
     (W3 healthz 503 v OpenAPI = advisory pre-existing, odloženo slice 2.)'
 return_payload: {}
 model_overrides: {}
-epoch: 25
+epoch: 26
 type_versions:
   spec: 19
   acceptance: 20
   has_ui: 19
-  gate-output: 25
+  gate-output: 26
   reuse-decision: 11
   server-code: 13
   unit-tests: 13
@@ -186,6 +187,7 @@ node_versions:
   security: 17
   code-quality: 18
   product: 20
+  spec-audit: 26
 ```
 
 ## Lidský přehled
