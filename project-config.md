@@ -13,8 +13,11 @@ status: READY_FOR_SPEC
 ```yaml
 project_name: dream-team-sandbox
 project_type: greenfield
-vision: "Out-of-band bezpečnostní klec (containment cage) pro dream-team-app — default-deny egress, Smokescreen doménový allowlist, host-enforced Fly Network Policy, overlay-at-deploy model."
+vision: "Runtime/sandbox vrstva pro bezpečný běh AI — MOTOR (container image, agent, lifecycle, clone, PTY, file-read) + ZEĎ (default-deny egress, Smokescreen allowlist, host-enforced policy, overlay-at-deploy). Vystavuje kontrakt konzumovaný dream-team-app; použitelný standalone."
 stage: setup/design
+# Pozn.: cage framing (klec obalující appku) je supersedován re-charterem 2026-06-21.
+# ZEĎ (invarianty I1–I11, server/cage/**, contracts/containment-cage.md, rules/cage-enforcement.md)
+# je platná enforcement vrstva runtime — zachována beze změny.
 ```
 
 ## Targets
