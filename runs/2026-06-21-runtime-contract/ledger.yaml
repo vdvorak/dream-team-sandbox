@@ -130,3 +130,35 @@ outputs:
 agent: tony-cto
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-contract
+node: architecture
+outcome: PASS
+phase: T2
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: false
+  touches_shared_ui: false
+  has_deploy: false
+changed:
+- contract
+- error-codes
+tier: L
+cost:
+  model: opus
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 270
+note: kontrakt hotový — runtime-contract.md (188ř) + runtime.openapi.yaml (8 ops,
+  Environment schema, x-websocket); app-facing error registr (10 kódů) oddělen od
+  cage; ZEĎ-disjunktnost strukturálně (additionalProperties:false) + fail-closed garance.
+outputs:
+- type: contract
+- type: error-codes
+- type: reuse-decision
+agent: ted-architect

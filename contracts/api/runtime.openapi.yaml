@@ -1,0 +1,451 @@
+openapi: 3.1.0
+info:
+  title: dream-team-sandbox Runtime Contract
+  description: >
+    Stabilní, substrátem-agnostický kontrakt app↔runtime. Odběratel řídí stavový automat
+    nad nounem `Environment` a dostane opaque connection handle. NIKDY neodhaluje substrát
+    ani ZEĎ internals; `ready` se neobjeví bez aktivní ZDI (fail-closed). Próza, trust model,
+    versioning a app-facing error registr: contracts/runtime-contract.md.
+  version: 1.0.0
+  x-contract-version: "1.0.0"
+servers:
+  - url: /v1
+    description: Control plane (HTTP+JSON). Data plane (terminál) = WebSocket, viz x-websocket.
+security:
+  - mtls: []
+  - serviceToken: []
+tags:
+  - name: lifecycle
+  - name: workspace
+  - name: meta
+
+paths:
+  /environments/{project_id}/ensure:
+    post:
+      tags: [lifecycle]
+      operationId: ensureEnvironment
+      summary: Idempotentně vytvoří/obnoví prostředí; naklonuje repo. ready jen s aktivní ZDÍ.
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EnsureRequest' }
+      responses:
+        '200':
+          description: Prostředí je ready (ZEĎ aktivní). Idempotentní; serializované per project_id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Environment' }
+        '202':
+          description: Provisioning probíhá; klient opakuje po retry_after.
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Sekundy do dalšího pokusu.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Environment' }
+        '400': { $ref: '#/components/responses/ToolNotAllowed' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/RepoMismatch' }
+        '422': { $ref: '#/components/responses/CloneFailed' }
+        '502': { $ref: '#/components/responses/ProvisionFailed' }
+        '503': { $ref: '#/components/responses/RuntimeUnavailable' }
+
+  /environments/{project_id}:
+    get:
+      tags: [lifecycle]
+      operationId: getEnvironment
+      summary: Vrátí stav a opaque connection (null pokud není ready).
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Aktuální stav prostředí.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Environment' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/RuntimeUnavailable' }
+    delete:
+      tags: [lifecycle]
+      operationId: destroyEnvironment
+      summary: Nevratné odstranění prostředí; idempotentní.
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Zrušeno (nebo už neexistovalo). Následný getEnvironment → 404 / destroyed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Environment' }
+        '202':
+          description: Rušení probíhá (destroyed bude potvrzeno asynchronně).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Environment' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /environments/{project_id}/sleep:
+    post:
+      tags: [lifecycle]
+      operationId: sleepEnvironment
+      summary: Advisory uvolnění zdrojů; idempotentní. Runtime smí ignorovat (aktivní PTY).
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Přijato. Stav přejde na asleep nebo zůstane ready (advisory — obojí OK).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Environment' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /environments/{project_id}/git:
+    get:
+      tags: [workspace]
+      operationId: getGitStatus
+      summary: Branch, stav stromu a poslední commit workspace.
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Git metadata workspace.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GitStatus' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/NotReady' }
+
+  /environments/{project_id}/files:
+    get:
+      tags: [workspace]
+      operationId: listFiles
+      summary: Výpis souborů workspace s volitelným filtrem. Cesta mimo sandbox → 403 path-escape.
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - name: prefix
+          in: query
+          required: false
+          schema: { type: string }
+          description: Filtr na prefix relativní cesty ve workspace.
+        - name: suffix
+          in: query
+          required: false
+          schema: { type: string }
+          description: Filtr na suffix (např. přípona).
+      responses:
+        '200':
+          description: Seznam souborů ve workspace.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/PathEscape' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/NotReady' }
+
+  /environments/{project_id}/terminal:
+    get:
+      tags: [workspace]
+      operationId: attachTerminal
+      summary: >
+        WebSocket upgrade — obousměrný PTY stream. OpenAPI 3.1 WS nemodeluje; viz x-websocket.
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - name: tool
+          in: query
+          required: true
+          schema: { type: string }
+          description: AI nástroj k připojení (např. "claude"). Nevalidní → close 4400.
+      responses:
+        '101':
+          description: Switching Protocols — WebSocket etablován. Detaily v x-websocket.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/NotReady' }
+      x-websocket:
+        description: >
+          Obousměrný PTY stream. Binární frames = raw PTY I/O (oba směry). Text frame =
+          control JSON. Uzavření WS NERUŠÍ prostředí; klient se re-attachne ke stávající session.
+          BYOK token AI nástroje vstupuje VÝHRADNĚ interaktivně uvnitř tohoto streamu (login),
+          NIKDY přes control API ani query param.
+        clientToServer:
+          - binary: raw PTY input bytes (stdin)
+          - text:
+              schema: { $ref: '#/components/schemas/TerminalControl' }
+        serverToClient:
+          - binary: raw PTY output bytes (stdout/stderr)
+        closeCodes:
+          4401: neautentizováno (App→Runtime mTLS/token selhal); viz ERR_UNAUTHORIZED
+          4404: prostředí neexistuje; viz ERR_ENVIRONMENT_NOT_FOUND
+          4400: prostředí není ready / nevalidní tool; viz ERR_ENVIRONMENT_NOT_READY / ERR_TOOL_NOT_ALLOWED
+          1011: interní chyba runtimu (standardní WS)
+
+  /healthz:
+    get:
+      tags: [meta]
+      operationId: healthz
+      summary: Stav služby + verze kontraktu (drift-check fixture).
+      security: []
+      responses:
+        '200':
+          description: Služba je živá.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+
+components:
+  securitySchemes:
+    mtls:
+      type: mutualTLS
+      description: App→Runtime primární. Selhání → 401 ERR_UNAUTHORIZED.
+    serviceToken:
+      type: http
+      scheme: bearer
+      description: App→Runtime fallback service token (app-side). User→App CF-Access runtime nevidí.
+
+  parameters:
+    ProjectId:
+      name: project_id
+      in: path
+      required: true
+      description: Opaque klíč prostředí. Runtime neinterpretuje.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9_-]+$'
+        minLength: 1
+        maxLength: 128
+
+  schemas:
+    Environment:
+      type: object
+      description: Kanonický shape prostředí. connection = opaque URL stringy (žádný substrát-noun).
+      required: [project_id, status, repo, tool, connection, contract_version]
+      properties:
+        project_id:
+          type: string
+          pattern: '^[A-Za-z0-9_-]+$'
+        status:
+          type: string
+          enum: [provisioning, ready, asleep, destroyed]
+          description: Stavový automat. ready ⟹ ZEĎ aktivní (fail-closed garance).
+        phase:
+          type: string
+          description: >
+            Informativní podstav uvnitř provisioning (např. cloning/enforcing/booting).
+            Volný string, NE enum (tolerant reader). Přítomen typicky jen při provisioning.
+        repo:
+          $ref: '#/components/schemas/RepoState'
+        tool:
+          type: string
+          description: AI nástroj zvolený při ensure (např. "claude").
+        connection:
+          oneOf:
+            - $ref: '#/components/schemas/Connection'
+            - type: 'null'
+          description: Opaque připojovací adresy; null mimo stav ready.
+        contract_version:
+          type: string
+          description: SemVer verze kontraktu (shoduje se s healthz; drift-check).
+          examples: ["1.0.0"]
+
+    Connection:
+      type: object
+      description: >
+        OPAQUE URL handle. Klient použije URL beze změny; z ní NEZJISTÍ substrát.
+        Žádný Fly/Docker/6PN/.internal/IP/:808x identifikátor (AC-3b, AC-11c).
+      required: [control_url, terminal_url]
+      properties:
+        control_url:
+          type: string
+          format: uri
+          description: Opaque URL pro workspace control rovinu.
+        terminal_url:
+          type: string
+          format: uri
+          description: Opaque WS URL pro attachTerminal.
+
+    RepoState:
+      type: object
+      required: [url, cloned]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Odkaz na repozitář projektu (zadán v ensure).
+        ref:
+          type: string
+          description: Volitelný branch/tag/commit; default = výchozí branch repa.
+        cloned:
+          type: boolean
+          description: Zda je repo naklonováno do workspace.
+
+    EnsureRequest:
+      type: object
+      required: [repo, tool]
+      properties:
+        repo:
+          type: object
+          required: [url]
+          properties:
+            url:
+              type: string
+              format: uri
+            ref:
+              type: string
+              description: Volitelný branch/tag/commit.
+          additionalProperties: false
+        tool:
+          type: string
+          description: AI nástroj k provisionu (např. "claude"). Nepodporovaný → 400 ERR_TOOL_NOT_ALLOWED.
+      additionalProperties: false
+      description: >
+        Žádné pole nezmírňuje ani nenastavuje ZEĎ (egress/ingress/shell) a žádné nepřijímá
+        BYOK token. Neznámá pole jsou odmítnuta (additionalProperties:false) — AC-12c, AC-13a.
+
+    GitStatus:
+      type: object
+      required: [branch, dirty, changed_files, last_commit]
+      properties:
+        branch: { type: string }
+        dirty:
+          type: boolean
+          description: True pokud má pracovní strom necommitnuté změny.
+        changed_files:
+          type: array
+          items: { type: string }
+        last_commit:
+          type: object
+          properties:
+            sha: { type: string }
+            message: { type: string }
+            author: { type: string }
+            date: { type: string, format: date-time }
+
+    FileList:
+      type: object
+      required: [files]
+      properties:
+        files:
+          type: array
+          items:
+            type: object
+            required: [path]
+            properties:
+              path:
+                type: string
+                description: Relativní cesta ve workspace (nikdy mimo sandbox).
+              size: { type: integer }
+              is_dir: { type: boolean }
+
+    TerminalControl:
+      type: object
+      description: Jediná podporovaná WS text control zpráva; neznámý type se ignoruje.
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [resize]
+        rows: { type: integer, minimum: 1 }
+        cols: { type: integer, minimum: 1 }
+
+    Health:
+      type: object
+      required: [status, contract_version]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        contract_version:
+          type: string
+          examples: ["1.0.0"]
+
+    Error:
+      type: object
+      description: >
+        Sdílený error envelope (identický s app error modelem). code z app-facing registru
+        (runtime-contract.md §8). Interní cage kódy se sem NIKDY nepromítnou; žádné pole
+        nepřijímá ani nevrací BYOK token.
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - ERR_ENVIRONMENT_NOT_FOUND
+            - ERR_ENVIRONMENT_NOT_READY
+            - ERR_ENVIRONMENT_DESTROYING
+            - ERR_REPO_MISMATCH
+            - ERR_CLONE_FAILED
+            - ERR_PROVISION_FAILED
+            - ERR_PATH_ESCAPE
+            - ERR_TOOL_NOT_ALLOWED
+            - ERR_UNAUTHORIZED
+            - ERR_RUNTIME_UNAVAILABLE
+        message:
+          type: string
+        detail:
+          type: object
+          additionalProperties: true
+
+  responses:
+    Unauthorized:
+      description: Chybí/neplatná App→Runtime identita.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_UNAUTHORIZED, message: "Missing or invalid service identity" }
+    NotFound:
+      description: Prostředí pro project_id neexistuje.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_ENVIRONMENT_NOT_FOUND, message: "Environment not found" }
+    NotReady:
+      description: Operace vyžaduje ready, prostředí je v jiném stavu.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_ENVIRONMENT_NOT_READY, message: "Environment is not ready" }
+    RepoMismatch:
+      description: ensure s jiným repo.url na živém prostředí (1 prostředí = 1 repo).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_REPO_MISMATCH, message: "Environment is bound to a different repository" }
+    CloneFailed:
+      description: Klonování repa selhalo (neplatný/nedostupný url/ref).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_CLONE_FAILED, message: "Repository clone failed" }
+    ProvisionFailed:
+      description: Provisioning selhal (vč. neaplikovatelné ZDI — bez interního detailu).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_PROVISION_FAILED, message: "Provisioning failed" }
+    ToolNotAllowed:
+      description: Nepodporovaný tool.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_TOOL_NOT_ALLOWED, message: "Tool not allowed" }
+    PathEscape:
+      description: Cesta mimo workspace sandbox (path traversal).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_PATH_ESCAPE, message: "Path escapes workspace sandbox" }
+    RuntimeUnavailable:
+      description: Runtime nemůže obsloužit / enforcement nelze ověřit (fail-closed default).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ERR_RUNTIME_UNAVAILABLE, message: "Runtime unavailable" }

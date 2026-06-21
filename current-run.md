@@ -18,23 +18,24 @@ archivuje do handoffu a soubor se resetuje (`status: idle`, `run: null`). Tohle 
 
 ```yaml
 run: 2026-06-21-runtime-contract
-wave_base: bae4948c571abc581856361d8da5cffee372ed02
+wave_base: null
 graph: delivery
 status: in_progress
-active_node: feasibility
+active_node: architecture
 frontier: []
 completed:
 - intake
 - product
 - spec-gate
 - feasibility
+- architecture
 outcomes:
   intake: PASS
   product: PASS
   spec-gate: PASS
   feasibility: PASS
-skipped:
-- feasibility
+  architecture: PASS
+skipped: []
 counters:
   spec-gate->product: 1
 awaiting_human: []
@@ -61,17 +62,20 @@ findings:
     mimo sandbox". Acceptance je OK (neměnit).'
 return_payload: {}
 model_overrides: {}
-epoch: 6
+epoch: 7
 type_versions:
   spec: 4
   acceptance: 3
   has_ui: 3
   gate-output: 6
+  contract: 7
+  error-codes: 7
 node_versions:
   intake: 1
   product: 4
   spec-gate: 5
   feasibility: 6
+  architecture: 7
 ```
 
 ## Lidský přehled
