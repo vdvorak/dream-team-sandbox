@@ -68,3 +68,27 @@ agent: sheldon-spec
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: product
+outcome: PASS
+changed:
+- spec
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+  has_deploy: false
+tier: S
+note: Re-flow po spec-gate FAIL — spec přepsán do doménového jazyka (odstraněny HTTP
+  metody/cesty, status/error kódy, operationId, file-path). Acceptance nedotčen.
+outputs:
+- type: spec
+  path: specs/runtime-control-plane.md
+- type: acceptance
+  path: acceptance/runtime-control-plane.md
+agent: vision-po
+phase: T1
+time:
+  seconds: 0

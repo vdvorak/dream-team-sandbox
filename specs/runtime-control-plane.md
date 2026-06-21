@@ -8,10 +8,10 @@ note: slice 1 — lifecycle core; git/files/terminal deferred na navazující wa
 
 ## Cíl
 
-Postavit reálný HTTP control-plane server, který implementuje slice 1 kontraktu
-(`contracts/runtime-contract.md` v1.0.0): životní cyklus prostředí (`ensure` / `get` /
-`sleep` / `destroy`) + `healthz`. Server musí být spustitelný standalone na Linuxu
-(dev provider) a zároveň garantovat fail-closed při napojení na reálný enforcement provider.
+Postavit reálný control-plane server, který implementuje slice 1 runtime kontraktu
+(v1.0.0): životní cyklus prostředí (zajisti / stav / uspi / zruš) + zdravotní kontrola.
+Server musí být spustitelný standalone na Linuxu (dev provider) a zároveň garantovat
+fail-closed při napojení na reálný enforcement provider.
 
 ## Aktér a cíl
 
@@ -24,21 +24,20 @@ lifecycle + fail-closed chování bez živého enforcement backendu.
 
 ## Hlavní scénář
 
-Klient se autentizuje (mTLS nebo service token) → volá `POST ensure` s `project_id` +
-`repo.url` + `tool` → server zkontroluje, zda prostředí existuje; pokud ne, spustí
+Klient se autentizuje (mTLS nebo service token) → klient zajistí prostředí (s `project_id` +
+`repo.url` + `tool`) → server zkontroluje, zda prostředí existuje; pokud ne, spustí
 provisioning přes enforcement provider → provider garantuje, že enforcement je aktivní;
-teprve pak server přepne stav na `ready` → klient opakovaně volá `GET {project_id}` a
-dostane stav (s `connection` handle pokud `ready`) → klient volá `POST sleep` (advisory)
-nebo `DELETE {project_id}` → `GET /v1/healthz` vrátí verzi kontraktu a stav služby.
+teprve pak server přepne stav na `ready` → klient čte stav prostředí a dostane aktuální
+stav (s `connection` handle pokud `ready`) → klient uspí prostředí (advisory) nebo klient
+zruší prostředí → zdravotní kontrola služby vrátí verzi kontraktu a stav služby.
 
 Pokud enforcement provider nemůže garantovat aktivní ZEĎ → server NESMÍ přepnout na `ready`;
-vrátí `502 ERR_PROVISION_FAILED` nebo zůstane v `provisioning` (fail-closed).
+selže fail-closed (prostředí nezůstane `ready`, zůstane v `provisioning`).
 
 ## Scope
 
 **In:**
-- HTTP server na `GET /v1/healthz` + 4 lifecycle operace dle OpenAPI (`ensureEnvironment`,
-  `getEnvironment`, `sleepEnvironment`, `destroyEnvironment`).
+- Zdravotní kontrola služby + čtyři lifecycle operace: zajisti / stav / uspi / zruš prostředí.
 - Stavový automat `Environment`: `none → provisioning → ready → asleep`; `destroyed`
   z kteréhokoli stavu (viz kontrakt §2).
 - In-memory state store per `project_id` (slice 1 — trvanlivost persistence deferred).
@@ -51,17 +50,17 @@ vrátí `502 ERR_PROVISION_FAILED` nebo zůstane v `provisioning` (fail-closed).
 - **Dev/local provider**: nevynucuje žádný skutečný enforcement, ale explicitně reportuje
   „enforcement active = true" — umožňuje standalone spuštění a testování lifecycle na Linuxu
   bez cloudu.
-- Auth middleware: ověření mTLS klientského certifikátu nebo `Authorization: Bearer` tokenu;
-  selhání → `401 ERR_UNAUTHORIZED`.
+- Auth middleware: ověření mTLS klientského certifikátu nebo service tokenu; selhání
+  ověření identity → požadavek odmítnut.
 - App-facing error registr (reuse z kontraktu §8): server vrací pouze kódy z tohoto registru;
   interní provider chyby se nikdy neprůmítnou navenek.
 - `phase` informativní string v `provisioning` stavu (tolerant reader — volný string, ne enum).
 - `contract_version: "1.0.0"` ve všech `Environment` response i v `healthz`.
 
 **Out (deferred na navazující wave):**
-- `getGitStatus` (`GET …/git`) — AC-6.
-- `listFiles` (`GET …/files`) — AC-7.
-- `attachTerminal` (`GET …/terminal` WS) — AC-8.
+- Čtení stavu repozitáře — AC-6.
+- Čtení souborů — AC-7.
+- Připojení terminálu — AC-8.
 - Reálné klonování repozitáře (git clone uvnitř kontejneru/workspace).
 - Reálné spuštění AI agenta v kontejneru (MOTOR těžká část).
 - Trvanlivá persistence stavu (DB / soubor).
@@ -90,8 +89,8 @@ dle kontraktu §7 (AC-11).
   přepíná stav; `ensure` na `destroyed` = nový provisioning run).
 - **Sleep semantika při probíhajícím ensure:** co se stane, pokud klient volá `sleep` zatímco
   prostředí je v `provisioning`? Pravděpodobně no-op nebo `2xx` s aktuálním stavem — definovat.
-- **Provider health vs server health:** `healthz` vrací `status: ok | degraded`; kdy je
-  `degraded` vs `503`? Navrhuju: provider odpovídá → `degraded`; provider nedosažitelný →
-  `503 ERR_RUNTIME_UNAVAILABLE`.
+- **Provider health vs server health:** zdravotní kontrola vrací stav `ok | degraded`; kdy
+  je `degraded` vs chyba dostupnosti? Navrhuju: provider odpovídá → `degraded`; provider
+  nedosažitelný → chyba dostupnosti služby.
 - **Opaque connection v dev provideru:** dev provider vrátí placeholder URL (např.
   `http://localhost:9999`); toto musí projít AC-11 grep testem (žádný substrát-noun).
