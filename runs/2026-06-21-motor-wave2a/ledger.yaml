@@ -279,3 +279,15 @@ agent: sheldon-spec
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: code-quality
+outcome: PASS
+summary: W7 opraveno — except Exception as exc + logger.debug. Advisory W1-W3, W8,
+  dup FlyProvider uložit do improvements/code-quality.md.
+outputs:
+- type: gate-output
+agent: vitek-quality
+phase: T3
+time:
+  seconds: 0
