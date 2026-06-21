@@ -21,7 +21,7 @@ run: 2026-06-21-motor-wave2a
 wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
 graph: delivery
 status: in_progress
-active_node: code-lint
+active_node: qa
 frontier: []
 completed:
 - intake
@@ -31,6 +31,7 @@ completed:
 - backend
 - code-lint
 - architecture
+- qa
 outcomes:
   intake: PASS
   product: PASS
@@ -39,6 +40,7 @@ outcomes:
   backend: PASS
   code-lint: PASS
   architecture: PASS
+  qa: PASS
 skipped: []
 counters:
   qa->architecture: 1
@@ -61,12 +63,12 @@ findings:
   signature: ''
 return_payload: {}
 model_overrides: {}
-epoch: 11
+epoch: 12
 type_versions:
   spec: 2
   acceptance: 2
   has_ui: 2
-  gate-output: 11
+  gate-output: 12
   contract: 9
   error-codes: 9
   reuse-decision: 9
@@ -80,6 +82,7 @@ node_versions:
   backend: 10
   code-lint: 11
   architecture: 9
+  qa: 12
 ```
 
 ## Lidský přehled

@@ -175,3 +175,14 @@ agent: vitek-quality
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: qa
+outcome: PASS
+summary: 47/47 PASS. RCP-6 6a-6e + RCP-7 7a-7g pokryto 12/12. Regression OK.
+outputs:
+- type: gate-output
+agent: joey-qa
+phase: T3
+time:
+  seconds: 0
