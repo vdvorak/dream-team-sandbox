@@ -49,7 +49,9 @@ def create_runtime_app(
             If None, uses the configured enforcement_provider setting.
     """
     settings = get_runtime_settings()
-    effective_token = service_token if service_token is not None else settings.service_token
+    effective_token = (
+        service_token if service_token is not None else settings.service_token
+    )
 
     if enforcement_provider_override is not None:
         provider = enforcement_provider_override

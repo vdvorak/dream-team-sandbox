@@ -37,19 +37,21 @@ ERR_RUNTIME_UNAVAILABLE = "ERR_RUNTIME_UNAVAILABLE"
 ERR_INVALID_REQUEST = "ERR_INVALID_REQUEST"
 
 # Closed set for quick membership checks (guards against accidental cage code leak).
-APP_FACING_CODES = frozenset({
-    ERR_ENVIRONMENT_NOT_FOUND,
-    ERR_ENVIRONMENT_NOT_READY,
-    ERR_ENVIRONMENT_DESTROYING,
-    ERR_REPO_MISMATCH,
-    ERR_CLONE_FAILED,
-    ERR_PROVISION_FAILED,
-    ERR_PATH_ESCAPE,
-    ERR_TOOL_NOT_ALLOWED,
-    ERR_UNAUTHORIZED,
-    ERR_RUNTIME_UNAVAILABLE,
-    ERR_INVALID_REQUEST,
-})
+APP_FACING_CODES = frozenset(
+    {
+        ERR_ENVIRONMENT_NOT_FOUND,
+        ERR_ENVIRONMENT_NOT_READY,
+        ERR_ENVIRONMENT_DESTROYING,
+        ERR_REPO_MISMATCH,
+        ERR_CLONE_FAILED,
+        ERR_PROVISION_FAILED,
+        ERR_PATH_ESCAPE,
+        ERR_TOOL_NOT_ALLOWED,
+        ERR_UNAUTHORIZED,
+        ERR_RUNTIME_UNAVAILABLE,
+        ERR_INVALID_REQUEST,
+    }
+)
 
 
 class RuntimeApiError(Exception):
@@ -81,7 +83,9 @@ class RuntimeApiError(Exception):
         super().__init__(message)
 
 
-async def runtime_api_error_handler(request: Request, exc: RuntimeApiError) -> JSONResponse:
+async def runtime_api_error_handler(
+    request: Request, exc: RuntimeApiError
+) -> JSONResponse:
     """Serialize RuntimeApiError to contract §8 envelope {code, message, detail?}."""
     body: dict = {"code": exc.code, "message": exc.message}
     if exc.detail is not None:
@@ -89,7 +93,9 @@ async def runtime_api_error_handler(request: Request, exc: RuntimeApiError) -> J
     return JSONResponse(status_code=exc.http_status, content=body)
 
 
-async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+async def validation_error_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
     """Map ALL Pydantic/schema RequestValidationError → 400 ERR_INVALID_REQUEST.
 
     WHY override default 422:

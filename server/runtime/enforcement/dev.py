@@ -79,7 +79,9 @@ class DevEnforcementProvider:
 
     def __init__(self, mode: str = "active") -> None:
         if mode not in _VALID_MODES:
-            raise ValueError(f"DevEnforcementProvider: invalid mode {mode!r}. Must be one of {_VALID_MODES}")
+            raise ValueError(
+                f"DevEnforcementProvider: invalid mode {mode!r}. Must be one of {_VALID_MODES}"
+            )
         self._mode = mode
 
     async def ensure_active(

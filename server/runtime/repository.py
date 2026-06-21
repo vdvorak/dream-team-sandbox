@@ -14,7 +14,7 @@ Repository itself is called only under that lock for any given project_id.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass

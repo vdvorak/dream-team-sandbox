@@ -27,7 +27,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .errors import ERR_UNAUTHORIZED, RuntimeApiError
-from .models import EnsureRequest, Environment, Health
+from .models import EnsureRequest, Environment
 from .service import LifecycleService
 
 logger = logging.getLogger(__name__)
@@ -40,6 +40,7 @@ _bearer_scheme = HTTPBearer(auto_error=False)
 
 
 # --- Dependency stubs (overridden per-app by create_runtime_app) ---
+
 
 def get_lifecycle_service() -> LifecycleService:
     """Dependency stub — overridden by create_runtime_app via dependency_overrides."""
@@ -57,6 +58,7 @@ def get_service_token() -> str:
 
 # --- Auth dependency ---
 
+
 async def verify_service_token(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     expected_token: str = Depends(get_service_token),
@@ -73,6 +75,7 @@ async def verify_service_token(
 
 # --- healthz (public, no auth per RCP-A7 / RCP-14c) ---
 
+
 @router.get("/healthz", tags=["meta"])
 async def healthz(
     service: LifecycleService = Depends(get_lifecycle_service),
@@ -84,6 +87,7 @@ async def healthz(
 
 
 # --- lifecycle endpoints (all require auth) ---
+
 
 @router.post(
     "/environments/{project_id}/ensure",
@@ -154,4 +158,6 @@ async def destroy_environment(
 ) -> JSONResponse:
     """Destroy environment idempotently (RCP-5). Never 5xx."""
     env, http_status = await service.destroy(project_id)
-    return JSONResponse(status_code=http_status, content=env.model_dump(exclude_none=False))
+    return JSONResponse(
+        status_code=http_status, content=env.model_dump(exclude_none=False)
+    )

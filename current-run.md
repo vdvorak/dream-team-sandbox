@@ -21,7 +21,7 @@ run: 2026-06-21-runtime-lifecycle
 wave_base: ce416f24808fd65e0279d85cfb5813ea62afac88
 graph: delivery
 status: in_progress
-active_node: backend
+active_node: code-lint
 frontier: []
 completed:
 - intake
@@ -37,12 +37,13 @@ outcomes:
   feasibility: PASS
   architecture: PASS
   backend: PASS
+  code-lint: FAIL
 skipped: []
 counters:
   spec-gate->product: 0
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false

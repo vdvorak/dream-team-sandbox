@@ -321,3 +321,19 @@ agent: bob-backend
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: code-lint
+outcome: FAIL
+severity: blocking
+signature: 'Mechanická lint FAIL: 6 souborů potřebuje ruff format (dev.py, errors.py,
+  main.py, router.py, service.py, test_runtime_lifecycle.py); 3 F401 nepoužité importy
+  (repository.py:17 dataclasses.field, router.py:30 Health, test:24 pytest). File-size
+  OK. Fix = ruff format + ruff check --fix.
+
+  '
+note: Mechanická brána, žádný úsudek.
+agent: vitek-quality
+phase: T2
+time:
+  seconds: 0

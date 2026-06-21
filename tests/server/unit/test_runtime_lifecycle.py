@@ -21,7 +21,6 @@ from __future__ import annotations
 import asyncio
 import re
 
-import pytest
 from httpx import ASGITransport, AsyncClient
 
 from server.runtime.enforcement.dev import DevEnforcementProvider
@@ -59,7 +58,9 @@ def client_for(app):
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
 
 
-async def ensure_ready(client, project_id: str = "proj-1", repo: str = BASE_REPO) -> dict:
+async def ensure_ready(
+    client, project_id: str = "proj-1", repo: str = BASE_REPO
+) -> dict:
     """Helper: ensure project and assert it reaches ready. Returns response JSON."""
     r = await client.post(
         f"/v1/environments/{project_id}/ensure",
@@ -139,7 +140,9 @@ class TestEnsureBasic:
         ready_data = [r.json() for r in results if r.status_code == 200]
         if ready_data:
             project_ids = {d["project_id"] for d in ready_data}
-            assert project_ids == {"proj-race"}, "Multiple project IDs in concurrent results"
+            assert project_ids == {"proj-race"}, (
+                "Multiple project IDs in concurrent results"
+            )
 
     async def test_rcp1e_repo_mismatch_returns_409(self):
         """RCP-1e: ensure with different repo.url on live env → 409 ERR_REPO_MISMATCH."""
@@ -170,7 +173,11 @@ class TestEnsureBasic:
         async with client_for(make_app()) as c:
             r = await c.post(
                 "/v1/environments/proj-extra/ensure",
-                json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL, "firewall": "off"},
+                json={
+                    "repo": {"url": BASE_REPO},
+                    "tool": VALID_TOOL,
+                    "firewall": "off",
+                },
                 headers=AUTH_HEADERS,
             )
         assert r.status_code == 400
@@ -325,7 +332,9 @@ class TestSleep:
         app = make_app()
         async with client_for(app) as c:
             await ensure_ready(c, "proj-sleep4a")
-            r = await c.post("/v1/environments/proj-sleep4a/sleep", headers=AUTH_HEADERS)
+            r = await c.post(
+                "/v1/environments/proj-sleep4a/sleep", headers=AUTH_HEADERS
+            )
         assert r.status_code == 200
         assert r.json()["status"] in ("asleep", "ready")
 
@@ -335,7 +344,9 @@ class TestSleep:
         async with client_for(app) as c:
             await ensure_ready(c, "proj-sleep4b")
             await c.post("/v1/environments/proj-sleep4b/sleep", headers=AUTH_HEADERS)
-            r2 = await c.post("/v1/environments/proj-sleep4b/sleep", headers=AUTH_HEADERS)
+            r2 = await c.post(
+                "/v1/environments/proj-sleep4b/sleep", headers=AUTH_HEADERS
+            )
         assert r2.status_code == 200
         assert r2.status_code < 500
 
@@ -345,7 +356,9 @@ class TestSleep:
         async with client_for(app) as c:
             await ensure_ready(c, "proj-sleep4c")
             await c.delete("/v1/environments/proj-sleep4c", headers=AUTH_HEADERS)
-            r = await c.post("/v1/environments/proj-sleep4c/sleep", headers=AUTH_HEADERS)
+            r = await c.post(
+                "/v1/environments/proj-sleep4c/sleep", headers=AUTH_HEADERS
+            )
         assert r.status_code in (200, 404)
         assert r.status_code < 500
 
@@ -366,7 +379,9 @@ class TestSleep:
                 json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL},
                 headers=AUTH_HEADERS,
             )
-            r_sleep = await c.post("/v1/environments/proj-prov-sleep/sleep", headers=AUTH_HEADERS)
+            r_sleep = await c.post(
+                "/v1/environments/proj-prov-sleep/sleep", headers=AUTH_HEADERS
+            )
         assert r_sleep.status_code == 200
         # Should return current state (provisioning), not error.
         assert r_sleep.json()["status"] == "provisioning"
@@ -453,7 +468,9 @@ class TestHealthz:
         # Must not be silent ok — either 503 or degraded.
         assert r.status_code in (200, 503)
         if r.status_code == 200:
-            assert r.json()["status"] != "ok", "Provider down must not report healthz ok"
+            assert r.json()["status"] != "ok", (
+                "Provider down must not report healthz ok"
+            )
 
     async def test_rcp9c_provider_degraded_healthz_degraded(self):
         """RCP-9c: provider in fail mode (degraded health) → healthz status=degraded."""
@@ -477,7 +494,9 @@ class TestAgnostika:
             data = await ensure_ready(c, "proj-agnostic")
         conn = data["connection"]
         for url in [conn["control_url"], conn["terminal_url"]]:
-            assert not SUBSTRATE_NOUNS_PATTERN.search(url), f"Substrate leak in URL: {url}"
+            assert not SUBSTRATE_NOUNS_PATTERN.search(url), (
+                f"Substrate leak in URL: {url}"
+            )
 
     async def test_control_url_https_scheme(self):
         """control_url uses https:// scheme (RCP-A6 E)."""
@@ -498,16 +517,20 @@ class TestAgnostika:
         app = make_app()
         async with client_for(app) as c:
             data = await ensure_ready(c, "proj-grep")
+
         # Recursively check all string values in response.
         def grep_strings(obj):
             if isinstance(obj, str):
-                assert not SUBSTRATE_NOUNS_PATTERN.search(obj), f"Substrate noun in value: {obj}"
+                assert not SUBSTRATE_NOUNS_PATTERN.search(obj), (
+                    f"Substrate noun in value: {obj}"
+                )
             elif isinstance(obj, dict):
                 for v in obj.values():
                     grep_strings(v)
             elif isinstance(obj, list):
                 for item in obj:
                     grep_strings(item)
+
         grep_strings(data)
 
 
@@ -555,7 +578,11 @@ class TestWallDisjunctness:
         async with client_for(make_app("active")) as c:
             r = await c.post(
                 "/v1/environments/proj-firewall-bypass/ensure",
-                json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL, "firewall": "disabled"},
+                json={
+                    "repo": {"url": BASE_REPO},
+                    "tool": VALID_TOOL,
+                    "firewall": "disabled",
+                },
                 headers=AUTH_HEADERS,
             )
         # If provider had been called with active mode, we'd get 200. Getting 400 confirms
@@ -568,7 +595,10 @@ class TestWallDisjunctness:
         async with client_for(make_app()) as c:
             r = await c.post(
                 "/v1/environments/proj-repobp/ensure",
-                json={"repo": {"url": BASE_REPO, "firewall": "off"}, "tool": VALID_TOOL},
+                json={
+                    "repo": {"url": BASE_REPO, "firewall": "off"},
+                    "tool": VALID_TOOL,
+                },
                 headers=AUTH_HEADERS,
             )
         assert r.status_code == 400
@@ -586,7 +616,11 @@ class TestByokDoesNotLeak:
         async with client_for(make_app()) as c:
             r = await c.post(
                 "/v1/environments/proj-byok/ensure",
-                json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL, "ai_token": "sk-secret"},
+                json={
+                    "repo": {"url": BASE_REPO},
+                    "tool": VALID_TOOL,
+                    "ai_token": "sk-secret",
+                },
                 headers=AUTH_HEADERS,
             )
         assert r.status_code == 400  # extra_forbidden
@@ -596,15 +630,27 @@ class TestByokDoesNotLeak:
         app = make_app()
         async with client_for(app) as c:
             data = await ensure_ready(c, "proj-byokchk")
-        sensitive_keys = {"token", "api_key", "secret", "credential", "byok", "ai_token", "password"}
+        sensitive_keys = {
+            "token",
+            "api_key",
+            "secret",
+            "credential",
+            "byok",
+            "ai_token",
+            "password",
+        }
+
         def check_keys(obj):
             if isinstance(obj, dict):
                 for k in obj.keys():
-                    assert k.lower() not in sensitive_keys, f"Sensitive key in response: {k}"
+                    assert k.lower() not in sensitive_keys, (
+                        f"Sensitive key in response: {k}"
+                    )
                     check_keys(obj[k])
             elif isinstance(obj, list):
                 for item in obj:
                     check_keys(item)
+
         check_keys(data)
 
 
@@ -619,14 +665,19 @@ class TestAuth:
         app = make_app()
         async with client_for(app) as c:
             ops = [
-                c.post("/v1/environments/proj-auth/ensure", json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL}),
+                c.post(
+                    "/v1/environments/proj-auth/ensure",
+                    json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL},
+                ),
                 c.get("/v1/environments/proj-auth"),
                 c.post("/v1/environments/proj-auth/sleep"),
                 c.delete("/v1/environments/proj-auth"),
             ]
             for coro in ops:
                 r = await coro
-                assert r.status_code == 401, f"Expected 401, got {r.status_code} for {r.url}"
+                assert r.status_code == 401, (
+                    f"Expected 401, got {r.status_code} for {r.url}"
+                )
                 assert r.json()["code"] == "ERR_UNAUTHORIZED"
 
     async def test_rcp14a_wrong_token_returns_401(self):
@@ -683,12 +734,22 @@ class TestErrorEnvelope:
     async def test_error_code_in_app_facing_set(self):
         """All error codes returned are from the app-facing registr §8 (not cage codes)."""
         from server.runtime.errors import APP_FACING_CODES
+
         app = make_app()
         async with client_for(app) as c:
             responses = [
-                await c.get("/v1/environments/nonexistent", headers=AUTH_HEADERS),  # 404
-                await c.post("/v1/environments/proj-tc/ensure", json={"repo": {"url": BASE_REPO}, "tool": INVALID_TOOL}, headers=AUTH_HEADERS),  # 400
-                await c.post("/v1/environments/proj-tc/ensure", json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL}),  # 401
+                await c.get(
+                    "/v1/environments/nonexistent", headers=AUTH_HEADERS
+                ),  # 404
+                await c.post(
+                    "/v1/environments/proj-tc/ensure",
+                    json={"repo": {"url": BASE_REPO}, "tool": INVALID_TOOL},
+                    headers=AUTH_HEADERS,
+                ),  # 400
+                await c.post(
+                    "/v1/environments/proj-tc/ensure",
+                    json={"repo": {"url": BASE_REPO}, "tool": VALID_TOOL},
+                ),  # 401
             ]
         for r in responses:
             code = r.json().get("code")
@@ -753,7 +814,9 @@ class TestStandaloneServiceIdentity:
             assert r_ensure.json()["status"] == "ready"
 
             # get
-            r_get = await c.get("/v1/environments/proj-standalone", headers=service_only_headers)
+            r_get = await c.get(
+                "/v1/environments/proj-standalone", headers=service_only_headers
+            )
             assert r_get.status_code == 200, (
                 f"RCP-10: get with service token only failed: {r_get.text}"
             )
@@ -778,4 +841,6 @@ class TestStandaloneServiceIdentity:
         """RCP-10/RCP-9a: healthz requires zero authentication — not even service token."""
         async with client_for(make_app()) as c:
             r = await c.get("/v1/healthz")  # no Authorization header at all
-        assert r.status_code == 200, f"RCP-10: healthz without any auth failed: {r.text}"
+        assert r.status_code == 200, (
+            f"RCP-10: healthz without any auth failed: {r.text}"
+        )

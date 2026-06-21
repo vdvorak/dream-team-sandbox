@@ -106,7 +106,9 @@ class LifecycleService:
 
     # --- ensure ---
 
-    async def ensure(self, project_id: str, repo_url: str, repo_ref: str | None, tool: str) -> tuple[Environment, int]:
+    async def ensure(
+        self, project_id: str, repo_url: str, repo_ref: str | None, tool: str
+    ) -> tuple[Environment, int]:
         """Idempotently ensure an environment exists and is ready.
 
         Returns (Environment, http_status) where http_status is 200 or 202.
@@ -142,7 +144,9 @@ class LifecycleService:
 
                 if record.status == "ready":
                     # Idempotent no-op for ready + same url (RCP-1c).
-                    logger.info("ensure: project_id=%s already ready (idempotent)", project_id)
+                    logger.info(
+                        "ensure: project_id=%s already ready (idempotent)", project_id
+                    )
                     return _record_to_response(record), 200
 
                 if record.status == "asleep":
@@ -169,7 +173,9 @@ class LifecycleService:
             # --- Call enforcement provider (inside lock, under provisioning state) ---
             repo_spec = RepoSpec(url=repo_url, ref=repo_ref)
             try:
-                outcome = await self._provider.ensure_active(project_id, repo_spec, tool)
+                outcome = await self._provider.ensure_active(
+                    project_id, repo_spec, tool
+                )
             except Exception as exc:
                 # Unexpected provider exception (infra failure). Log internal detail,
                 # never forward to client (RCP-A5).
@@ -310,13 +316,20 @@ class LifecycleService:
             ph = ProviderHealth.unavailable
 
         if ph == ProviderHealth.unavailable:
-            return HealthResult(status="degraded", contract_version=CONTRACT_VERSION, http_status=503)
+            return HealthResult(
+                status="degraded", contract_version=CONTRACT_VERSION, http_status=503
+            )
         if ph == ProviderHealth.degraded:
-            return HealthResult(status="degraded", contract_version=CONTRACT_VERSION, http_status=200)
-        return HealthResult(status="ok", contract_version=CONTRACT_VERSION, http_status=200)
+            return HealthResult(
+                status="degraded", contract_version=CONTRACT_VERSION, http_status=200
+            )
+        return HealthResult(
+            status="ok", contract_version=CONTRACT_VERSION, http_status=200
+        )
 
 
 # --- helpers ---
+
 
 def _normalize_url(url: str) -> str:
     """Normalize URL for mismatch comparison (strip trailing slash)."""
