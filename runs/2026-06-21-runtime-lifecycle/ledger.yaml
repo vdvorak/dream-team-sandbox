@@ -218,3 +218,15 @@ agent: vision-po
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: spec-gate
+outcome: PASS
+note: Finální PASS — spec čistě behaviorální (89 ř.), agnostická, strukturálně kompletní.
+  Po 3 audit-defect kolech + resolve-loop + strukturální lean přepis.
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T1
+time:
+  seconds: 0
