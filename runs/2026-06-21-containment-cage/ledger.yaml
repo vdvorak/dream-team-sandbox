@@ -160,3 +160,28 @@ note: spec 100% agnostický, AC otagované, stack+contracts OK. T1 spec clean.
 outputs:
 - type: gate-output
 agent: sheldon-spec
+---
+run: 2026-06-21-containment-cage
+node: feasibility
+outcome: PASS
+phase: T1
+flags:
+  has_ui: false
+  has_db: false
+  has_deploy: true
+tier: L
+cost:
+  model: opus
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 176
+note: feasibility PASS; obě díry potvrzeny v kódu; I8/I9 už drží; žádný git write
+  credential ve workspace dnes; 4 provozní otázky pro provozovatele (shadow-build,
+  git credential model, DNS resolver, CF team doména).
+outputs:
+- type: gate-output
+agent: tony-cto
