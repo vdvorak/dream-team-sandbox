@@ -38,3 +38,28 @@ outputs:
 - type: has_ui
 agent: vision-po
 phase: T1
+---
+run: 2026-06-21-containment-cage
+node: spec-gate
+outcome: FAIL
+severity: blocking
+phase: T1
+signature: '(1) spec-agnostika: odstranit stack/tool názvy ze specs/containment-cage.md
+  — Smokescreen→"egress proxy", Fly/6PN/Network Policy/fly.workspace.toml→"host-enforced
+  síťová politika / privátní síť", smazat názvy souborů (Dockerfile.workspace, entrypoint.sh)
+  → "hardened workspace overlay artefakty", smazat env+port ($http_proxy=...:4750),
+  smazat reference na agenty (alfred/ted) a gate (T2); konkrétní stack přesunout do
+  stack/ nebo contracts/. Nadstandardní §Rozhraní přesunout do contracts/. (2) acceptance/containment-cage.md:
+  doplnit povinné tagy ke VŠEM AC; bezpečnostní invarianty I1-I7 → [security].'
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 67
+note: spec-gate FAIL → returns_to product; 2 blocking nálezy (agnostika specu + chybějící
+  AC tagy).
+agent: sheldon-spec

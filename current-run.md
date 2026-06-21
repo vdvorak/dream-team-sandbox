@@ -21,19 +21,18 @@ run: 2026-06-21-containment-cage
 wave_base: d15032c244be306133f70d7bbd9d271a2b976e6f
 graph: delivery
 status: in_progress
-active_node: product
+active_node: spec-gate
 frontier: []
 completed:
 - intake
-- product
 outcomes:
   intake: PASS
-  product: PASS
 skipped: []
-counters: {}
+counters:
+  spec-gate->product: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false
@@ -41,16 +40,36 @@ flags:
   has_deploy: true
 note: null
 pending_delegations: []
-findings: []
-return_payload: {}
+findings:
+- node: spec-gate
+  severity: blocking
+  returns_to: product
+  signature: '(1) spec-agnostika: odstranit stack/tool názvy ze specs/containment-cage.md
+    — Smokescreen→"egress proxy", Fly/6PN/Network Policy/fly.workspace.toml→"host-enforced
+    síťová politika / privátní síť", smazat názvy souborů (Dockerfile.workspace, entrypoint.sh)
+    → "hardened workspace overlay artefakty", smazat env+port ($http_proxy=...:4750),
+    smazat reference na agenty (alfred/ted) a gate (T2); konkrétní stack přesunout
+    do stack/ nebo contracts/. Nadstandardní §Rozhraní přesunout do contracts/. (2)
+    acceptance/containment-cage.md: doplnit povinné tagy ke VŠEM AC; bezpečnostní
+    invarianty I1-I7 → [security].'
+return_payload:
+  product:
+  - '(1) spec-agnostika: odstranit stack/tool názvy ze specs/containment-cage.md —
+    Smokescreen→"egress proxy", Fly/6PN/Network Policy/fly.workspace.toml→"host-enforced
+    síťová politika / privátní síť", smazat názvy souborů (Dockerfile.workspace, entrypoint.sh)
+    → "hardened workspace overlay artefakty", smazat env+port ($http_proxy=...:4750),
+    smazat reference na agenty (alfred/ted) a gate (T2); konkrétní stack přesunout
+    do stack/ nebo contracts/. Nadstandardní §Rozhraní přesunout do contracts/. (2)
+    acceptance/containment-cage.md: doplnit povinné tagy ke VŠEM AC; bezpečnostní
+    invarianty I1-I7 → [security].'
 model_overrides: {}
-epoch: 2
+epoch: 3
 type_versions:
-  spec: 2
-  acceptance: 2
+  spec: 3
+  acceptance: 3
+  has_ui: 3
 node_versions:
   intake: 1
-  product: 2
 ```
 
 ## Lidský přehled
