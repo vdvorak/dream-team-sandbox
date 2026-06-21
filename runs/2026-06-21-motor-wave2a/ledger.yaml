@@ -221,3 +221,14 @@ agent: heimdall-security
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: code-quality
+outcome: FAIL
+summary: 'BLOCKER W7: workspace.py:194 except Exception: continue bez log (swallowed
+  exception). Advisory: W1 (git_runner type), W2 (main.py types), W3 (list[dict] untyped),
+  W8 (sleep bez WHY), dup FlyProvider._find_machine_id.'
+agent: vitek-quality
+phase: T3
+time:
+  seconds: 0
