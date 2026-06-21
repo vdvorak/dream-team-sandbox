@@ -21,7 +21,7 @@ run: 2026-06-21-runtime-contract
 wave_base: null
 graph: delivery
 status: in_progress
-active_node: security
+active_node: spec-audit
 frontier: []
 completed:
 - intake
@@ -30,6 +30,7 @@ completed:
 - feasibility
 - architecture
 - security
+- spec-audit
 outcomes:
   intake: PASS
   product: PASS
@@ -37,6 +38,7 @@ outcomes:
   feasibility: PASS
   architecture: PASS
   security: PASS
+  spec-audit: PASS
 skipped: []
 counters:
   spec-gate->product: 1
@@ -64,12 +66,12 @@ findings:
     mimo sandbox". Acceptance je OK (neměnit).'
 return_payload: {}
 model_overrides: {}
-epoch: 8
+epoch: 9
 type_versions:
   spec: 4
   acceptance: 3
   has_ui: 3
-  gate-output: 8
+  gate-output: 9
   contract: 7
   error-codes: 7
 node_versions:
@@ -79,6 +81,7 @@ node_versions:
   feasibility: 6
   architecture: 7
   security: 8
+  spec-audit: 9
 ```
 
 ## Lidský přehled

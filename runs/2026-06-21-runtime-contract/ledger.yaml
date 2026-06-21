@@ -183,3 +183,22 @@ note: ZEĎ-disjunktnost (additionalProperties:false) + fail-closed + no-leak + B
 outputs:
 - type: gate-output
 agent: heimdall-security
+---
+run: 2026-06-21-runtime-contract
+node: spec-audit
+outcome: PASS
+phase: T3
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 105
+note: konzistence kontrakt↔spec↔acceptance↔ústava OK; plocha-agnostika OK; app-facing
+  registr disjunktní od cage; AC-1..14 namapované 0 orphanů.
+outputs:
+- type: gate-output
+agent: sheldon-spec
