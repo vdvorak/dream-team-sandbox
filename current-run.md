@@ -21,16 +21,18 @@ run: 2026-06-21-motor-wave2a
 wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
 graph: delivery
 status: in_progress
-active_node: spec-gate
+active_node: feasibility
 frontier: []
 completed:
 - intake
 - product
 - spec-gate
+- feasibility
 outcomes:
   intake: PASS
   product: PASS
   spec-gate: PASS
+  feasibility: PASS
 skipped: []
 counters: {}
 awaiting_human: []
@@ -48,16 +50,17 @@ pending_delegations: []
 findings: []
 return_payload: {}
 model_overrides: {}
-epoch: 3
+epoch: 4
 type_versions:
   spec: 2
   acceptance: 2
   has_ui: 2
-  gate-output: 3
+  gate-output: 4
 node_versions:
   intake: 1
   product: 2
   spec-gate: 3
+  feasibility: 4
 ```
 
 ## Lidský přehled
