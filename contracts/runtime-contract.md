@@ -2,7 +2,7 @@
 type: app-runtime-contract
 owner: ted-architect
 status: v1 (initial)
-contract_version: "1.0.0"
+contract_version: "1.1.0"
 api: contracts/api/runtime.openapi.yaml
 constitution: PROJECT-CONSTITUTION.md §Kontrakt app↔runtime
 related-but-separate: contracts/error-codes.md (INTERNÍ cage registr — NEMÍCHAT)
@@ -113,8 +113,10 @@ Nikdy tiché selhání: nelze-li attachnout, WS se zavře s konkrétním kódem 
 
 ## 6. Versioning
 
-- **SemVer.** `contract_version` (např. `"1.0.0"`) vrací `healthz` i každý `environment` objekt.
+- **SemVer.** `contract_version` (aktuálně `"1.1.0"`) vrací `healthz` i každý `environment` objekt.
   Cesta nese MAJOR: `/v1`.
+- **Changelog:** `1.1.0` (MINOR, non-breaking) přidalo app-facing kód `ERR_INVALID_REQUEST` (`400`,
+  schema-validace request body) — viz §8. Tolerant reader appky beze změny snese (žádný L3).
 - **Non-breaking** (PATCH/MINOR, bez koordinace): přidání **optional** pole, nové operace, nového
   error kódu, nové `phase` hodnoty. Odběratel je **tolerant reader** (ignoruje neznámá pole).
 - **Breaking** (MAJOR, **koordinovaný L3 v obou repech**): odebrání/přejmenování pole, změna typu,
@@ -152,16 +154,22 @@ error registr (§8).
 
 | code | HTTP | trigger | poznámka |
 |---|---|---|---|
+| `ERR_INVALID_REQUEST` | `400` | request body nesplňuje schéma: **neznámé/zakázané pole** (`additionalProperties:false`, vč. enforcement-bypass pole kdekoli v body i v `repo.*`), chybějící **required** pole, špatný typ, nevalidní tvar `repo.url` | schema-validační selhání; NIKDY tiché přijetí (AC-12c). Disjunktní od `ERR_TOOL_NOT_ALLOWED` (to je business allowlist `tool`, ne schéma) |
 | `ERR_ENVIRONMENT_NOT_FOUND` | `404` | operace na neexistující `project_id` | WS analogie close `4404` |
 | `ERR_ENVIRONMENT_NOT_READY` | `409` | operace vyžadující `ready` na prostředí v jiném stavu (git/files/terminal) | |
 | `ERR_ENVIRONMENT_DESTROYING` | `409` | operace na prostředí, které se právě ruší | |
 | `ERR_REPO_MISMATCH` | `409` | `ensure` s jiným `repo.url` na živém prostředí | jedno prostředí = jeden repozitář |
-| `ERR_CLONE_FAILED` | `422` | klonování repa selhalo (neplatný/nedostupný `url`/`ref`) | AC-1d, AC-6b |
+| `ERR_CLONE_FAILED` | `422` | klonování repa **selhalo za běhu** (syntakticky validní, ale nedostupný/neexistující `url`/`ref`) | AC-1d, AC-6b. NE schema-chyba (ta je `ERR_INVALID_REQUEST` 400) |
 | `ERR_PROVISION_FAILED` | `502` | provisioning selhal (vč. neaplikovatelné ZDI — bez interního detailu) | fail-closed; viz §4 |
 | `ERR_PATH_ESCAPE` | `403` | `listFiles` cesta mimo workspace sandbox (path traversal) | AC-7c |
-| `ERR_TOOL_NOT_ALLOWED` | `400` | nepodporovaný `tool` v `ensure`/`terminal` | WS analogie close `4400` |
+| `ERR_TOOL_NOT_ALLOWED` | `400` | nepodporovaný `tool` v `ensure`/`terminal` (business allowlist, NE schéma) | WS analogie close `4400` |
 | `ERR_UNAUTHORIZED` | `401` | chybí/neplatná App→Runtime identita (mTLS/token) | nikdy `5xx`; WS close `4401` |
 | `ERR_RUNTIME_UNAVAILABLE` | `503` | runtime nemůže obsloužit / enforcement nelze ověřit | fail-closed default |
+
+> **Hranice `400` kódů (load-bearing).** `ERR_INVALID_REQUEST` = **schéma** body nesedí (neznámé/zakázané
+> pole, chybějící required, špatný typ). `ERR_TOOL_NOT_ALLOWED` = body je schématicky validní, ale
+> hodnota `tool` není v business allowlistu. Obě `400`, ale disjunktní trigger; enforcement-bypass pokus
+> (`firewall`/`egress`/`policy` kdekoli v body) je vždy schema-chyba → `ERR_INVALID_REQUEST`.
 
 **Žádný kód nepřijímá ani nevrací AI tool token či jiný BYOK credential** (AC-13a).
 

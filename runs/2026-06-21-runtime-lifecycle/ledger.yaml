@@ -284,3 +284,40 @@ agent: ted-architect
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: backend
+outcome: PASS
+changed:
+- server-code
+- unit-tests
+flags:
+  touches_db: false
+  touches_server: true
+  touches_shared_ui: false
+tier: L
+note: 'Control-plane server slice 1 hotov: server/runtime/ (router/service/repository
+  + enforcement provider Protocol + DevEnforcementProvider + CageEnforcementProvider
+  stub). 49/49 unit testů PASS (ověřeno orchestrátorem), pokrývají in-scope AC RCP-1,2,3,4,5,9,10,11,12,13,14.
+
+  IN-FLIGHT CONTRACT FIX (provenance): implementace odhalila mezeru — acceptance RCP-1h/12b/13b
+  vyžaduje 400+odmítnutí extra polí, ale kontrakt §8 neměl kód pro malformed body.
+  Ted (architecture re-flow) přidal ERR_INVALID_REQUEST (400) non-breaking dle §6,
+  bump contract_version 1.0.0->1.1.0 (contracts/runtime-contract.md + runtime.openapi.yaml
+  + rules/runtime-control-plane.md RCP-A6). Backend zarovnán: validation handler ->
+  ERR_INVALID_REQUEST (ne ERR_CLONE_FAILED), verze 1.1.0 z jediné konstanty CONTRACT_VERSION,
+  +testy RCP-10 standalone a RCP-12b bypass-never-reaches-provider.
+
+  Fail-closed garance v service (ready jen po EnforcementActive), error nepropustnost
+  dle kind. Server lokálně spustitelný: uvicorn server.runtime.main:app.
+
+  '
+outputs:
+- type: server-code
+  path: server/runtime/
+- type: unit-tests
+  path: tests/server/unit/test_runtime_lifecycle.py
+agent: bob-backend
+phase: T2
+time:
+  seconds: 0

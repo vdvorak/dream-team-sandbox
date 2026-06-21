@@ -6,8 +6,8 @@ info:
     nad nounem `Environment` a dostane opaque connection handle. NIKDY neodhaluje substrát
     ani ZEĎ internals; `ready` se neobjeví bez aktivní ZDI (fail-closed). Próza, trust model,
     versioning a app-facing error registr: contracts/runtime-contract.md.
-  version: 1.0.0
-  x-contract-version: "1.0.0"
+  version: 1.1.0
+  x-contract-version: "1.1.0"
 servers:
   - url: /v1
     description: Control plane (HTTP+JSON). Data plane (terminál) = WebSocket, viz x-websocket.
@@ -47,7 +47,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Environment' }
-        '400': { $ref: '#/components/responses/ToolNotAllowed' }
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '409': { $ref: '#/components/responses/RepoMismatch' }
         '422': { $ref: '#/components/responses/CloneFailed' }
@@ -254,7 +254,7 @@ components:
         contract_version:
           type: string
           description: SemVer verze kontraktu (shoduje se s healthz; drift-check).
-          examples: ["1.0.0"]
+          examples: ["1.1.0"]
 
     Connection:
       type: object
@@ -365,7 +365,7 @@ components:
           enum: [ok, degraded]
         contract_version:
           type: string
-          examples: ["1.0.0"]
+          examples: ["1.1.0"]
 
     Error:
       type: object
@@ -378,6 +378,7 @@ components:
         code:
           type: string
           enum:
+            - ERR_INVALID_REQUEST
             - ERR_ENVIRONMENT_NOT_FOUND
             - ERR_ENVIRONMENT_NOT_READY
             - ERR_ENVIRONMENT_DESTROYING
@@ -431,12 +432,22 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
           example: { code: ERR_PROVISION_FAILED, message: "Provisioning failed" }
-    ToolNotAllowed:
-      description: Nepodporovaný tool.
+    BadRequest:
+      description: >
+        Request odmítnut s HTTP 400. Dva disjunktní triggery (oba shape Error §8):
+        ERR_INVALID_REQUEST = schéma body nesedí (neznámé/zakázané pole vč. enforcement-bypass
+        kdekoli v body i v repo.*, chybějící required, špatný typ); NIKDY tiché přijetí (AC-12c).
+        ERR_TOOL_NOT_ALLOWED = body je schématicky validní, ale hodnota tool není v allowlistu.
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          example: { code: ERR_TOOL_NOT_ALLOWED, message: "Tool not allowed" }
+          examples:
+            invalidRequest:
+              summary: Neznámé/zakázané pole nebo nevalidní schéma (vč. enforcement-bypass)
+              value: { code: ERR_INVALID_REQUEST, message: "Request body failed schema validation" }
+            toolNotAllowed:
+              summary: Nepodporovaný tool (business allowlist)
+              value: { code: ERR_TOOL_NOT_ALLOWED, message: "Tool not allowed" }
     PathEscape:
       description: Cesta mimo workspace sandbox (path traversal).
       content:

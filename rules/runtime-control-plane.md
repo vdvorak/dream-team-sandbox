@@ -3,13 +3,13 @@ type: rules
 layer: runtime-control-plane
 owner: ted-architect
 normative: true
-contract: contracts/runtime-contract.md v1.0.0 · contracts/api/runtime.openapi.yaml
+contract: contracts/runtime-contract.md v1.1.0 · contracts/api/runtime.openapi.yaml
 slice: 1 (lifecycle core)
 ---
 # Rules — runtime control-plane (vnitřní architektura serveru)
 
 Tech-agnostická-kde-to-jde, jinak konkrétní (rules/ je INTERNÍ — smí jmenovat substrát).
-Normativní (MUST / MUST NOT). Kontrakt (`contracts/runtime-contract.md` v1.0.0 +
+Normativní (MUST / MUST NOT). Kontrakt (`contracts/runtime-contract.md` v1.1.0 +
 `runtime.openapi.yaml`) je **autorita a NEMĚNÍ se** (změna = L3). Tato pravidla popisují, jak
 postavit server, který kontrakt naplní, a definují rozhraní, která spec záměrně vynechal.
 Implementátor = bob-backend; diagnostika = ted/heimdall/joey. *Architecture is forever.*
@@ -114,7 +114,7 @@ mutátor; repository jen drží `EnvironmentRecord`.
 - **MUST — souběh:** souběžné `ensure` pro tentýž `project_id` serializované `Lock`em → vznikne
   **jedno** prostředí; race NIKDY nevrátí dvě různá `ready`, NIKDY `5xx` (RCP-1d, kontrakt §2).
 - **MUST:** `phase` (volný string, NE enum) je přítomen typicky při `provisioning` (RCP-3e). Mimo
-  `ready` je `connection: null` (RCP-3d). `contract_version: "1.0.0"` v **každém** `Environment`
+  `ready` je `connection: null` (RCP-3d). `contract_version: "1.1.0"` v **každém** `Environment`
   response (RCP-1b) i v `healthz` — jediný zdroj (konstanta/config), drift-check shoda (RCP-9b).
 
 ## RCP-A5 — Nepropustnost interních chyb (kontrakt §4, load-bearing)
@@ -155,7 +155,9 @@ Rules/ smí být konkrétní; **navenek nesmí** uniknout žádný substrát-nou
   povinné, `detail` optional `object`). **MUST NOT** použít scaffold `shared/errors.py` 1:1 —
   jeho shape je `{code, details}` (chybí `message`, jiný klíč). Net-new `RuntimeApiError`
   (`src/runtime/errors.py`) nese `code, message, detail, http_status`; exception handler serializuje
-  přesně `{code, message, detail?}`.
+  přesně `{code, message, detail?}`. **MUST:** týž envelope produkuje i handler schema-validačních
+  chyb (`RequestValidationError` → `ERR_INVALID_REQUEST` `400`, riziko D) — žádná operace nesmí vrátit
+  FastAPI default `422 {detail:[...]}`, ten porušuje §8 shape.
 - **Riziko C — OpenAPI drift: kontrakt je autorita.** **MUST:** `runtime.openapi.yaml` je
   **autoritativní** artefakt; FastAPI-generovaný `/openapi.json` se proti němu drift-checkuje.
   **Tolerovatelný sémantický ekvivalent** (NENÍ drift-fail): nullable `connection` zapsané FastAPI
@@ -164,12 +166,26 @@ Rules/ smí být konkrétní; **navenek nesmí** uniknout žádný substrát-nou
   `Connection`, nebo `null`, nikdy obojí). **Drift-fail (NENÍ tolerovatelné):** odlišný set polí,
   jiné `required`, jiný `enum` (zúžení/rozšíření app-facing error kódů), chybějící operace, jiné
   HTTP kódy, jiný `additionalProperties`. Shoda `contract_version` je tvrdá (RCP-9b).
-- **Riziko D — `additionalProperties: false` i na vnořeném `repo`.** **MUST:** `extra="forbid"`
-  (`ConfigDict`) platí na `EnsureRequest` **i** na vnořeném `repo` objektu — extra pole jako
-  `repo.firewall`, `repo.egress`, `repo.policy` (bypass-pokus) → `400` (RCP-1h/12b/13b). OpenAPI to
-  už vyžaduje (`EnsureRequest.additionalProperties: false` **a** `EnsureRequest.repo.additionalProperties:
-  false`). **MUST:** modelovat `repo` jako vlastní vnořený Pydantic model s `extra="forbid"`, NE
-  `dict`/`Any` (ten by bypass propustil). Extra pole = `400`, NIKDY tiché přijetí (AC-12c).
+- **Riziko D — `additionalProperties: false` i na vnořeném `repo`; schema-chyba → `400 ERR_INVALID_REQUEST`.**
+  **MUST:** `extra="forbid"` (`ConfigDict`) platí na `EnsureRequest` **i** na vnořeném `repo` objektu —
+  extra pole jako `repo.firewall`, `repo.egress`, `repo.policy` (bypass-pokus) → `400` (RCP-1h/12b/13b).
+  OpenAPI to už vyžaduje (`EnsureRequest.additionalProperties: false` **a**
+  `EnsureRequest.repo.additionalProperties: false`). **MUST:** modelovat `repo` jako vlastní vnořený
+  Pydantic model s `extra="forbid"`, NE `dict`/`Any` (ten by bypass propustil).
+- **MUST — přesný kód+status pro schema-selhání (kontrakt §8, `contract_version 1.1.0`):** jakákoli
+  Pydantic/schema-validační chyba request body — **neznámé/zakázané pole** (vč. enforcement-bypass
+  kdekoli v body i v `repo.*`), **chybějící required** pole, **špatný typ**, **nevalidní tvar `repo.url`**
+  — **MUST** být serializována jako **`400` s app-facing kódem `ERR_INVALID_REQUEST`** v envelope
+  `{code, message, detail?}` (RCP-1h/12b/13b/1g). **MUST NOT** propustit FastAPI/Pydantic **default
+  `422` `{detail:[...]}`** (jiný status i jiný shape než kontrakt §8) — router **MUST** zaregistrovat
+  handler na `RequestValidationError` (a Pydantic `ValidationError`), který přemapuje na
+  `ERR_INVALID_REQUEST` + `400` + envelope §8. **MUST NOT** mapovat schema-chybu na `ERR_CLONE_FAILED`
+  (`422`, sémanticky „klon selhal za běhu", ne schema) ani na `ERR_TOOL_NOT_ALLOWED` (to je výhradně
+  business allowlist `tool`, riziko A). Extra pole / bypass-pokus = `400 ERR_INVALID_REQUEST`, NIKDY
+  tiché přijetí (AC-12c).
+- **Hranice dvou `400` kódů (load-bearing, kontrakt §8):** `ERR_INVALID_REQUEST` = **schéma** body
+  nesedí (router/handler na validation error). `ERR_TOOL_NOT_ALLOWED` = body schématicky validní, ale
+  hodnota `tool` mimo allowlist (**service** vrstva, riziko A). Disjunktní trigger; obojí `400`.
 - **Riziko E — dev-provider connection URL: opaque, bez substrát-nounu, bez portu 808x.**
   **MUST:** `DevEnforcementProvider` generuje `control_url`/`terminal_url`, které **NEOBSAHUJÍ**
   žádný substrát-identifikátor: ne `Fly`/`fly.dev`/`docker`/`6PN`/`.internal`, ne public IP, **ne
@@ -198,7 +214,8 @@ Rules/ smí být konkrétní; **navenek nesmí** uniknout žádný substrát-nou
   service NESMÍ přidat skryté chování reagující na neznámé pole.
 - **MUST NOT:** žádná response vrací `policy`/`ruleset`/`allowlist`/`capability` jako pole (RCP-12c).
 - **MUST:** pokus o enforcement-bypass pole (`firewall`/`egress`/… kdekoliv v body včetně `repo.*`)
-  → `400` (RCP-A6 riziko D), NIKDY tiché ignorování s oslabením ZDI (AC-12c).
+  → `400 ERR_INVALID_REQUEST` (schema-chyba `additionalProperties:false`; RCP-A6 riziko D), NIKDY
+  tiché ignorování s oslabením ZDI (AC-12c).
 
 ## Reuse decision (per constitution §Reuse policy)
 
