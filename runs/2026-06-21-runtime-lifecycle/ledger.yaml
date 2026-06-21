@@ -534,3 +534,16 @@ agent: vision-po
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: spec-gate
+outcome: PASS
+note: Re-flow no-op (acceptance doc-only fix). Spec nezměněn (už PASS), acceptance
+  oprava jen srovnala expected kódy/verze s kontraktem v1.1.0 - acceptance smí obsahovat
+  error kódy. Orchestrátor ověřil.
+outputs:
+- type: gate-output
+agent: sheldon-spec
+phase: T1
+time:
+  seconds: 0
