@@ -21,8 +21,9 @@ run: 2026-06-21-containment-cage
 wave_base: d15032c244be306133f70d7bbd9d271a2b976e6f
 graph: delivery
 status: in_progress
-active_node: code-lint
-frontier: []
+active_node: qa
+frontier:
+- qa
 completed:
 - intake
 - product
