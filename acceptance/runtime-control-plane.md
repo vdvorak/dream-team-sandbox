@@ -1,7 +1,8 @@
-# Acceptance criteria — runtime-control-plane (slice 1)
+# Acceptance criteria — runtime-control-plane (slice 1+2a)
 
-Slice 1 scope: lifecycle core (`ensure` / `get` / `sleep` / `destroy` / `healthz`),
-stavový automat, fail-closed garance, enforcement-provider rozhraní, auth.
+Slice 1+2a scope: lifecycle core (`ensure` / `get` / `sleep` / `destroy` / `healthz`),
+stavový automat, fail-closed garance, enforcement-provider rozhraní, auth, stav repozitáře
+(AC-6), seznam souborů (AC-7). Terminál (AC-8) deferred na wave 2b.
 
 Tagger: `[security]` `[integration]` `[automated]` `[manual E2E]`
 
@@ -9,22 +10,22 @@ Tagger: `[security]` `[integration]` `[automated]` `[manual E2E]`
 
 ## Přehled: které AC z runtime-contract jsou IN-SCOPE vs DEFERRED
 
-| AC | Název | Slice 1 |
+| AC | Název | Stav |
 |---|---|---|
-| AC-1 | ensure | **IN** |
-| AC-2 | fail-closed / ZEĎ garance | **IN** |
-| AC-3 | get + opaque connection | **IN** |
-| AC-4 | sleep | **IN** |
-| AC-5 | destroy | **IN** |
-| AC-6 | git status | DEFERRED (navazující wave) |
-| AC-7 | files | DEFERRED (navazující wave) |
-| AC-8 | terminal / PTY | DEFERRED (navazující wave) |
-| AC-9 | healthz | **IN** |
-| AC-10 | standalone usability | **IN** (bez git/files/PTY kroků) |
-| AC-11 | agnostika kontraktu | **IN** |
-| AC-12 | ZEĎ-disjunktnost | **IN** |
-| AC-13 | BYOK neteče | **IN** |
-| AC-14 | auth odběratele | **IN** |
+| AC-1 | ensure | **IN** (slice 1) |
+| AC-2 | fail-closed / ZEĎ garance | **IN** (slice 1+2a — reálný CageEnforcementProvider) |
+| AC-3 | get + opaque connection | **IN** (slice 1) |
+| AC-4 | sleep | **IN** (slice 1) |
+| AC-5 | destroy | **IN** (slice 1) |
+| AC-6 | git status | **IN** (wave 2a) |
+| AC-7 | files | **IN** (wave 2a) |
+| AC-8 | terminal / PTY | DEFERRED (wave 2b) |
+| AC-9 | healthz | **IN** (slice 1+2a — reálný provider.health()) |
+| AC-10 | standalone usability | **IN** (bez PTY kroků) |
+| AC-11 | agnostika kontraktu | **IN** (slice 1) |
+| AC-12 | ZEĎ-disjunktnost | **IN** (slice 1) |
+| AC-13 | BYOK neteče | **IN** (slice 1) |
+| AC-14 | auth odběratele | **IN** (slice 1) |
 
 Kritéria níže jsou konkrétní na úrovni serveru (HTTP response, hlavičky, stavový automat).
 Tam, kde existuje identické AC v `acceptance/runtime-contract.md`, je uvedena reference —
@@ -180,11 +181,41 @@ Ref: AC-14.
 
 ---
 
-## Deferred AC (mimo slice 1)
+---
+
+## RCP-6 — git status v prostředí `[integration]` `[automated]`
+
+Ref: AC-6.
+
+| # | Podmínka | PASS |
+|---|---|---|
+| 6a | `GET /v1/environments/{project_id}/git` na `ready` prostředí | `200` s tělem obsahujícím: `status` (čisté/dirty), informace o větvi, seznam necommitovaných souborů |
+| 6b | `GET /v1/environments/{project_id}/git` na prostředí v jiném stavu než `ready` | `409 ERR_ENVIRONMENT_NOT_READY`; nikdy `5xx` |
+| 6c | `GET /v1/environments/{project_id}/git` pro neexistující `project_id` | `404 ERR_ENVIRONMENT_NOT_FOUND` |
+| 6d | Response body neobsahuje žádný substrát-noun (Fly, docker, 6PN, .internal, workspace layout) | Grep response body: žádný výskyt substrát-nounu z §7 kontraktu |
+| 6e | `GET /v1/environments/{project_id}/git` bez autentizace | `401 ERR_UNAUTHORIZED`; nikdy `5xx` |
+
+---
+
+## RCP-7 — seznam souborů v prostředí `[integration]` `[automated]`
+
+Ref: AC-7.
+
+| # | Podmínka | PASS |
+|---|---|---|
+| 7a | `GET /v1/environments/{project_id}/files` (bez parametru nebo `path=/`) na `ready` prostředí | `200` se seznamem souborů a složek v workspace root |
+| 7b | `GET /v1/environments/{project_id}/files?path=<validní-podadresář>` | `200` se seznamem obsahu daného podadresáře |
+| 7c | `GET /v1/environments/{project_id}/files?path=../../etc/passwd` nebo jiný path traversal mimo workspace | `403 ERR_PATH_ESCAPE`; nikdy `5xx`; žádný obsah mimo workspace |
+| 7d | `GET /v1/environments/{project_id}/files` na prostředí v jiném stavu než `ready` | `409 ERR_ENVIRONMENT_NOT_READY`; nikdy `5xx` |
+| 7e | `GET /v1/environments/{project_id}/files` pro neexistující `project_id` | `404 ERR_ENVIRONMENT_NOT_FOUND` |
+| 7f | Response body neobsahuje interní workspace layout (overlay dirs, entrypoint.sh apod.) | Ověření: interní artefakty cage nejsou viditelné klientovi |
+| 7g | `GET /v1/environments/{project_id}/files` bez autentizace | `401 ERR_UNAUTHORIZED`; nikdy `5xx` |
+
+---
+
+## Deferred AC (wave 2b+)
 
 | AC | Podmínka |
 |---|---|
-| AC-6 | `getGitStatus` — deferred na wave s MOTOR (reálný git workspace) |
-| AC-7 | `listFiles` — deferred na wave s MOTOR (reálný filesystem workspace) |
-| AC-8 | `attachTerminal` (PTY/WS) — deferred na wave s MOTOR (PTY + kontejner) |
-| AC-10 S3/S4 | Standalone kroky pro git a terminal — deferred spolu s AC-6/7/8 |
+| AC-8 | `attachTerminal` (PTY/WS) — deferred na wave 2b (PTY + kontejner) |
+| AC-10 S3/S4 | Standalone kroky pro terminal — deferred spolu s AC-8 |

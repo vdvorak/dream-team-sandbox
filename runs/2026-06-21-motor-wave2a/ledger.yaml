@@ -18,3 +18,19 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: product
+outcome: PASS
+outputs:
+- type: spec
+  path: specs/runtime-control-plane.md
+- type: acceptance
+  path: acceptance/runtime-control-plane.md
+note: 'Spec rozsiren o wave 2a scope: reálný motor (provider-agnostický), AC-6 git
+  status, AC-7 listFiles. RCP-6 a RCP-7 pridany do acceptance. AC-8 zustava deferred
+  (wave 2b).'
+agent: vision-po
+phase: T1
+time:
+  seconds: 0
