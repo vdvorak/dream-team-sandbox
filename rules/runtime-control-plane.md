@@ -4,7 +4,7 @@ layer: runtime-control-plane
 owner: ted-architect
 normative: true
 contract: contracts/runtime-contract.md v1.1.0 · contracts/api/runtime.openapi.yaml
-slice: 1 (lifecycle core)
+slice: 1+2a (lifecycle core + motor bez PTY + AC-6/7)
 ---
 # Rules — runtime control-plane (vnitřní architektura serveru)
 
@@ -217,6 +217,83 @@ Rules/ smí být konkrétní; **navenek nesmí** uniknout žádný substrát-nou
   → `400 ERR_INVALID_REQUEST` (schema-chyba `additionalProperties:false`; RCP-A6 riziko D), NIKDY
   tiché ignorování s oslabením ZDI (AC-12c).
 
+## RCP-A9 — Provider-agnostická cage runtime vrstva (`server/cage/runtime.py`) — wave 2a
+
+Nová vrstva pro lifecycle běžícího workspace (start/stop/status). **Oddělená od
+`server/cage/deploy/cage_deploy.py`** (ta řeší build + deploy image; tato vrstva řeší
+runtime lifecycle už nasazené machine).
+
+- **MUST:** `CageRuntimeProvider` = Python `Protocol` v `server/cage/runtime.py` s async operacemi:
+  - `async def start(project_id: str, repo_url: str, ref: str | None, tool: str) -> WorkspaceHandle`
+  - `async def stop(project_id: str) -> None`
+  - `async def status(project_id: str) -> WorkspaceStatus`
+  - `async def health() -> ProviderHealth`
+- **`WorkspaceHandle`** = dataclass s opaque `control_url: str` a `terminal_url: str` — tytéž
+  sémantiky jako `ConnectionHandle` v enforcement vrstvě. Provider produkuje URL; nic mimo
+  provider (ani `CageEnforcementProvider`) substrát-specifická URL NESMÍ konstruovat.
+- **`WorkspaceStatus`** = enum `starting | ready | stopped | unknown` — interní, nikdy app-facing.
+- **Fly.io adapter (`server/cage/providers/fly_provider.py`):** konkrétní implementace
+  `CageRuntimeProvider` přes Fly Machines API (REST, `httpx`). Fly specifika (Machine ID, 6PN,
+  `.internal`, `fly.io` domains, API endpoints) MUSÍ zůstat uvnitř tohoto souboru — NIKDY
+  nesm í leaknout přes rozhraní do `CageEnforcementProvider` ani výše.
+- **MUST NOT:** duplikovat deploy orchestraci z `cage_deploy.py`. Vrstva předpokládá, že workspace
+  image je už deploynutý (deploy = `cage_deploy.py`; lifecycle = tato vrstva).
+- **`httpx.AsyncClient`** jako HTTP klient (async, FastAPI kompatibilní). Dependency-injectable
+  pro testy (nevolat `httpx` přímo ze třídy — inject přes konstruktor nebo fixture).
+
+## RCP-A10 — CageEnforcementProvider (reálná implementace, wave 2a)
+
+Nahrazuje STUB v `server/runtime/enforcement/cage.py`. Wiring: `CageEnforcementProvider`
+volá `CageRuntimeProvider` (viz RCP-A9) — tenká adaptérová vrstva, NE přímé Fly API.
+
+- **MUST:** `ensure_active(project_id, repo, tool)`:
+  1. Zavolá `cage_runtime.start(project_id, repo.url, repo.ref, tool)`.
+  2. Pokud OK → vrátí `EnforcementActive(handle=ConnectionHandle(control_url=..., terminal_url=...))`.
+  3. Pokud `ProxyDownError` → `EnforcementFailed(provider_unreachable, internal_code=e.code)`.
+  4. Pokud jiný `CageError` → `EnforcementFailed(provider_error, internal_code=e.code)`.
+  5. Neočekávané výjimky (infra) smí propagovat (service je chytí a přemapuje na `503`).
+- **MUST:** `health()` → zavolá `cage_runtime.health()`, přeloží `ProviderHealth` 1:1
+  (obě vrstvy používají stejný enum — nebo `CageRuntimeProvider.health()` vrací tentýž typ).
+- **MUST NOT:** konstruovat jakékoli Fly-specifické URL, Machine ID ani substrát-noun — to je
+  výhradně `FlyProvider` (RCP-A9). `CageEnforcementProvider` je slepý vůči substrátu.
+- **MUST:** `internal_code` (z `CageError.code`) jít POUZE do server-side logu, NIKDY do
+  app-facing response (RCP-A5).
+
+## RCP-A11 — AC-6: getGitStatus architektura (wave 2a)
+
+- **Router** (`server/runtime/router.py`): nová route `GET /v1/environments/{project_id}/git`.
+  Auth (`Depends`) povinný (RCP-A7). Mapuje na `service.get_git_status(project_id)`.
+  Response schema = `GitStatus` (kontrakt OpenAPI).
+- **Service** (`server/runtime/service.py`): `async def get_git_status(project_id: str)`:
+  1. Načte prostředí; `not found` → `404`; stav ≠ `ready` → `409 ERR_ENVIRONMENT_NOT_READY`.
+  2. Zavolá workspace git operaci (přes `CageRuntimeProvider` nebo workspace accessor).
+  3. Vrátí `GitStatus` Pydantic model.
+- **MUST NOT:** response obsahovat žádný substrát-noun (Fly, docker, workspace absolutní cesta,
+  `.internal`) — RCP-A6 / kontrakt §7. Vrátí se jen branch, dirty bool, changed_files, last_commit.
+- **Workspace accessor oddělení:** git operace (subprocess git nebo gitpython) musí být izolované
+  v separátní vrstvě / helperu — testovatelné bez síťového volání (injectable runner).
+
+## RCP-A12 — AC-7: listFiles architektura + path sandbox (wave 2a)
+
+- **Router** (`server/runtime/router.py`): nová route `GET /v1/environments/{project_id}/files`.
+  Query params `prefix?: str`, `suffix?: str` (viz OpenAPI). Auth povinný.
+  Mapuje na `service.list_files(project_id, prefix, suffix)`.
+  Response schema = `FileList`.
+- **Service** (`server/runtime/service.py`): `async def list_files(project_id, prefix, suffix)`:
+  1. Prostředí musí být `ready` (shodně s RCP-A11).
+  2. Sanitize `prefix` → **path sandbox check (load-bearing):**
+     - Resolve absolutní cesta = `workspace_root / Path(prefix).resolve()`.
+     - **MUST:** výsledná cesta MUSÍ začínat `workspace_root` (prefix assertion na `Path.resolve()`).
+     - Pokud ne → `403 ERR_PATH_ESCAPE`. **MUST NOT** leaknout žádný soubor mimo workspace.
+  3. Filtruj soubory dle `suffix` (pokud zadán).
+  4. Vrátí `FileList` — relativní cesty vůči workspace root; **MUST NOT** obsahovat absolutní
+     cesty, workspace layout internals (overlay dirs, entrypoint.sh, cage artefakty).
+- **MUST:** interní workspace layout (cage overlay artefakty: `Dockerfile.workspace`,
+  `entrypoint.sh`, `nftables.cage.conf`, `fly.workspace.toml`, `smokescreen-acl.*`) MUSÍ
+  být VYLOUČEN z výsledku (blacklist nebo subtree exclude). Klient NESMÍ vidět cage internals.
+- **MUST:** path traversal `../../` nebo absolutní cesta mimo workspace → vždy `403 ERR_PATH_ESCAPE`;
+  nikdy `5xx`; žádný obsah mimo sandbox (RCP-7c `[security]`).
+
 ## Reuse decision (per constitution §Reuse policy)
 
 | pattern | kategorie | rozhodnutí |
@@ -226,18 +303,28 @@ Rules/ smí být konkrétní; **navenek nesmí** uniknout žádný substrát-nou
 | `pydantic-settings` config | **reuse-existing** | Scaffold `config.py` Settings pattern; rozšířit o `enforcement_provider`, `service_token`. |
 | Error envelope | **feature-local** | Scaffold `{code, details}` NEVYHOVUJE (riziko B). Net-new `RuntimeApiError` + handler `{code, message, detail}` dle kontraktu §8. NEsdílet se scaffoldem (jiný shape). |
 | `healthz` | **feature-local** | Scaffold `shared/health.py` nezná `contract_version` ani provider degradaci (RCP-9). Net-new runtime healthz. |
-| Cage error registr (`server/cage/errors.py`, `CageError`) | **reuse-existing (read-only)** | Reálný `CageEnforcementProvider` (deferred) chytá `CageError` a mapuje na `EnforcementFailed`. NEROZŠIŘOVAT registr; čte se jen pro překlad (RCP-A5). |
-| `EnforcementProvider` abstrakce | **feature-local (slice 1)** | Net-new; 1 výskyt → žádný extract teď. Sledováno jako Extraction Candidate (viz níže) — 2. spotřebitel (např. budoucí MOTOR/workspace provider) povýší na `extract-shared`. |
+| Cage error registr (`server/cage/errors.py`, `CageError`) | **reuse-existing (read-only)** | `CageEnforcementProvider` chytá `CageError` a mapuje na `EnforcementFailed`. NEROZŠIŘOVAT registr; čte se jen pro překlad (RCP-A5). |
+| `EnforcementProvider` abstrakce | **feature-local → extraction candidate** | 1 výskyt slice 1; wave 2a přidává `CageRuntimeProvider` jako 2. podobný pattern → sledovat. Extrakce když 3. spotřebitel. |
+| `CageRuntimeProvider` + `FlyProvider` | **feature-local (wave 2a)** | Net-new; 1 výskyt. Extraction candidate pro wave 2b/2c (PTY + deploy provider). |
+| Git subprocess / workspace accessor | **feature-local (wave 2a)** | Net-new; injectable runner pro testovatelnost. Žádný sdílený git modul zatím. |
 
-**Žádný `extract-shared` teď** (žádný pattern nemá 2+ výskyt v slice 1). Žádný net-new sdílený
-building block. Stack-defined bloky (FastAPI/Pydantic/scaffold vrstvení) mají hard přednost a
-jsou použity.
+**Žádný `extract-shared` pro wave 2a** — provider vzory jsou nové, zatím 1 výskyt.
 
-## Co je net-new vs reuse (souhrn pro implementátora)
+## Co je net-new vs reuse — wave 2a doplněk (souhrn pro implementátora)
 
-- **Net-new:** `src/runtime/{router,service,repository,models,errors}.py`,
-  `src/runtime/enforcement/{provider,dev,cage}.py`, runtime healthz, config rozšíření.
-- **Reuse:** vrstvení (scaffold), Pydantic/FastAPI/OpenAPI generování, `pydantic-settings`,
-  `CageError` registr (read-only, deferred provider).
-- **NEpoužít:** scaffold `shared/errors.py` (jiný envelope shape), SQLAlchemy/`database.py`/`get_db`
-  (no DB v slice 1).
+**Nové (wave 2a):**
+- `server/cage/runtime.py` — `CageRuntimeProvider` Protocol + `WorkspaceHandle`/`WorkspaceStatus`.
+- `server/cage/providers/fly_provider.py` — `FlyProvider` (Fly.io specifika uvnitř).
+- `server/runtime/enforcement/cage.py` — nahrazení STUB reálnou implementací.
+- `server/runtime/router.py` — nové routes AC-6/7 (`getGitStatus`, `listFiles`).
+- `server/runtime/service.py` — nové metody `get_git_status`, `list_files`.
+- `server/runtime/workspace.py` (doporučeno) — git subprocess helper + file accessor (injectable).
+
+**Beze změny (zachovat):**
+- `server/runtime/enforcement/provider.py` — Protocol + typy (finální, nemeníme).
+- `server/runtime/enforcement/dev.py` — `DevEnforcementProvider` (slice 1, zachovat funkční).
+- `server/runtime/repository.py` — in-memory repo (wave 2a NEdotýká se perzistence).
+- `server/cage/deploy/cage_deploy.py` — deploy orchestrace (mimo scope wave 2a).
+- `server/cage/errors.py` — NEROZŠIŘOVAT (read-only pro wave 2a).
+
+**NEpoužít:** scaffold `shared/errors.py`, SQLAlchemy/`database.py`/`get_db`.

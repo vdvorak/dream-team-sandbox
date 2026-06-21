@@ -71,3 +71,24 @@ agent: tony-cto
 phase: T1
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: architecture
+outcome: PASS
+outputs:
+- type: reuse-decision
+  path: rules/runtime-control-plane.md
+flags:
+  touches_server: true
+  touches_db: false
+  touches_shared_ui: false
+note: 'PASS. Kontrakt se NEMENI (OpenAPI uz ma AC-6/7 endpointy + schemata). Pridana
+  pravidla RCP-A9 az RCP-A12: provider-agnosticka cage runtime vrstva (server/cage/runtime.py
+  + FlyProvider), CageEnforcementProvider realna implementace (tenka adaptorova vrstva
+  nad CageRuntimeProvider), AC-6 getGitStatus (injectable git helper), AC-7 listFiles
+  (path sandbox load-bearing). Reuse decision aktualizovan. contract-update: NONE
+  (additivni implementace deferred endpointu). breaking-change: NONE.'
+agent: ted-architect
+phase: T2
+time:
+  seconds: 0
