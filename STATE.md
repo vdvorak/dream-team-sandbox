@@ -25,31 +25,32 @@ closed_waves:
 
 ## Aktualni fokus
 
-✅ **Re-charter (L3) + contract wave HOTOVO (2026-06-21).** Repo povysen z „klec obalujici
-appku" na **samostatnou RUNTIME/SANDBOX vrstvu (MOTOR + ZEĎ), ktera vystavuje kontrakt**.
-Ustava prepsana (North Star + identita), kontrakt napsan, boundary audit hotov. Vsechny
-gates PASS. Nic se nepresouvalo mezi repy (L3 — extrakce motoru je budouci krok).
+✅ **Runtime control-plane lifecycle core (slice 1) HOTOVO (2026-06-21).** PATER RUNTIMU
+postavena — 5 operaci stavoveho automatu (ensure/get/sleep/destroy/healthz), fail-closed
+EnforcementProvider kontrakt (uzavreny typ), 3-vrstvova architektura (router/service/repository).
+243/243 testu PASS. Kontrakt bumpnut v1.0.0 → v1.1.0 (ERR_INVALID_REQUEST, non-breaking).
+Deploy track vedome odlozen na slice 2 (realny motor + cloud infra).
+
+### Wave `2026-06-21-runtime-lifecycle` — completed (15 nodes, vsechny PASS, return_loops: 1)
+- intake · product · spec-gate (3 kola resolve-loop; strukturalni lean prepis) · feasibility ·
+  architecture · security (heimdall opus) · code-quality · **implementation (bob)** · qa ·
+  perf · spec-audit (1x FAIL po contract-bumpu → AC-1g/1b/9a opraveny → PASS). Deploy
+  track (devops/deploy) vedome preskocen — odlozeno na slice 2.
+
+### Deliverables (vse committed)
+- `server/runtime/**` (13 modulu) — router/service/repository, EnforcementProvider Protocol
+  (EnforcementActive|EnforcementFailed uzavreny soucet), DevEnforcementProvider (active/fail/down),
+  CageEnforcementProvider (STUB = slice 2). Spustitelny: `uvicorn server.runtime.main:app`.
+- `specs/runtime-control-plane.md` + `acceptance/runtime-control-plane.md` (RCP-1..14).
+- `rules/runtime-control-plane.md` (RCP-A1..A8) + `stack/runtime-control-plane.md`.
+- `tests/`: 49 unit + 74 integration + 7 perf — 243/243 PASS.
+- **`contracts/runtime-contract.md` + `contracts/api/runtime.openapi.yaml`** — bumpnuto
+  v1.1.0 (ERR_INVALID_REQUEST pridan, non-breaking).
 
 ### Wave `2026-06-21-runtime-contract` — completed (7 nodes, vsechny PASS)
-- intake · product (spec+acceptance runtime; 1x spec-gate FAIL agnostika → fix) · spec-gate ·
-  feasibility (z minule wave) · **architecture = KONTRAKT** (ted) · **security** (heimdall) ·
-  **spec-audit** (sheldon). Implementacni/deploy uzly (qa/perf/code-quality/devops/deploy)
-  jsou pro docs-only wave N/A — graf je nedosahne (nema kod); to je ocekavane, ne chyba.
-
-### Deliverables (vse v tomto repu, committed)
-- `PROJECT-CONSTITUTION.md` — re-charter: North Star (3 vrstvy + zelezna pravidla), identita
-  RUNTIME, I1-I11 jako spec ZDI, MOTOR nacrt, kontrakt sekce. (commit `bae4948`)
-- `specs/runtime-contract.md` + `acceptance/runtime-contract.md` (AC-1..14, agnosticke).
-- **`contracts/runtime-contract.md`** (189 r) + **`contracts/api/runtime.openapi.yaml`** (452 r,
-  8 ops, Environment schema, x-websocket) — KONTRAKT. App-facing error registr (10 kodu)
-  disjunktni od interniho cage registru.
-- `audit/runtime-boundary.md` — hranicni prestupky (motor v appce) + standalone mezery +
-  endpoint→kontrakt mapovani + extrakce roadmapa.
-
-### Gate verdikty
-- heimdall (security) PASS: ZEĎ-disjunktnost strukturalne (`additionalProperties:false`),
-  fail-closed („ready jen s aktivni ZDI"), zadny leak internich kodu, BYOK jen v PTY, auth oddelena.
-- sheldon (spec-audit) PASS: konzistence + plocha-agnostika + AC-1..14 namapovane, 0 orphanu.
+- Repo re-charter (L3): North Star, identita RUNTIME, kontrakt napsan.
+- `PROJECT-CONSTITUTION.md`, `contracts/runtime-contract.md` (v1.0.0),
+  `contracts/api/runtime.openapi.yaml`, `audit/runtime-boundary.md`.
 
 ### Cage wave (`2026-06-21-containment-cage`) = ZEĎ (zachovana, paused/superseded framing)
 T1+T2 hotovo, T3 qa staticky (128/128); zive AC + deploy = budouci motor-extrakce L3.
@@ -57,12 +58,19 @@ T1+T2 hotovo, T3 qa staticky (128/128); zive AC + deploy = budouci motor-extrakc
 
 ## Open Items (budouci, gated)
 
+- [ ] **Realny MOTOR (slice 2):** CageEnforcementProvider → realna integrace na `server/cage/**`;
+      realne klonovani repa; realne spusteni agenta v kontejneru; PTY/terminal (AC-8); git status
+      (AC-6); file-read (AC-7).
+- [ ] **Produkcni deploy (slice 2):** Fly infra + secrets, build image (vlastni verzovany),
+      staging → produkce. Vedome odlozeno z wave `runtime-lifecycle`.
+- [ ] **Advisory hardening (impl-time, neblokujici):** security — dev-token fail-fast guard,
+      constant-time compare; code-quality — type anotace (mypy strict), test-helper dedup,
+      healthz 503 v OpenAPI (W3); perf — lock-dict GC, perf acceptance targets formalizovat.
 - [ ] **Motor-extrakce (koordinovany L3, vyzaduje vyslovne potvrzeni):** 1) vendor kontraktu
-      do dream-team-app · 2) presun agent+lifecycle+image do runtime (vlastni verzovany image) ·
-      3) app → tenke contract-klienty · 4) live acceptance (I1-I11 harness) pres kontrakt ·
-      5) retire dvoji implementace. Kazdy krok = L3 ve vice repech.
-- [ ] **Advisory hardening kontraktu (impl-time, heimdall):** `phase` (volny string) a
-      `Error.detail` (additionalProperties:true) jsou potencialni leak kanaly → implementace
-      MUSI scrubovat proti §7 noun-blacklistu + contract-test fixture.
+      do dream-team-app · 2) presun agent+lifecycle+image do runtime · 3) app → tenke
+      contract-klienty · 4) live acceptance (I1-I11 harness) pres kontrakt · 5) retire dvoji
+      implementace. Kazdy krok = L3 ve vice repech.
 - [ ] Vendoring mechanika kontraktu (submodul vs copy + drift-check v CI obou repu).
-- [ ] Standalone mezery (contract-server, vlastni image, lifecycle service, CLI) — viz audit §C.
+- [ ] **Advisory hardening kontraktu (heimdall):** `phase` (volny string) a `Error.detail`
+      (additionalProperties:true) jsou potencialni leak kanaly → impl MUSI scrubovat proti
+      §7 noun-blacklistu + contract-test fixture.
