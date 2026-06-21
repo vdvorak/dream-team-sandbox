@@ -130,11 +130,11 @@ paths:
       summary: Výpis souborů workspace s volitelným filtrem. Cesta mimo sandbox → 403 path-escape.
       parameters:
         - $ref: '#/components/parameters/ProjectId'
-        - name: prefix
+        - name: path
           in: query
           required: false
           schema: { type: string }
-          description: Filtr na prefix relativní cesty ve workspace.
+          description: Cesta do podadresáře workspace (directory navigation).
         - name: suffix
           in: query
           required: false

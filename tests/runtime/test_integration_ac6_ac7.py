@@ -12,8 +12,8 @@ Acceptance criteria covered:
   RCP-6c: GET /git nonexistent project_id → 404 ERR_ENVIRONMENT_NOT_FOUND
   RCP-6e: GET /git without auth → 401
   RCP-7a: GET /files on ready → 200 with files: [...]
-  RCP-7b: GET /files?prefix=subdir → 200 with subdir contents
-  RCP-7c: GET /files?prefix=../../etc/passwd → 403 ERR_PATH_ESCAPE
+  RCP-7b: GET /files?path=subdir → 200 with subdir contents
+  RCP-7c: GET /files?path=../../etc/passwd → 403 ERR_PATH_ESCAPE
   RCP-7d: GET /files on non-ready → 409 ERR_ENVIRONMENT_NOT_READY
   RCP-7e: GET /files nonexistent project_id → 404 ERR_ENVIRONMENT_NOT_FOUND
   RCP-7g: GET /files without auth → 401
@@ -275,14 +275,14 @@ class TestRCP7Files:
         assert "src/app.py" in paths, "RCP-7a: expected src/app.py in files"
 
     @pytest.mark.asyncio
-    async def test_rcp7b_files_with_prefix_returns_subdir(self, tmp_path):
-        """RCP-7b: GET /files?prefix=subdir → 200 with subdir contents only."""
+    async def test_rcp7b_files_with_path_returns_subdir(self, tmp_path):
+        """RCP-7b: GET /files?path=subdir → 200 with subdir contents only."""
         ws = _make_workspace(tmp_path)
         app = _make_app(ws)
 
         async with _http_client(app) as c:
             await _ensure_ready(c, "rcp7b")
-            r = await c.get("/v1/environments/rcp7b/files?prefix=subdir", headers=AUTH)
+            r = await c.get("/v1/environments/rcp7b/files?path=subdir", headers=AUTH)
 
         assert r.status_code == 200, (
             f"RCP-7b: expected 200, got {r.status_code}: {r.text}"
@@ -296,14 +296,14 @@ class TestRCP7Files:
 
     @pytest.mark.asyncio
     async def test_rcp7c_files_path_traversal_returns_403(self, tmp_path):
-        """RCP-7c: GET /files?prefix=../../etc/passwd → 403 ERR_PATH_ESCAPE."""
+        """RCP-7c: GET /files?path=../../etc/passwd → 403 ERR_PATH_ESCAPE."""
         ws = _make_workspace(tmp_path)
         app = _make_app(ws)
 
         async with _http_client(app) as c:
             await _ensure_ready(c, "rcp7c")
             r = await c.get(
-                "/v1/environments/rcp7c/files?prefix=../../etc/passwd",
+                "/v1/environments/rcp7c/files?path=../../etc/passwd",
                 headers=AUTH,
             )
 

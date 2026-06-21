@@ -142,8 +142,8 @@ class WorkspaceAccessor:
             last_commit=last_commit,
         )
 
-    def list_files(self, prefix: str = "", suffix: str = "") -> list[dict]:
-        """List files under workspace_root/prefix, filtered by suffix.
+    def list_files(self, path: str = "", suffix: str = "") -> list[dict]:
+        """List files under workspace_root/path, filtered by suffix.
 
         Path sandbox check (LOAD-BEARING security invariant, RCP-A12):
           Any resolved path that escapes workspace_root raises RuntimeApiError(403).
@@ -157,7 +157,7 @@ class WorkspaceAccessor:
         """
         # --- Path sandbox check (load-bearing) ---
         try:
-            target = (self._root / Path(prefix)).resolve()
+            target = (self._root / Path(path)).resolve()
         except Exception as exc:
             raise RuntimeApiError(
                 code=ERR_PATH_ESCAPE,
@@ -192,7 +192,8 @@ class WorkspaceAccessor:
             # Sandbox check for each item (defensive, shouldn't be needed but safe).
             try:
                 resolved_item = item.resolve()
-            except Exception:
+            except Exception as exc:
+                logger.debug("list_files: skipping item %s: %s", item, exc)
                 continue
             if not resolved_item.is_relative_to(self._root):
                 continue

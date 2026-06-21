@@ -389,7 +389,7 @@ class LifecycleService:
     async def list_files(
         self,
         project_id: str,
-        prefix: str = "",
+        path: str = "",
         suffix: str = "",
     ) -> FileListResponse:
         """Return file listing for a ready environment (RCP-A12).
@@ -422,7 +422,7 @@ class LifecycleService:
             return FileListResponse(files=[])
 
         # WorkspaceAccessor.list_files raises RuntimeApiError(403) on path escape.
-        raw_entries = accessor.list_files(prefix=prefix, suffix=suffix)
+        raw_entries = accessor.list_files(path=path, suffix=suffix)
         files = [FileEntry(path=e["path"], kind=e["kind"]) for e in raw_entries]
         return FileListResponse(files=files)
 

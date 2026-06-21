@@ -162,7 +162,7 @@ def test_list_files_subdir(tmp_path):
     _setup_workspace(tmp_path)
     accessor = WorkspaceAccessor(workspace_root=tmp_path)
 
-    entries = accessor.list_files(prefix="subdir")
+    entries = accessor.list_files(path="subdir")
     paths = {e["path"] for e in entries}
 
     assert "subdir/nested.txt" in paths
@@ -193,7 +193,7 @@ def test_list_files_path_escape_raises_403(tmp_path):
     accessor = WorkspaceAccessor(workspace_root=tmp_path)
 
     with pytest.raises(RuntimeApiError) as exc_info:
-        accessor.list_files(prefix="../../etc")
+        accessor.list_files(path="../../etc")
 
     assert exc_info.value.code == ERR_PATH_ESCAPE
     assert exc_info.value.http_status == 403
@@ -205,7 +205,7 @@ def test_list_files_path_escape_absolute_raises_403(tmp_path):
 
     with pytest.raises(RuntimeApiError) as exc_info:
         # On most systems, Path(tmp_path) / Path("/etc") resolves to /etc
-        accessor.list_files(prefix="/etc/passwd")
+        accessor.list_files(path="/etc/passwd")
 
     assert exc_info.value.code == ERR_PATH_ESCAPE
     assert exc_info.value.http_status == 403
@@ -216,7 +216,7 @@ def test_list_files_valid_subdir_ok(tmp_path):
     _setup_workspace(tmp_path)
     accessor = WorkspaceAccessor(workspace_root=tmp_path)
 
-    entries = accessor.list_files(prefix="src")
+    entries = accessor.list_files(path="src")
     paths = {e["path"] for e in entries}
 
     assert "src/app.py" in paths

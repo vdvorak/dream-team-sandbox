@@ -254,3 +254,15 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: performance
+outcome: PASS
+summary: B1 opraveno — AsyncClient sdílený v __init__. Advisory A1 (sync rglob) a
+  A2 (git bez timeout) zůstávají v improvements log.
+outputs:
+- type: gate-output
+agent: optimus-perf
+phase: T3
+time:
+  seconds: 0

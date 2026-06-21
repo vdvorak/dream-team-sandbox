@@ -100,28 +100,24 @@ class FlyProvider:
     ) -> None:
         self._api_token = api_token or os.environ.get("FLY_API_TOKEN", "")
         self._app_name = app_name or os.environ.get("FLY_APP_NAME", "")
+        # Shared client — created once to enable TCP connection reuse.
         # Injected for testability (avoids real network calls in unit tests).
-        self._http_client = http_client
-
-    # --- internal helpers ---
-
-    def _headers(self) -> dict[str, str]:
-        return {
+        self._http_client = http_client or httpx.AsyncClient(timeout=30.0)
+        self._headers = {
             "Authorization": f"Bearer {self._api_token}",
             "Content-Type": "application/json",
         }
+
+    # --- internal helpers ---
 
     def _url(self, *parts: str) -> str:
         """Build a Fly API URL from path segments."""
         path = "/".join(parts)
         return f"{_FLY_API_BASE}/{path}"
 
-    async def _client(self) -> httpx.AsyncClient:
-        """Return the injected client or create a default one."""
-        if self._http_client is not None:
-            return self._http_client
-        # In production, create a default async client.
-        return httpx.AsyncClient(timeout=30.0)
+    def _client(self) -> httpx.AsyncClient:
+        """Return the shared AsyncClient instance."""
+        return self._http_client
 
     def _translate_error(self, exc: Exception) -> CageError:
         """Translate httpx errors to CageError subclasses.
@@ -173,7 +169,7 @@ class FlyProvider:
 
         All CageError subclasses propagate to the caller (CageEnforcementProvider).
         """
-        client = await self._client()
+        client = self._client()
         machine_payload: dict[str, Any] = {
             "config": {
                 "env": {
@@ -189,7 +185,7 @@ class FlyProvider:
             # 1. Create machine
             create_resp = await client.post(
                 self._url("apps", self._app_name, "machines"),
-                headers=self._headers(),
+                headers=self._headers,
                 json=machine_payload,
             )
         except Exception as exc:
@@ -209,7 +205,7 @@ class FlyProvider:
             # 2. Start machine
             start_resp = await client.post(
                 self._url("apps", self._app_name, "machines", machine_id, "start"),
-                headers=self._headers(),
+                headers=self._headers,
             )
         except Exception as exc:
             raise self._translate_error(exc) from exc
@@ -231,11 +227,11 @@ class FlyProvider:
         NOTE: In this implementation we look up the machine by listing all machines
         and finding one with a matching PROJECT_ID env label. Idempotent if not found.
         """
-        client = await self._client()
+        client = self._client()
         try:
             list_resp = await client.get(
                 self._url("apps", self._app_name, "machines"),
-                headers=self._headers(),
+                headers=self._headers,
             )
         except Exception as exc:
             raise self._translate_error(exc) from exc
@@ -261,7 +257,7 @@ class FlyProvider:
         try:
             stop_resp = await client.post(
                 self._url("apps", self._app_name, "machines", machine_id, "stop"),
-                headers=self._headers(),
+                headers=self._headers,
             )
         except Exception as exc:
             raise self._translate_error(exc) from exc
@@ -274,11 +270,11 @@ class FlyProvider:
 
         Returns WorkspaceStatus.unknown if no machine is found.
         """
-        client = await self._client()
+        client = self._client()
         try:
             list_resp = await client.get(
                 self._url("apps", self._app_name, "machines"),
-                headers=self._headers(),
+                headers=self._headers,
             )
         except Exception as exc:
             raise self._translate_error(exc) from exc
@@ -302,11 +298,11 @@ class FlyProvider:
         - Network/timeout error → unavailable
         - Other 4xx → degraded (API reachable but issue)
         """
-        client = await self._client()
+        client = self._client()
         try:
             resp = await client.get(
                 self._url("apps", self._app_name, "machines"),
-                headers=self._headers(),
+                headers=self._headers,
             )
         except (httpx.ConnectError, httpx.TimeoutException):
             logger.warning("fly_provider.health: Fly API unreachable")
