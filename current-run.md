@@ -25,7 +25,6 @@ active_node: spec-audit
 frontier: []
 completed:
 - intake
-- product
 - spec-gate
 - feasibility
 - architecture
@@ -37,7 +36,6 @@ completed:
 - code-quality
 outcomes:
   intake: PASS
-  product: PASS
   spec-gate: PASS
   feasibility: PASS
   architecture: PASS
@@ -51,6 +49,7 @@ outcomes:
 skipped: []
 counters:
   spec-gate->product: 0
+  spec-audit->product: 1
 awaiting_human: []
 halt_gate: null
 last_outcome: FAIL
@@ -145,20 +144,51 @@ findings:
   severity: intervention
   returns_to: null
   signature: resolve-loop counter 3->0 @ 2026-06-21T18:24:45.694413+00:00
-return_payload: {}
+- node: spec-audit
+  severity: blocking
+  returns_to: product
+  signature: 'acceptance/runtime-control-plane.md nesesynchronizován s kontraktem
+    v1.1.0 (kód je správně, chyba jen v acceptance dokumentu):
+
+    F1 (BLOCKER): AC-1g dovoluje "422 ERR_CLONE_FAILED nebo validační 400" pro syntakticky
+    chybné repo.url. Kontrakt v1.1.0 §8: malformed URL = schema chyba = výhradně 400
+    ERR_INVALID_REQUEST; ERR_CLONE_FAILED (422) je JEN runtime selhání klonu (validní
+    url, nedostupný). Oprav AC-1g: PASS = 400 ERR_INVALID_REQUEST; 422 = FAIL.
+
+    W1: AC-1b a AC-9a testují contract_version "1.0.0" -> oprav na "1.1.0".
+
+    W2: AC-1h, AC-12b, AC-13b PASS jen "400 (additionalProperties odmítnuto)" bez
+    kódu -> doplň "400 ERR_INVALID_REQUEST".
+
+    (W3 healthz 503 v OpenAPI = advisory pre-existing, odloženo slice 2.)'
+return_payload:
+  product:
+  - 'acceptance/runtime-control-plane.md nesesynchronizován s kontraktem v1.1.0 (kód
+    je správně, chyba jen v acceptance dokumentu):
+
+    F1 (BLOCKER): AC-1g dovoluje "422 ERR_CLONE_FAILED nebo validační 400" pro syntakticky
+    chybné repo.url. Kontrakt v1.1.0 §8: malformed URL = schema chyba = výhradně 400
+    ERR_INVALID_REQUEST; ERR_CLONE_FAILED (422) je JEN runtime selhání klonu (validní
+    url, nedostupný). Oprav AC-1g: PASS = 400 ERR_INVALID_REQUEST; 422 = FAIL.
+
+    W1: AC-1b a AC-9a testují contract_version "1.0.0" -> oprav na "1.1.0".
+
+    W2: AC-1h, AC-12b, AC-13b PASS jen "400 (additionalProperties odmítnuto)" bez
+    kódu -> doplň "400 ERR_INVALID_REQUEST".
+
+    (W3 healthz 503 v OpenAPI = advisory pre-existing, odloženo slice 2.)'
 model_overrides: {}
-epoch: 18
+epoch: 19
 type_versions:
-  spec: 8
-  acceptance: 7
-  has_ui: 7
+  spec: 19
+  acceptance: 19
+  has_ui: 19
   gate-output: 18
   reuse-decision: 11
   server-code: 13
   unit-tests: 13
 node_versions:
   intake: 1
-  product: 8
   spec-gate: 9
   feasibility: 10
   architecture: 11
