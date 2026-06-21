@@ -96,6 +96,18 @@ async def _ensure_ready(client: AsyncClient, project_id: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def assert_no_substrate_nouns(response_body: str) -> None:
+    """Assert response body contains no substrate-identifying nouns (RCP-11a / AC-6d)."""
+    SUBSTRATE_NOUNS = ["Fly", "fly.io", "docker", "6PN", ".internal", "WORKSPACE_AGENT_BASE", "nftables", "tmux"]
+    for noun in SUBSTRATE_NOUNS:
+        assert noun not in response_body, f"Substrate noun {noun!r} leaked into response body"
+
+
+# ---------------------------------------------------------------------------
 # RCP-6: GET /environments/{id}/git
 # ---------------------------------------------------------------------------
 
@@ -204,6 +216,19 @@ class TestRCP6Git:
             f"RCP-6c: expected 404, got {r.status_code}: {r.text}"
         )
         assert r.json()["code"] == "ERR_ENVIRONMENT_NOT_FOUND"
+
+    @pytest.mark.asyncio
+    async def test_rcp6d_git_response_no_substrate_nouns(self, tmp_path):
+        """RCP-6d / AC-6d: GET /git on ready → response body must not contain substrate nouns."""
+        ws = _make_workspace(tmp_path)
+        app = _make_app(ws)
+
+        async with _http_client(app) as c:
+            await _ensure_ready(c, "rcp6d")
+            r = await c.get("/v1/environments/rcp6d/git", headers=AUTH)
+
+        assert r.status_code == 200, f"RCP-6d: expected 200, got {r.status_code}: {r.text}"
+        assert_no_substrate_nouns(r.text)
 
     @pytest.mark.asyncio
     async def test_rcp6e_git_without_auth_returns_401(self, tmp_path):
@@ -319,6 +344,47 @@ class TestRCP7Files:
             f"RCP-7e: expected 404, got {r.status_code}: {r.text}"
         )
         assert r.json()["code"] == "ERR_ENVIRONMENT_NOT_FOUND"
+
+    @pytest.mark.asyncio
+    async def test_rcp7f_files_response_excludes_cage_internals(self, tmp_path):
+        """RCP-7f / AC-7: GET /files → cage-internal files must not appear in listing."""
+        ws = _make_workspace(tmp_path)
+        app = _make_app(ws)
+
+        # Create cage-internal files that the implementation must exclude
+        cage_files = [
+            "entrypoint.sh",
+            "Dockerfile.workspace",
+            "nftables.cage.conf",
+            "fly.workspace.toml",
+            "smokescreen-acl.nft",
+            "smokescreen-acl.yaml",
+        ]
+        for fname in cage_files:
+            (tmp_path / fname).write_text(f"# cage internal: {fname}")
+
+        # Legitimate user file that must appear in the listing
+        (tmp_path / "main.py").write_text("print('hello')")
+
+        async with _http_client(app) as c:
+            await _ensure_ready(c, "rcp7f")
+            r = await c.get("/v1/environments/rcp7f/files", headers=AUTH)
+
+        assert r.status_code == 200, f"RCP-7f: expected 200, got {r.status_code}: {r.text}"
+        data = r.json()
+        assert "files" in data, "RCP-7f: missing files key"
+        returned_paths = {f["path"] for f in data["files"]}
+
+        # Cage-internal files must NOT be present
+        for fname in cage_files:
+            assert fname not in returned_paths, (
+                f"RCP-7f: cage-internal file {fname!r} leaked into /files response"
+            )
+
+        # Legitimate file must be present (guard against false-green empty listing)
+        assert "main.py" in returned_paths, (
+            "RCP-7f: main.py missing from /files response — test may be falsely passing"
+        )
 
     @pytest.mark.asyncio
     async def test_rcp7g_files_without_auth_returns_401(self, tmp_path):

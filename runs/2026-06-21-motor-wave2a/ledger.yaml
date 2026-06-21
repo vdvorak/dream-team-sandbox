@@ -149,3 +149,17 @@ agent: ted-architect
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: backend
+outcome: PASS
+summary: 'Přidány 2 chybějící integration testy: test_rcp6d (substrate-noun grep)
+  + test_rcp7f (HTTP-level cage internals exclusion) + helper assert_no_substrate_nouns().
+  47/47 PASS.'
+outputs:
+- type: server-code
+- type: unit-tests
+agent: bob-backend
+phase: T2
+time:
+  seconds: 0
