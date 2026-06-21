@@ -114,3 +114,31 @@ time:
 note: spec-gate FAIL#2 → returns_to product; jen spec-agnostika (3 zbytky), AC už
   OK.
 agent: sheldon-spec
+---
+run: 2026-06-21-containment-cage
+node: product
+outcome: PASS
+flags:
+  has_ui: false
+  has_db: false
+  has_deploy: true
+changed:
+- spec
+tier: M
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 83
+note: re-flow#2 — kompletní agnostika sweep specu (grep prázdný), AC/contracts/stack
+  beze změny.
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
+phase: T1
