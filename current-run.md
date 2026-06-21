@@ -21,7 +21,7 @@ run: 2026-06-21-motor-wave2a
 wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
 graph: delivery
 status: in_progress
-active_node: performance
+active_node: spec-audit
 frontier: []
 completed:
 - intake
@@ -42,6 +42,7 @@ outcomes:
   architecture: PASS
   qa: PASS
   performance: FAIL
+  spec-audit: FAIL
 skipped: []
 counters:
   qa->architecture: 1

@@ -197,3 +197,14 @@ agent: optimus-perf
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: spec-audit
+outcome: FAIL
+summary: 'BLOCKER: contract drift — AC-7b/7c používají query param ?path= pro directory
+  navigation, ale OpenAPI + rules používají ?prefix= a ?suffix=. Tři dokumenty ve
+  dvou skupinách. Ted musí rozhodnout o kanonickém názvu.'
+agent: sheldon-spec
+phase: T3
+time:
+  seconds: 0
