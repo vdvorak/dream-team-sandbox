@@ -390,3 +390,22 @@ agent: joey-qa
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-lifecycle
+node: performance
+outcome: PASS
+note: 'PASS. Všechny kritické cesty pod cíli (ensure p95 0.10ms typical / 0.03ms peak;
+  get p95 0.009ms lock-free; 315KB/1000 destroyed). Async čisté (žádné blokující volání),
+  per-project_id lock korektně scoped (meta-lock jen O(1) lookup, project lock přes
+  provider await = záměrná serializace), žádný deadlock/N+1. 7 perf testů (tests/perf/).
+  Advisory slice 2 (improvements/performance.md): lock-dict roste O(N) bez GC, destroyed
+  neohraničeně (tiny); acceptance nemá perf sekci - doplnit pro slice 2 (reálný provider
+  IO).
+
+  '
+outputs:
+- type: gate-output
+agent: optimus-perf
+phase: T3
+time:
+  seconds: 0
