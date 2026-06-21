@@ -232,3 +232,14 @@ agent: vitek-quality
 phase: T3
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: audit-join
+outcome: FAIL
+summary: 'Fan-out výsledky: security PASS; performance FAIL (B1 httpx client leak);
+  spec-audit FAIL (path vs prefix drift); code-quality FAIL (W7 swallowed except).
+  Celkem 3 BLOCKERy pro Bob.'
+agent: null
+phase: null
+time:
+  seconds: 0
