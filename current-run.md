@@ -21,18 +21,20 @@ run: 2026-06-21-runtime-contract
 wave_base: bae4948c571abc581856361d8da5cffee372ed02
 graph: delivery
 status: in_progress
-active_node: spec-gate
+active_node: product
 frontier: []
 completed:
 - intake
+- product
 outcomes:
   intake: PASS
+  product: PASS
 skipped: []
 counters:
   spec-gate->product: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: FAIL
+last_outcome: PASS
 class: feature
 flags:
   has_ui: false
@@ -52,22 +54,16 @@ findings:
     ř.91 "viz kontrakt (Ted)" → smazat jméno agenta; ř.93 "Ted definuje idempotency
     klíč/mutex" → "konkrétní mechaniku určí kontrakt"; ř.96 "listFiles" → "čtení souborů
     mimo sandbox". Acceptance je OK (neměnit).'
-return_payload:
-  product:
-  - 'spec-agnostika v specs/runtime-contract.md (7 míst): ř.20 "curl / CLI" → "generický
-    klient bez aplikačního kódu"; ř.34 "healthz" → "zdravotní dotaz"; ř.73 "HTTP+JSON"
-    → smazat protokol; ř.79 "OpenAPI artefakt" → "verzovaný kontrakt"; ř.91 "viz kontrakt
-    (Ted)" → smazat jméno agenta; ř.93 "Ted definuje idempotency klíč/mutex" → "konkrétní
-    mechaniku určí kontrakt"; ř.96 "listFiles" → "čtení souborů mimo sandbox". Acceptance
-    je OK (neměnit).'
+return_payload: {}
 model_overrides: {}
-epoch: 3
+epoch: 4
 type_versions:
-  spec: 3
+  spec: 4
   acceptance: 3
   has_ui: 3
 node_versions:
   intake: 1
+  product: 4
 ```
 
 ## Lidský přehled

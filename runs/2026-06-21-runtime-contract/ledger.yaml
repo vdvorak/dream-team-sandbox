@@ -64,3 +64,32 @@ time:
 note: spec-gate FAIL → returns_to product; jen agnostika specu (7 míst), acceptance
   OK.
 agent: sheldon-spec
+---
+run: 2026-06-21-runtime-contract
+node: product
+outcome: PASS
+phase: T1
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: false
+  touches_shared_ui: false
+  has_deploy: false
+changed:
+- spec
+tier: M
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 30
+note: re-flow oprava agnostiky specu (7 míst, grep prázdný); acceptance beze změny.
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po

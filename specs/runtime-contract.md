@@ -17,7 +17,7 @@ Kontrakt je fyzicky vlastněn tímto repem; odběratel ho vendoruje read-only.
 **Primární:** Aplikace (řídící vrstva) chce zajistit, uspat, zrušit prostředí
 pro projekt a číst jeho stav, soubory a terminál — bez znalosti substrátu.
 
-**Sekundární:** Generický klient (curl / CLI) chce totéž bez aplikace.
+**Sekundární:** Generický klient bez aplikačního kódu chce totéž.
 Runtime musí být použitelný standalone.
 
 ## Hlavní scénář
@@ -31,7 +31,7 @@ odběratel zavolá **čti soubory** nebo **stav repozitáře** pro přístup
 k workspace projektovým datům → odběratel otevře **terminál** (obousměrný
 PTY stream) a interaguje se zaklecovaným procesem → odběratel zavolá
 **uspi** (advisory, bez záruky okamžitosti) nebo **zruš** prostředí →
-zdravotní dotaz (`healthz`) vrátí verzi kontraktu a stav služby.
+zdravotní dotaz vrátí verzi kontraktu a stav služby.
 
 Při jakékoli operaci, kdy prostředí neexistuje nebo ZEĎ není aktivní, runtime
 vrátí jasnou chybu — nikdy neteče stav `ready` bez garantovaného enforcement.
@@ -70,13 +70,13 @@ vrátí jasnou chybu — nikdy neteče stav `ready` bez garantovaného enforceme
 ## Scope
 
 **In:**
-- Kontrolní rovina (HTTP+JSON): 7 operací výše + healthz.
+- Kontrolní rovina: 7 operací výše + zdravotní dotaz.
 - Datová rovina: obousměrný PTY stream s podporou změny velikosti a reconnect.
 - Stavový automat prostředí: `none → provisioning → ready → asleep → destroyed`.
 - Autentizace odběratele vůči runtimeu (aplikace se autentizuje vlastní identitou;
   BYOK token nikdy přes tuto rovinu).
 - App-facing chybový registr (oddělen od interního cage registru).
-- Versioning a drift-check fixture (OpenAPI artefakt vendorovaný do appky).
+- Verzování a drift-check fixture (verzovaný kontraktní artefakt vendorovaný do aplikace).
 
 **Out:**
 - Implementace (image, agent, lifecycle service, enforcement) — viz future L3.
@@ -88,10 +88,10 @@ vrátí jasnou chybu — nikdy neteče stav `ready` bez garantovaného enforceme
 
 - **Reconnect terminálové session:** při výpadku transportu odběratel re-attach
   ke stávající session (workspace proces neexituje) — konkrétní close kódy a
-  behavior viz kontrakt (Ted).
+  behavior viz kontrakt.
 - **Souběžné `ensure` pro stejný projekt:** runtime serializuje; výsledek = jedno
-  prostředí (Ted definuje idempotency klíč nebo per-project mutex).
+  prostředí (konkrétní mechaniku určí kontrakt).
 - **Sleep semantika:** sleep je advisory; runtime může ignorovat (např. probíhá
   aktivní PTY session) — odběratel nesmí spoléhat na okamžitou změnu stavu.
-- **Soubory mimo workspace:** `listFiles` s cestou mimo sandbox → chyba (path
+- **Soubory mimo workspace:** čtení souborů s cestou mimo sandbox → chyba (path
   escape guard); detailní guard logika viz kontrakt.
