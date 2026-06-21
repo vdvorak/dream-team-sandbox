@@ -63,3 +63,31 @@ time:
 note: spec-gate FAIL → returns_to product; 2 blocking nálezy (agnostika specu + chybějící
   AC tagy).
 agent: sheldon-spec
+---
+run: 2026-06-21-containment-cage
+node: product
+outcome: PASS
+flags:
+  has_ui: false
+  has_db: false
+  has_deploy: true
+changed:
+- spec
+- acceptance
+tier: M
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 161
+note: re-flow oprava — spec agnostický, AC otagované, stack/ + contracts/ založeny.
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
+phase: T1
