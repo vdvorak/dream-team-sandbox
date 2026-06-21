@@ -40,3 +40,27 @@ outputs:
 - type: acceptance
 - type: has_ui
 agent: vision-po
+---
+run: 2026-06-21-runtime-contract
+node: spec-gate
+outcome: FAIL
+severity: blocking
+phase: T1
+signature: 'spec-agnostika v specs/runtime-contract.md (7 míst): ř.20 "curl / CLI"
+  → "generický klient bez aplikačního kódu"; ř.34 "healthz" → "zdravotní dotaz"; ř.73
+  "HTTP+JSON" → smazat protokol; ř.79 "OpenAPI artefakt" → "verzovaný kontrakt"; ř.91
+  "viz kontrakt (Ted)" → smazat jméno agenta; ř.93 "Ted definuje idempotency klíč/mutex"
+  → "konkrétní mechaniku určí kontrakt"; ř.96 "listFiles" → "čtení souborů mimo sandbox".
+  Acceptance je OK (neměnit).'
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 86
+note: spec-gate FAIL → returns_to product; jen agnostika specu (7 míst), acceptance
+  OK.
+agent: sheldon-spec
