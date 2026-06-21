@@ -21,14 +21,13 @@ run: 2026-06-21-motor-wave2a
 wave_base: d647abd4ffa23e11c92500645c32d24f333cdb20
 graph: delivery
 status: in_progress
-active_node: code-lint
+active_node: qa
 frontier: []
 completed:
 - intake
 - product
 - spec-gate
 - feasibility
-- architecture
 - backend
 - code-lint
 outcomes:
@@ -36,14 +35,14 @@ outcomes:
   product: PASS
   spec-gate: PASS
   feasibility: PASS
-  architecture: PASS
   backend: PASS
   code-lint: PASS
 skipped: []
-counters: {}
+counters:
+  qa->architecture: 1
 awaiting_human: []
 halt_gate: null
-last_outcome: PASS
+last_outcome: FAIL
 class: feature
 flags:
   has_ui: false
@@ -53,18 +52,22 @@ flags:
   has_deploy: false
 note: null
 pending_delegations: []
-findings: []
+findings:
+- node: qa
+  severity: blocking
+  returns_to: architecture
+  signature: ''
 return_payload: {}
 model_overrides: {}
-epoch: 7
+epoch: 8
 type_versions:
   spec: 2
   acceptance: 2
   has_ui: 2
   gate-output: 7
-  contract: 5
-  error-codes: 5
-  reuse-decision: 5
+  contract: 8
+  error-codes: 8
+  reuse-decision: 8
   server-code: 6
   unit-tests: 6
 node_versions:
@@ -72,7 +75,6 @@ node_versions:
   product: 2
   spec-gate: 3
   feasibility: 4
-  architecture: 5
   backend: 6
   code-lint: 7
 ```

@@ -119,3 +119,13 @@ agent: vitek-quality
 phase: T2
 time:
   seconds: 0
+---
+run: 2026-06-21-motor-wave2a
+node: qa
+outcome: FAIL
+summary: 'Chybí 2 integrační testy: 6d (grep response /git na substrate-nouns) a 7f
+  (HTTP-level cage-internals exclusion). 11/11 existující testy PASS, coverage 10/12.'
+agent: joey-qa
+phase: T3
+time:
+  seconds: 0
