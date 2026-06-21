@@ -9,3 +9,34 @@ agent: null
 phase: null
 time:
   seconds: 0
+---
+run: 2026-06-21-runtime-contract
+node: product
+outcome: PASS
+phase: T1
+flags:
+  has_ui: false
+  touches_db: false
+  touches_server: false
+  touches_shared_ui: false
+  has_deploy: false
+changed:
+- spec
+- acceptance
+tier: M
+cost:
+  model: sonnet
+  input_tokens: 0
+  output_tokens: 0
+  credits: 0.0
+time:
+  started: null
+  ended: null
+  seconds: 135
+note: runtime spec + acceptance AC-1..AC-14 (agnostické, otagované); docs/design wave,
+  žádný kód/deploy.
+outputs:
+- type: spec
+- type: acceptance
+- type: has_ui
+agent: vision-po
